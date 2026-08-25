@@ -1,4 +1,4 @@
-import { query, request, upload } from "./client";
+import { query, request, upload, uploadWithFields } from "./client";
 import type {
   Biomarker,
   BiomarkerSeries,
@@ -11,6 +11,8 @@ import type {
   Features,
   Intervention,
   InterventionKind,
+  Photo,
+  Pose,
   Report,
   ReportSummary,
   Sex,
@@ -108,6 +110,20 @@ export const interventions = {
   update: (id: string, payload: Partial<{ ended_on: string | null; name: string }>) =>
     request<Intervention>(`/api/interventions/${id}`, { method: "PATCH", body: payload }),
   remove: (id: string) => request<void>(`/api/interventions/${id}`, { method: "DELETE" }),
+};
+
+export const photos = {
+  list: (filters: DateWindow & { pose?: Pose } = {}) =>
+    request<Photo[]>(
+      `/api/photos${query({ pose: filters.pose, from: filters.from, to: filters.to })}`,
+    ),
+  create: (payload: { file: File; taken_on: string; pose: Pose; notes?: string }) =>
+    uploadWithFields<Photo>("/api/photos", payload.file, {
+      taken_on: payload.taken_on,
+      pose: payload.pose,
+      ...(payload.notes ? { notes: payload.notes } : {}),
+    }),
+  remove: (id: string) => request<void>(`/api/photos/${id}`, { method: "DELETE" }),
 };
 
 export const body = {

@@ -50,8 +50,17 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 }
 
 export async function upload<T>(path: string, file: File): Promise<T> {
+  return uploadWithFields<T>(path, file);
+}
+
+export async function uploadWithFields<T>(
+  path: string,
+  file: File,
+  fields: Record<string, string> = {},
+): Promise<T> {
   const form = new FormData();
   form.append("file", file);
+  for (const [key, value] of Object.entries(fields)) form.append(key, value);
   // No Content-Type header: the browser has to set it itself, because only it
   // knows the multipart boundary it is about to generate.
   const response = await fetch(path, { method: "POST", credentials: "include", body: form });

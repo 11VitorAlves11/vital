@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { BodyScanForm } from "../components/domain/BodyScanForm";
+import { SubNav } from "../components/layout/SubNav";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -26,7 +27,15 @@ export function Body() {
 
   return (
     <section>
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <SubNav
+        label={t("nav.bodySection")}
+        items={[
+          { to: "/body", label: t("body.title") },
+          { to: "/photos", label: t("photos.title") },
+        ]}
+      />
+
+      <header className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl leading-tight font-medium text-ink">
           {t("body.title")}
         </h1>

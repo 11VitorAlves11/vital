@@ -12,7 +12,8 @@
     "profile": "Perfil",
     "theme": "Alternar tema",
     "themeDark": "Ativar tema escuro",
-    "themeLight": "Ativar tema claro"
+    "themeLight": "Ativar tema claro",
+    "bodySection": "Secção do corpo"
   },
   "actions": {
     "save": "Guardar",
@@ -165,6 +166,37 @@
       "metabolism": "Metabolismo",
       "other": "Outros"
     }
+  },
+  "photos": {
+    "title": "Fotos de progresso",
+    "new": "Adicionar foto",
+    "takenOn": "Data da foto",
+    "pose": "Pose",
+    "allPoses": "Todas as poses",
+    "notes": "Notas",
+    "pickFile": "Escolher ou tirar uma foto",
+    "pickAPhoto": "Escolhe uma foto.",
+    "privacyNote": "As fotos ficam nesta instância e são guardadas sem metadados: a localização, o modelo da câmara e a hora de captura não sobrevivem ao envio.",
+    "created": "Foto guardada.",
+    "deleted": "Foto eliminada.",
+    "emptyTitle": "Ainda não há fotos",
+    "emptyDescription": "Tira a primeira foto para teres com que comparar mais tarde.",
+    "viewLabel": "Modo de visualização",
+    "gallery": "Galeria",
+    "compare": "Comparar",
+    "compareFirst": "Primeira foto",
+    "compareSecond": "Segunda foto",
+    "compareNeedsTwoTitle": "Faltam fotos para comparar",
+    "compareNeedsTwoDescription": "São precisas pelo menos duas fotos desta pose.",
+    "apart": "{{count}} dia de intervalo",
+    "apart_other": "{{count}} dias de intervalo",
+    "imageAlt": "Foto de progresso, pose {{pose}}, de {{date}}"
+  },
+  "poses": {
+    "frente": "Frente",
+    "lado": "Lado",
+    "costas": "Costas",
+    "outro": "Outra"
   },
   "profile": {
     "title": "Perfil",

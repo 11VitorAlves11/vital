@@ -121,6 +121,22 @@ export type ExtractionJob = {
 
 export type Features = { extraction: boolean };
 
+export type Pose = "frente" | "lado" | "costas" | "outro";
+
+/** The order the filter offers them in, and the only values the API accepts. */
+export const POSES: Pose[] = ["frente", "lado", "costas", "outro"];
+
+export type Photo = {
+  id: string;
+  taken_on: string;
+  pose: Pose;
+  /** Of the stored image, so a gallery can reserve its box before it loads. */
+  width: number;
+  height: number;
+  notes: string | null;
+  created_at: string;
+};
+
 export type Intervention = {
   id: string;
   kind: InterventionKind;

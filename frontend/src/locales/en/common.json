@@ -12,7 +12,8 @@
     "profile": "Profile",
     "theme": "Toggle theme",
     "themeDark": "Use dark theme",
-    "themeLight": "Use light theme"
+    "themeLight": "Use light theme",
+    "bodySection": "Body section"
   },
   "actions": {
     "save": "Save",
@@ -165,6 +166,37 @@
       "metabolism": "Metabolism",
       "other": "Other"
     }
+  },
+  "photos": {
+    "title": "Progress photos",
+    "new": "Add a photo",
+    "takenOn": "Date taken",
+    "pose": "Pose",
+    "allPoses": "Every pose",
+    "notes": "Notes",
+    "pickFile": "Choose or take a photo",
+    "pickAPhoto": "Choose a photo.",
+    "privacyNote": "Photos stay on this instance and are stored without metadata: the location, the camera model and the capture time do not survive the upload.",
+    "created": "Photo saved.",
+    "deleted": "Photo deleted.",
+    "emptyTitle": "No photos yet",
+    "emptyDescription": "Take the first photo so there is something to compare against later.",
+    "viewLabel": "View mode",
+    "gallery": "Gallery",
+    "compare": "Compare",
+    "compareFirst": "First photo",
+    "compareSecond": "Second photo",
+    "compareNeedsTwoTitle": "Not enough photos to compare",
+    "compareNeedsTwoDescription": "At least two photos of this pose are needed.",
+    "apart": "{{count}} day apart",
+    "apart_other": "{{count}} days apart",
+    "imageAlt": "Progress photo, {{pose}} pose, from {{date}}"
+  },
+  "poses": {
+    "frente": "Front",
+    "lado": "Side",
+    "costas": "Back",
+    "outro": "Other"
   },
   "profile": {
     "title": "Profile",

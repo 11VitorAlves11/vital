@@ -10,6 +10,7 @@ import { Body } from "./pages/Body";
 import { Dashboard } from "./pages/Dashboard";
 import { Interventions } from "./pages/Interventions";
 import { Login } from "./pages/Login";
+import { Photos } from "./pages/Photos";
 import { Profile } from "./pages/Profile";
 import { ReportDetail } from "./pages/ReportDetail";
 import { Reports } from "./pages/Reports";
@@ -102,6 +103,14 @@ export function App() {
         element={
           <RequireSession>
             <BodyMetricDetail />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/photos"
+        element={
+          <RequireSession>
+            <Photos />
           </RequireSession>
         }
       />
