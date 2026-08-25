@@ -26,6 +26,25 @@ docker compose -f docker-compose.dev.yml up --build
 
 Web: <http://localhost:5173> · API: <http://localhost:8000/api> · Docs: <http://localhost:8000/docs>
 
+The API migrates and seeds itself on start-up, so the first run comes up with the full
+clinical catalogue (31 biomarkers, 18 body-composition metrics) already loaded.
+
+## Authentication
+
+`AUTH_MODE` decides how people sign in, and the login screen follows it:
+
+| Mode | What it does |
+|---|---|
+| `local` | Email and password, registration open. No identity provider needed — the default in the dev stack |
+| `oidc` | Authorization-code flow against any OIDC provider (Authentik, Keycloak, Pocket ID, Google). Set `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and register `https://your-host/auth/callback` as the redirect URI |
+
+Either way the session is a signed, httpOnly, `SameSite=Lax` cookie: no token is readable
+from JavaScript and there is no session store to run. Set `SECRET_KEY` in production —
+the API refuses to start without one.
+
+Set your sex in the profile: reference ranges and clinical bands are sex-specific, and
+Vital declines to classify anything rather than guess which set applies.
+
 ### Without Docker
 
 ```bash
