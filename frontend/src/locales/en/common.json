@@ -1,0 +1,187 @@
+{
+  "app": {
+    "name": "Vital",
+    "tagline": "Lab results, body composition and physical progress."
+  },
+  "nav": {
+    "primary": "Main navigation",
+    "dashboard": "Home",
+    "reports": "Lab reports",
+    "body": "Body",
+    "interventions": "Interventions",
+    "profile": "Profile",
+    "theme": "Toggle theme"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "retry": "Try again",
+    "add": "Add",
+    "delete": "Delete",
+    "end": "End",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "register": "Create account",
+    "back": "Back",
+    "addResult": "Add result",
+    "removeResult": "Remove result",
+    "loginWithProvider": "Sign in with your identity provider"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "loginSubtitle": "Your health data, yours alone.",
+    "registerTitle": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 10 characters.",
+    "name": "Name",
+    "noAccount": "No account yet? Create one.",
+    "haveAccount": "Already have an account? Sign in.",
+    "oidcHint": "This instance authenticates through an identity provider."
+  },
+  "sex": {
+    "label": "Sex",
+    "M": "Male",
+    "F": "Female",
+    "unset": "Not set",
+    "why": "Sets the reference ranges and the clinical bands."
+  },
+  "dashboard": {
+    "title": "Home",
+    "lastReport": "Last collection",
+    "never": "No collections recorded",
+    "reportCount": "{{count}} collection recorded",
+    "reportCount_other": "{{count}} collections recorded",
+    "emptyTitle": "No lab results yet",
+    "emptyDescription": "Record your first collection to see trends and reference ranges.",
+    "sparklineSummary": "Last {{count}} values for {{name}}: from {{first}} to {{last}} {{unit}}."
+  },
+  "biomarker": {
+    "history": "History",
+    "date": "Date",
+    "value": "Value",
+    "lab": "Laboratory",
+    "flag": "Classification",
+    "reference": "Range",
+    "trendTitle": "Trend",
+    "emptyTitle": "No results for this biomarker",
+    "emptyDescription": "It shows up here as soon as you record a collection that includes it.",
+    "canonicalRange": "Catalogue reference range (dashed)",
+    "labRange": "Range reported by the laboratory",
+    "noRange": "No reference range"
+  },
+  "reports": {
+    "title": "Lab reports",
+    "new": "Record a collection",
+    "collectedOn": "Collection date",
+    "labName": "Laboratory",
+    "fasting": "Fasting",
+    "notes": "Notes",
+    "results": "Results",
+    "resultCount": "{{count}} result",
+    "resultCount_other": "{{count}} results",
+    "emptyTitle": "No collections recorded",
+    "emptyDescription": "Record your first lab report to start seeing trends.",
+    "filterFrom": "From",
+    "filterTo": "To",
+    "biomarker": "Biomarker",
+    "value": "Value",
+    "unit": "Unit",
+    "refMin": "Ref. min",
+    "refMax": "Ref. max",
+    "refHint": "As printed on the report. Left blank, the catalogue range is used.",
+    "detailTitle": "Collection of {{date}}",
+    "deleted": "Collection deleted.",
+    "created": "Collection recorded.",
+    "pickBiomarker": "Choose a biomarker"
+  },
+  "interventions": {
+    "title": "Interventions",
+    "new": "New intervention",
+    "kind": "Kind",
+    "name": "Name",
+    "dose": "Dose",
+    "startedOn": "Started",
+    "endedOn": "Ended",
+    "ongoing": "Ongoing",
+    "notes": "Notes",
+    "emptyTitle": "No interventions recorded",
+    "emptyDescription": "Record supplements, diet or training to see them overlaid on the charts.",
+    "filterKind": "Filter by kind",
+    "all": "All",
+    "created": "Intervention recorded.",
+    "ended": "Intervention ended.",
+    "deleted": "Intervention deleted."
+  },
+  "kinds": {
+    "suplemento": "Supplement",
+    "medicacao": "Medication",
+    "dieta": "Diet",
+    "treino": "Training",
+    "outro": "Other"
+  },
+  "body": {
+    "title": "Body composition",
+    "newScan": "Record a weigh-in",
+    "measuredAt": "Date and time",
+    "device": "Scale",
+    "notes": "Notes",
+    "values": "Values",
+    "noClinicalReference": "No clinical reference",
+    "trendOnlyHint": "Recorded as a trend. There is no validated clinical standard for this estimate.",
+    "emptyTitle": "No weigh-ins recorded",
+    "emptyDescription": "Record your first weigh-in to see the trend and the clinical bands.",
+    "setSexTitle": "Set your sex in the profile",
+    "setSexDescription": "Clinical bands differ between men and women — without it, values cannot be classified.",
+    "lastMeasured": "Measured on {{date}}",
+    "created": "Weigh-in recorded.",
+    "deleted": "Weigh-in deleted.",
+    "estimateWarning": "Bioimpedance figures are estimates. The trend is the reliable signal, not the isolated value.",
+    "atLeastOneValue": "Fill in at least one value."
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "language": "Language",
+    "saved": "Profile updated.",
+    "sexNote": "Changing the sex re-classifies the whole history."
+  },
+  "flags": {
+    "low": "Low",
+    "normal": "Normal",
+    "high": "High",
+    "unclassified": "Unclassified"
+  },
+  "categories": {
+    "hematologia": "Haematology",
+    "bioquimica": "Biochemistry",
+    "vitaminas": "Vitamins",
+    "ferro": "Iron panel",
+    "hormonas": "Hormones",
+    "lipidos": "Lipids",
+    "renal": "Kidney function",
+    "hepatico": "Liver function",
+    "outro": "Other"
+  },
+  "chart": {
+    "trendSummary": "Trend chart for {{name}}: {{count}} values, from {{first}} {{unit}} on {{firstDate}} to {{last}} {{unit}} on {{lastDate}}.",
+    "referenceBand": "Reference band",
+    "min": "Min {{value}}",
+    "max": "Max {{value}}",
+    "interventions": "Overlaid interventions"
+  },
+  "errors": {
+    "generic": "Something went wrong. Try again.",
+    "invalidCredentials": "Invalid email or password.",
+    "required": "Required field.",
+    "number": "Enter a valid number."
+  },
+  "common": {
+    "loading": "Loading…",
+    "optional": "optional",
+    "yes": "Yes",
+    "no": "No"
+  }
+}
