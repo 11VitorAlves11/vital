@@ -17,4 +17,9 @@
   --flag-normal: #157347;
   --flag-warn: #b45309;
   --flag-alert: #d42121;
+
+  /* Logo — the two strokes of the mark. Where they cross, the deep one is
+     painted back over the light one at 35%, so the crossing needs no token. */
+  --logo-deep: #155bc4;
+  --logo-light: #63a6f5;
 }

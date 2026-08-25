@@ -16,6 +16,8 @@
   --flag-normal: #34c98a;
   --flag-warn: #f0a33a;
   --flag-alert: #f26b6b;
+  --logo-deep: #2e7be8;
+  --logo-light: #8cc4ff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,5 +37,7 @@
     --flag-normal: #34c98a;
     --flag-warn: #f0a33a;
     --flag-alert: #f26b6b;
+    --logo-deep: #2e7be8;
+    --logo-light: #8cc4ff;
   }
 }

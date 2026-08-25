@@ -21,7 +21,18 @@ export default defineConfig({
         background_color: "#F3F6FB",
         display: "standalone",
         start_url: "/",
-        icons: [{ src: "/icon.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }],
+        // A maskable icon is cropped by the launcher, so it cannot be the same
+        // file as the one shown uncropped — it needs its own, wider margin.
+        icons: [
+          { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          {
+            src: "/icon-maskable-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
       },
     }),
   ],

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+import { Logo } from "../brand/Logo";
 import { cn } from "../../lib/cn";
 import { NAV_ITEMS } from "./navigation";
 import { ThemeToggle } from "./ThemeToggle";
@@ -15,7 +16,7 @@ export function Sidebar() {
       className="w-56 shrink-0 border-r border-border bg-surface-raised p-4"
     >
       <div className="mb-6 flex items-center justify-between pl-2">
-        <p className="font-display text-xl text-primary">{t("app.name")}</p>
+        <Logo />
         <ThemeToggle />
       </div>
       <ul className="flex flex-col gap-1">

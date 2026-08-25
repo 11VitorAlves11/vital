@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router-dom";
 
+import { LogoMark } from "../components/brand/Logo";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
@@ -47,8 +48,11 @@ export function Login() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 p-6">
       <div>
-        <h1 className="font-display text-3xl text-primary">{t("app.name")}</h1>
-        <p className="text-ink-muted">{t("auth.loginSubtitle")}</p>
+        <h1 className="flex items-center gap-3 font-display text-3xl text-primary">
+          <LogoMark className="h-11 w-auto shrink-0" />
+          {t("app.name")}
+        </h1>
+        <p className="mt-1 text-ink-muted">{t("auth.loginSubtitle")}</p>
       </div>
 
       {mode === "oidc" ? (
