@@ -87,7 +87,7 @@ export function interventionOverlayElements({
   // floating label pretending to be a period.
   if (domainEnd <= domainStart) return [];
 
-  return interventions.map((intervention) => {
+  return interventions.map((intervention, index) => {
     const start = Math.max(new Date(intervention.started_on).getTime(), domainStart);
     const end = Math.min(
       intervention.ended_on ? new Date(intervention.ended_on).getTime() : domainEnd,
@@ -99,14 +99,21 @@ export function interventionOverlayElements({
         x1={start}
         x2={end}
         fill="var(--color-primary)"
-        fillOpacity={0.08}
+        // Overlapping periods stack their fills, so each one stays faint enough
+        // that four at once do not paint over the reference band underneath.
+        fillOpacity={0.06}
         stroke="var(--color-primary)"
         strokeOpacity={0.35}
         label={{
           value: intervention.dose
             ? `${intervention.name} · ${intervention.dose}`
             : intervention.name,
-          position: "insideTop",
+          // Anchored to where the period starts and stepped down per band:
+          // centred on a shared top edge, concurrent labels overwrite each other
+          // into an unreadable smear, and the overlay stops being a signal.
+          position: "insideTopLeft",
+          dy: (index % 4) * 14,
+          dx: 4,
           fill: "var(--color-ink-muted)",
           fontSize: 11,
         }}
