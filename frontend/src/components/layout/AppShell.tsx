@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useIsDesktop } from "../../lib/useMediaQuery";
 import { BottomNav } from "./BottomNav";
 import { Sidebar } from "./Sidebar";
+import { ThemeToggle } from "./ThemeToggle";
 
 /**
  * Resolves mobile versus desktop navigation in one place: a bottom bar under md,
@@ -19,8 +20,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       {isDesktop ? <Sidebar /> : null}
       <div className="flex min-w-0 flex-1 flex-col">
         {isDesktop ? null : (
-          <header className="border-b border-border px-4 py-3">
+          <header className="flex items-center justify-between border-b border-border px-4 py-3">
             <p className="font-display text-xl text-primary">{t("app.name")}</p>
+            <ThemeToggle />
           </header>
         )}
         {/* Bottom padding clears the mobile nav bar. */}

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "../../lib/cn";
 import { NAV_ITEMS } from "./navigation";
+import { ThemeToggle } from "./ThemeToggle";
 
 /** Desktop navigation. */
 export function Sidebar() {
@@ -13,7 +14,10 @@ export function Sidebar() {
       aria-label={t("nav.primary")}
       className="w-56 shrink-0 border-r border-border bg-surface-raised p-4"
     >
-      <p className="mb-6 px-2 font-display text-xl text-primary">{t("app.name")}</p>
+      <div className="mb-6 flex items-center justify-between pl-2">
+        <p className="font-display text-xl text-primary">{t("app.name")}</p>
+        <ThemeToggle />
+      </div>
       <ul className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ to, labelKey, icon: Icon }) => (
           <li key={to}>

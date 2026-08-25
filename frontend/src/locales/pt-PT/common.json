@@ -10,7 +10,9 @@
     "body": "Corpo",
     "interventions": "Intervenções",
     "profile": "Perfil",
-    "theme": "Alternar tema"
+    "theme": "Alternar tema",
+    "themeDark": "Ativar tema escuro",
+    "themeLight": "Ativar tema claro"
   },
   "actions": {
     "save": "Guardar",

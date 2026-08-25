@@ -10,7 +10,9 @@
     "body": "Body",
     "interventions": "Interventions",
     "profile": "Profile",
-    "theme": "Toggle theme"
+    "theme": "Toggle theme",
+    "themeDark": "Use dark theme",
+    "themeLight": "Use light theme"
   },
   "actions": {
     "save": "Save",

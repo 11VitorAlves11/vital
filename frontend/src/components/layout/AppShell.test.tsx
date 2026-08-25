@@ -22,6 +22,19 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "Início" })).toBeInTheDocument();
   });
 
+  it("offers the theme switch in the mobile header", () => {
+    setViewport("mobile");
+    renderWithProviders(
+      <AppShell>
+        <p>conteúdo</p>
+      </AppShell>,
+    );
+
+    expect(
+      screen.getByRole("button", { name: /Ativar tema (claro|escuro)/ }),
+    ).toBeInTheDocument();
+  });
+
   it("uses the sidebar on a desktop", () => {
     setViewport("desktop");
     renderWithProviders(
@@ -31,6 +44,9 @@ describe("AppShell", () => {
     );
     const nav = screen.getByRole("navigation", { name: "Navegação principal" });
     expect(nav.className).toContain("w-56");
+    expect(
+      screen.getByRole("button", { name: /Ativar tema (claro|escuro)/ }),
+    ).toBeInTheDocument();
   });
 
   it("labels every destination, never an icon on its own", () => {
