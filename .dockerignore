@@ -1,0 +1,18 @@
+# The backend image builds from the repository root (it needs seed/), so the
+# ignore list lives here rather than in backend/.
+.git/
+.github/
+docs/
+scripts/
+frontend/
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/htmlcov/
+**/.coverage
+backend/tests/
+.env
+.env.local

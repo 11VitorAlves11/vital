@@ -20,10 +20,13 @@ services:
 
   api:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-vital}:${POSTGRES_PASSWORD:-vital}@db:5432/${POSTGRES_DB:-vital}
+      # Local accounts by default so the dev stack works without an identity provider.
+      AUTH_MODE: ${AUTH_MODE:-local}
     env_file:
       - path: .env
         required: false

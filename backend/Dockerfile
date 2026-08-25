@@ -10,12 +10,18 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml ./
-COPY app ./app
+# Built from the repository root: the image has to carry the clinical catalogue,
+# which lives in seed/ and is shared with the CI validator.
+COPY backend/pyproject.toml ./
+COPY backend/app ./app
 RUN pip install --upgrade pip && pip install -e .
 
-COPY alembic.ini ./
-COPY alembic ./alembic
+COPY backend/alembic.ini ./
+COPY backend/alembic ./alembic
+COPY backend/docker-entrypoint.sh ./
+COPY seed ./seed
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8000
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
