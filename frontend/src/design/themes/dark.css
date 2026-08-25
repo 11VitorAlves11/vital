@@ -1,17 +1,18 @@
-/* Dark theme — same token names, redefined values. */
+/* Dark theme — same token names, redefined values, same AA measurement. */
 
 [data-theme="dark"] {
-  --color-primary: #2aa8ac;
-  --color-primary-deep: #1d8b8f;
-  --color-on-primary: #101b1b;
-  --color-surface: #101b1b;
-  --color-surface-raised: #182626;
-  --color-border: #2a3b3b;
-  --color-border-strong: #647b7c;
-  --color-focus-ring: #57d6da;
-  --color-ink: #e6eded;
-  --color-ink-muted: #9bb0b0;
-  --color-band: #2aa8ac26;
+  --color-primary: #63a6f5;
+  --color-primary-deep: #4a8ed9;
+  --color-on-primary: #08131f;
+  --color-surface: #0c1420;
+  --color-surface-raised: #141e2d;
+  --color-border: #243449;
+  --color-border-strong: #68809b;
+  --color-focus-ring: #8cc4ff;
+  --color-ink: #e7eef8;
+  --color-ink-muted: #9cb1cc;
+  --color-band: #63a6f526;
+  --color-scrim: #04080ea6;
   --flag-normal: #34c98a;
   --flag-warn: #f0a33a;
   --flag-alert: #f26b6b;
@@ -19,17 +20,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-primary: #2aa8ac;
-    --color-primary-deep: #1d8b8f;
-    --color-on-primary: #101b1b;
-    --color-surface: #101b1b;
-    --color-surface-raised: #182626;
-    --color-border: #2a3b3b;
-    --color-border-strong: #647b7c;
-    --color-focus-ring: #57d6da;
-    --color-ink: #e6eded;
-    --color-ink-muted: #9bb0b0;
-    --color-band: #2aa8ac26;
+    --color-primary: #63a6f5;
+    --color-primary-deep: #4a8ed9;
+    --color-on-primary: #08131f;
+    --color-surface: #0c1420;
+    --color-surface-raised: #141e2d;
+    --color-border: #243449;
+    --color-border-strong: #68809b;
+    --color-focus-ring: #8cc4ff;
+    --color-ink: #e7eef8;
+    --color-ink-muted: #9cb1cc;
+    --color-band: #63a6f526;
+    --color-scrim: #04080ea6;
     --flag-normal: #34c98a;
     --flag-warn: #f0a33a;
     --flag-alert: #f26b6b;

@@ -18,7 +18,8 @@
   --font-body: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  /* Spacing — 4px base */
+  /* Spacing — 4px base. Groups are tight, sections are separated: a heading
+     always gets more space above it than below. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -31,7 +32,10 @@
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
-  --shadow-card: 0 1px 2px rgb(26 46 46 / 6%), 0 4px 12px rgb(26 46 46 / 4%);
+
+  /* Offset and blur, tinted with the ink hue — a card sits on the surface, it
+     does not glow on it. */
+  --shadow-card: 0 1px 2px rgb(16 28 46 / 6%), 0 4px 12px rgb(16 28 46 / 5%);
 
   /* Layout */
   --touch-target: 2.75rem; /* 44px a11y floor on mobile */

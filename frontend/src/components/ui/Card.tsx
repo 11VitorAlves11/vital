@@ -18,8 +18,13 @@ export function Card({ title, action, className, children, ...props }: CardProps
       {...props}
     >
       {title || action ? (
-        <div className="mb-3 flex items-start justify-between gap-2">
-          {title ? <h2 className="font-display text-lg text-ink">{title}</h2> : <span />}
+        // Tighter to its own content than to whatever sits above the card.
+        <div className="mb-4 flex items-start justify-between gap-3">
+          {title ? (
+            <h2 className="font-display text-lg leading-tight font-medium text-ink">{title}</h2>
+          ) : (
+            <span />
+          )}
           {action}
         </div>
       ) : null}

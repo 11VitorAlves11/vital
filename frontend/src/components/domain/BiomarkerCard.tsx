@@ -7,6 +7,11 @@ import { Card } from "../ui/Card";
 import { FlagChip } from "../ui/FlagChip";
 import { Sparkline } from "../ui/Sparkline";
 
+/**
+ * Three tiers, read in this order: the measurement, the interval it is judged
+ * against, and where it came from. Everything competing at one weight was what
+ * made the grid unreadable.
+ */
 export function BiomarkerCard({ item }: { item: DashboardItem }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
@@ -18,7 +23,7 @@ export function BiomarkerCard({ item }: { item: DashboardItem }) {
       <div className="flex items-start justify-between gap-3">
         <Link
           to={`/biomarkers/${item.biomarker.id}`}
-          className="font-display text-lg text-ink hover:text-primary"
+          className="text-base font-medium text-ink underline-offset-4 hover:text-primary hover:underline"
         >
           {item.biomarker.name}
         </Link>
@@ -28,9 +33,12 @@ export function BiomarkerCard({ item }: { item: DashboardItem }) {
         />
       </div>
 
-      <p className="flex items-baseline gap-2">
-        <span className="data text-2xl text-ink">{formatValue(item.value, locale)}</span>
-        <span className="text-sm text-ink-muted">{item.unit}</span>
+      {/* The datum, at the scale it deserves on a page of measurements. */}
+      <p className="flex items-baseline gap-1.5">
+        <span className="data text-3xl leading-none font-medium text-ink">
+          {formatValue(item.value, locale)}
+        </span>
+        <span className="text-sm text-ink">{item.unit}</span>
       </p>
 
       <Sparkline
@@ -44,10 +52,16 @@ export function BiomarkerCard({ item }: { item: DashboardItem }) {
         })}
       />
 
-      <p className="text-sm text-ink-muted">
-        {formatDate(item.collected_on, locale)}
-        {range ? ` · ${t("biomarker.reference")} ${range}` : ""}
-      </p>
+      <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-3 border-t border-border pt-3 text-sm">
+        {range ? (
+          <span className="text-ink">
+            {t("biomarker.reference")} <span className="data">{range}</span>
+          </span>
+        ) : (
+          <span className="text-ink-muted">{t("biomarker.noRange")}</span>
+        )}
+        <span className="text-ink-muted">{formatDate(item.collected_on, locale)}</span>
+      </div>
     </Card>
   );
 }

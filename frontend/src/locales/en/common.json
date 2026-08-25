@@ -138,7 +138,15 @@
     "created": "Weigh-in recorded.",
     "deleted": "Weigh-in deleted.",
     "estimateWarning": "Bioimpedance figures are estimates. The trend is the reliable signal, not the isolated value.",
-    "atLeastOneValue": "Fill in at least one value."
+    "atLeastOneValue": "Fill in at least one value.",
+    "groups": {
+      "weight": "Weight and index",
+      "fat": "Fat",
+      "lean": "Lean mass",
+      "water": "Water",
+      "metabolism": "Metabolism",
+      "other": "Other"
+    }
   },
   "profile": {
     "title": "Profile",

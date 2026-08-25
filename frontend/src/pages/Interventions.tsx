@@ -69,15 +69,17 @@ export function Interventions() {
   }
 
   return (
-    <section className="flex flex-col gap-6">
+    <section>
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl text-ink">{t("interventions.title")}</h1>
+        <h1 className="font-display text-2xl leading-tight font-medium text-ink">
+          {t("interventions.title")}
+        </h1>
         <Button icon={<Plus size={20} aria-hidden="true" />} onClick={() => setCreating(true)}>
           {t("interventions.new")}
         </Button>
       </header>
 
-      <div className="md:max-w-xs">
+      <div className="mt-6 md:max-w-xs">
         <Select
           label={t("interventions.filterKind")}
           placeholder={t("interventions.all")}
@@ -87,52 +89,60 @@ export function Interventions() {
         />
       </div>
 
-      {loading ? <Skeleton lines={4} label={t("common.loading")} /> : null}
-      {error ? <ErrorState onRetry={reload} /> : null}
+      <div className="mt-8">
+        {loading ? <Skeleton lines={4} label={t("common.loading")} /> : null}
+        {error ? <ErrorState onRetry={reload} /> : null}
 
-      {data && data.length === 0 ? (
-        <EmptyState
-          title={t("interventions.emptyTitle")}
-          description={t("interventions.emptyDescription")}
-          action={<Button onClick={() => setCreating(true)}>{t("interventions.new")}</Button>}
-        />
-      ) : null}
+        {data && data.length === 0 ? (
+          <EmptyState
+            title={t("interventions.emptyTitle")}
+            description={t("interventions.emptyDescription")}
+            action={<Button onClick={() => setCreating(true)}>{t("interventions.new")}</Button>}
+          />
+        ) : null}
 
-      <ul className="flex flex-col gap-3">
-        {data?.map((intervention) => (
-          <li key={intervention.id}>
-            <Card>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-display text-lg text-ink">
-                    {intervention.name}
-                    {intervention.dose ? (
-                      <span className="data ml-2 text-sm text-ink-muted">{intervention.dose}</span>
-                    ) : null}
-                  </p>
-                  <p className="text-sm text-ink-muted">
-                    {t(`kinds.${intervention.kind}`)} ·{" "}
-                    {formatDate(intervention.started_on, locale)} –{" "}
-                    {intervention.ended_on
-                      ? formatDate(intervention.ended_on, locale)
-                      : t("interventions.ongoing")}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {intervention.ended_on ? null : (
-                    <Button variant="secondary" onClick={() => end(intervention.id)}>
-                      {t("actions.end")}
+        {data && data.length > 0 ? (
+          <Card className="p-0">
+            <ul>
+              {data.map((intervention) => (
+                <li
+                  key={intervention.id}
+                  className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 first:border-t-0"
+                >
+                  <div className="min-w-0">
+                    <p className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="font-medium text-ink">{intervention.name}</span>
+                      {intervention.dose ? (
+                        <span className="data text-sm text-ink">{intervention.dose}</span>
+                      ) : null}
+                    </p>
+                    <p className="text-sm text-ink-muted">
+                      {t(`kinds.${intervention.kind}`)} ·{" "}
+                      <span className="data">{formatDate(intervention.started_on, locale)}</span>
+                      {" – "}
+                      {intervention.ended_on ? (
+                        <span className="data">{formatDate(intervention.ended_on, locale)}</span>
+                      ) : (
+                        <span className="text-ink">{t("interventions.ongoing")}</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {intervention.ended_on ? null : (
+                      <Button variant="secondary" onClick={() => end(intervention.id)}>
+                        {t("actions.end")}
+                      </Button>
+                    )}
+                    <Button variant="danger" onClick={() => remove(intervention.id)}>
+                      {t("actions.delete")}
                     </Button>
-                  )}
-                  <Button variant="danger" onClick={() => remove(intervention.id)}>
-                    {t("actions.delete")}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </li>
-        ))}
-      </ul>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+      </div>
 
       <FormSurface open={creating} onOpenChange={setCreating} title={t("interventions.new")}>
         <form className="flex flex-col gap-4" onSubmit={submit} noValidate>

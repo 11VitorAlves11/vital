@@ -16,7 +16,7 @@ export type SurfaceProps = {
 
 export function Overlay() {
   return (
-    <RadixDialog.Overlay className="fixed inset-0 z-40 bg-[rgb(0_0_0/45%)] motion-safe:animate-[fade-in_var(--duration-base)_var(--ease-standard)]" />
+    <RadixDialog.Overlay className="fixed inset-0 z-40 bg-scrim motion-safe:animate-[fade-in_var(--duration-base)_var(--ease-standard)]" />
   );
 }
 

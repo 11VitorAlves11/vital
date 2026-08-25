@@ -138,7 +138,15 @@
     "created": "Pesagem registada.",
     "deleted": "Pesagem eliminada.",
     "estimateWarning": "Valores de bioimpedância são estimativas. A tendência é o sinal fiável, não o valor isolado.",
-    "atLeastOneValue": "Preenche pelo menos um valor."
+    "atLeastOneValue": "Preenche pelo menos um valor.",
+    "groups": {
+      "weight": "Peso e índice",
+      "fat": "Gordura",
+      "lean": "Massa magra",
+      "water": "Água",
+      "metabolism": "Metabolismo",
+      "other": "Outros"
+    }
   },
   "profile": {
     "title": "Perfil",

@@ -39,7 +39,7 @@ export function BiomarkerDetail() {
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl text-ink">{biomarker.name}</h1>
+        <h1 className="font-display text-2xl leading-tight font-medium text-ink">{biomarker.name}</h1>
         <p className="text-sm text-ink-muted">
           {t(`categories.${biomarker.category}`)}
           {canonical

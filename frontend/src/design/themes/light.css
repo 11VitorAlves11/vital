@@ -1,18 +1,20 @@
-/* Light theme — default. */
+/* Light theme — default. Every value below was measured against WCAG AA on both
+   --color-surface and --color-surface-raised before it was written down. */
 
 :root {
-  --color-primary: #0D7377;
-  --color-primary-deep: #0A5A5E;
-  --color-on-primary: #FFFFFF;
-  --color-surface: #FAFAF8;
-  --color-surface-raised: #FFFFFF;
-  --color-border: #E2E6E5;
-  --color-border-strong: #7E8D8C;
-  --color-focus-ring: #0D7377;
-  --color-ink: #1A2E2E;
-  --color-ink-muted: #5C7070;
-  --color-band: #0D737714;
+  --color-primary: #155bc4;
+  --color-primary-deep: #0e4497;
+  --color-on-primary: #ffffff;
+  --color-surface: #f3f6fb;
+  --color-surface-raised: #ffffff;
+  --color-border: #dbe3ef;
+  --color-border-strong: #657b99;
+  --color-focus-ring: #155bc4;
+  --color-ink: #101c2e;
+  --color-ink-muted: #4e617c;
+  --color-band: #155bc414;
+  --color-scrim: #101c2e73;
   --flag-normal: #157347;
-  --flag-warn: #B45309;
-  --flag-alert: #DC2626;
+  --flag-warn: #b45309;
+  --flag-alert: #d42121;
 }

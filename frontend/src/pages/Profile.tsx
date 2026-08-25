@@ -45,7 +45,7 @@ export function Profile() {
 
   return (
     <section className="flex max-w-lg flex-col gap-6">
-      <h1 className="font-display text-2xl text-ink">{t("profile.title")}</h1>
+      <h1 className="font-display text-2xl leading-tight font-medium text-ink">{t("profile.title")}</h1>
 
       <Card>
         <form className="flex flex-col gap-4" onSubmit={submit} noValidate>

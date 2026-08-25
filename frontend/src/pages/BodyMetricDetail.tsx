@@ -28,7 +28,7 @@ export function BodyMetricDetail() {
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl text-ink">{metric.name}</h1>
+        <h1 className="font-display text-2xl leading-tight font-medium text-ink">{metric.name}</h1>
         <p className="text-sm text-ink-muted">
           {metric.unit}
           {metric.source ? ` · ${metric.source}` : ` · ${t("body.noClinicalReference")}`}

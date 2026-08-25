@@ -85,84 +85,102 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
 
   return (
     <FormSurface open={open} onOpenChange={onOpenChange} title={t("reports.new")}>
-      <form id="report-form" className="flex flex-col gap-4" onSubmit={submit} noValidate>
-        <Input
-          label={t("reports.collectedOn")}
-          type="date"
-          required
-          value={collectedOn}
-          onChange={(event) => setCollectedOn(event.target.value)}
-        />
-        <Input
-          label={t("reports.labName")}
-          required
-          value={labName}
-          onChange={(event) => setLabName(event.target.value)}
-        />
-        <label className="flex items-center gap-2 text-ink">
-          <input
-            type="checkbox"
-            checked={fasting}
-            onChange={(event) => setFasting(event.target.checked)}
-            className="size-5"
+      <form className="flex flex-col gap-8" onSubmit={submit} noValidate>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Input
+            label={t("reports.collectedOn")}
+            type="date"
+            required
+            value={collectedOn}
+            onChange={(event) => setCollectedOn(event.target.value)}
           />
-          {t("reports.fasting")}
-        </label>
+          <Input
+            label={t("reports.labName")}
+            required
+            value={labName}
+            onChange={(event) => setLabName(event.target.value)}
+          />
+          <label className="flex min-h-[var(--touch-target)] items-center gap-2 text-ink">
+            <input
+              type="checkbox"
+              checked={fasting}
+              onChange={(event) => setFasting(event.target.checked)}
+              className="size-5"
+            />
+            {t("reports.fasting")}
+          </label>
+        </div>
 
-        <fieldset className="flex flex-col gap-4">
-          <legend className="font-display text-lg text-ink">{t("reports.results")}</legend>
-          {rows.map((row) => (
-            <div key={row.key} className="flex flex-col gap-2 rounded-[var(--radius-md)] border border-border p-3">
-              <Select
-                label={t("reports.biomarker")}
-                placeholder={t("reports.pickBiomarker")}
-                options={options}
-                value={row.biomarkerId}
-                onChange={(event) => update(row.key, { biomarkerId: event.target.value })}
-              />
-              <Input
-                label={t("reports.value")}
-                inputMode="decimal"
-                value={row.value}
-                onChange={(event) => update(row.key, { value: event.target.value })}
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  label={t("reports.refMin")}
-                  inputMode="decimal"
-                  value={row.refMin}
-                  onChange={(event) => update(row.key, { refMin: event.target.value })}
+        <fieldset>
+          <legend className="w-full border-b border-border pb-2 font-display text-base font-medium text-ink">
+            {t("reports.results")}
+          </legend>
+          {/* Said once, above the rows, instead of repeated under every one. */}
+          <p className="mt-2 text-sm text-ink-muted">{t("reports.refHint")}</p>
+
+          <div className="mt-4 flex flex-col gap-4">
+            {rows.map((row) => (
+              <div
+                key={row.key}
+                className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-border p-3"
+              >
+                <Select
+                  label={t("reports.biomarker")}
+                  placeholder={t("reports.pickBiomarker")}
+                  options={options}
+                  value={row.biomarkerId}
+                  onChange={(event) => update(row.key, { biomarkerId: event.target.value })}
                 />
-                <Input
-                  label={t("reports.refMax")}
-                  inputMode="decimal"
-                  value={row.refMax}
-                  onChange={(event) => update(row.key, { refMax: event.target.value })}
-                />
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <Input
+                    label={t("reports.value")}
+                    inputMode="decimal"
+                    value={row.value}
+                    onChange={(event) => update(row.key, { value: event.target.value })}
+                  />
+                  <Input
+                    label={t("reports.refMin")}
+                    inputMode="decimal"
+                    value={row.refMin}
+                    onChange={(event) => update(row.key, { refMin: event.target.value })}
+                  />
+                  <Input
+                    label={t("reports.refMax")}
+                    inputMode="decimal"
+                    value={row.refMax}
+                    onChange={(event) => update(row.key, { refMax: event.target.value })}
+                  />
+                </div>
+                {rows.length > 1 ? (
+                  <div>
+                    <Button
+                      variant="ghost"
+                      icon={<Trash2 size={20} aria-hidden="true" />}
+                      onClick={() =>
+                        setRows((current) => current.filter((item) => item.key !== row.key))
+                      }
+                    >
+                      {t("actions.removeResult")}
+                    </Button>
+                  </div>
+                ) : null}
               </div>
-              <p className="text-sm text-ink-muted">{t("reports.refHint")}</p>
-              {rows.length > 1 ? (
-                <Button
-                  variant="ghost"
-                  icon={<Trash2 size={20} aria-hidden="true" />}
-                  onClick={() => setRows((current) => current.filter((item) => item.key !== row.key))}
-                >
-                  {t("actions.removeResult")}
-                </Button>
-              ) : null}
-            </div>
-          ))}
-          <Button
-            variant="secondary"
-            icon={<Plus size={20} aria-hidden="true" />}
-            onClick={() => setRows((current) => [...current, emptyRow(Date.now())])}
-          >
-            {t("actions.addResult")}
-          </Button>
+            ))}
+          </div>
+
+          <div className="mt-4">
+            <Button
+              variant="secondary"
+              icon={<Plus size={20} aria-hidden="true" />}
+              onClick={() => setRows((current) => [...current, emptyRow(Date.now())])}
+            >
+              {t("actions.addResult")}
+            </Button>
+          </div>
         </fieldset>
 
         <Input
-          label={t("reports.notes")}
+          label={`${t("reports.notes")} (${t("common.optional")})`}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
         />
@@ -173,7 +191,7 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
           </p>
         ) : null}
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 border-t border-border pt-4">
           <Button type="submit" loading={busy}>
             {t("actions.save")}
           </Button>

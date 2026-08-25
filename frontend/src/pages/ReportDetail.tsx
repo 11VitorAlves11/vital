@@ -32,7 +32,7 @@ export function ReportDetail() {
     <section className="flex flex-col gap-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl text-ink">
+          <h1 className="font-display text-2xl leading-tight font-medium text-ink">
             {t("reports.detailTitle", { date: formatDate(data.collected_on, locale) })}
           </h1>
           <p className="text-ink-muted">

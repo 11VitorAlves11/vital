@@ -17,6 +17,7 @@
   --color-ink: var(--color-ink);
   --color-ink-muted: var(--color-ink-muted);
   --color-band: var(--color-band);
+  --color-scrim: var(--color-scrim);
   --color-flag-normal: var(--flag-normal);
   --color-flag-warn: var(--flag-warn);
   --color-flag-alert: var(--flag-alert);
@@ -39,6 +40,31 @@ body {
 :focus-visible {
   outline: var(--focus-width) solid var(--color-focus-ring);
   outline-offset: var(--focus-offset);
+}
+
+/* The parts of the interface the browser draws still belong to the design
+   system: left at their defaults they are the tell that a page was assembled
+   rather than built. */
+::selection {
+  background-color: var(--color-band);
+  color: var(--color-ink);
+}
+
+::placeholder {
+  color: var(--color-ink-muted);
+  opacity: 1; /* Firefox dims placeholders further, below the measured ratio. */
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--color-primary);
+  accent-color: var(--color-primary);
+}
+
+* {
+  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-width: thin;
 }
 
 /* Surfaces entering: the overlay fades, the sheet travels. Both are switched off
