@@ -4,6 +4,7 @@ from app.models.body import BodyMetric, BodyScan, BodyScanValue
 from app.models.extraction import ExtractionJob
 from app.models.intervention import Intervention
 from app.models.lab_report import LabReport, Result
+from app.models.photo import ProgressPhoto
 from app.models.user import User
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "ExtractionJob",
     "Intervention",
     "LabReport",
+    "ProgressPhoto",
     "Result",
     "User",
 ]

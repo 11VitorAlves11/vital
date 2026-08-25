@@ -73,7 +73,7 @@ async def run_extraction(job_id: uuid.UUID) -> None:
         await db.commit()
 
         try:
-            content = storage.read_pdf(job.file_path)
+            content = storage.read_file(job.file_path)
             if content is None:
                 raise ExtractionError("The uploaded file is no longer on disk")
             answer, provider = await ask_model(page_contents(content, settings), settings)

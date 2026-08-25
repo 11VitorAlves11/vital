@@ -15,6 +15,7 @@ from app.api.routes import (
     features,
     health,
     interventions,
+    photos,
     reports,
     users,
 )
@@ -70,6 +71,7 @@ app.include_router(reports.router, prefix="/api")
 app.include_router(extractions.router, prefix="/api")
 app.include_router(interventions.router, prefix="/api")
 app.include_router(body.router, prefix="/api")
+app.include_router(photos.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 
 

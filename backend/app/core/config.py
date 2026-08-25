@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     extraction_text_threshold: int = 200
     upload_max_bytes: int = 20 * 1024 * 1024
 
+    # Progress photos are re-encoded on upload, so these bound what is kept on
+    # disk rather than what may be sent. The pixel cap is the decompression-bomb
+    # guard: a small file can decode to gigabytes.
+    photo_max_dimension: int = 2000
+    photo_max_pixels: int = 50_000_000
+
     storage_path: str = "/storage"
     cors_origins: list[str] = ["http://localhost:5173"]
 

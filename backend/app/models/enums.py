@@ -49,6 +49,15 @@ class ExtractionStatus(StrEnum):
     FAILED = "failed"
 
 
+class Pose(StrEnum):
+    """How a progress photo was taken, so a comparison lines two of a kind up."""
+
+    FRENTE = "frente"
+    LADO = "lado"
+    COSTAS = "costas"
+    OUTRO = "outro"
+
+
 class InterventionKind(StrEnum):
     SUPLEMENTO = "suplemento"
     MEDICACAO = "medicacao"

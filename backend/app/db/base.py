@@ -13,6 +13,7 @@ from app.models import (
     ExtractionJob,
     Intervention,
     LabReport,
+    ProgressPhoto,
     Result,
     User,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "ExtractionJob",
     "Intervention",
     "LabReport",
+    "ProgressPhoto",
     "Result",
     "User",
 ]

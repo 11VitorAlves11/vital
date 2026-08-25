@@ -151,7 +151,7 @@ async def read_report_file(report_id: uuid.UUID, user: CurrentUser, db: DbSessio
     internet is this ownership check.
     """
     report = await _owned_report(report_id, user, db)
-    content = storage.read_pdf(report.file_path) if report.file_path else None
+    content = storage.read_file(report.file_path) if report.file_path else None
     if content is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No file for this report")
     # The lab name is whatever the account typed, and it lands in a header:

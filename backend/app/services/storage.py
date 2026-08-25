@@ -17,17 +17,28 @@ def reports_dir(user_id: uuid.UUID) -> Path:
     return Path(get_settings().storage_path) / "reports" / str(user_id)
 
 
-def store_pdf(user_id: uuid.UUID, job_id: uuid.UUID, content: bytes) -> str:
-    directory = reports_dir(user_id)
+def photos_dir(user_id: uuid.UUID) -> Path:
+    return Path(get_settings().storage_path) / "photos" / str(user_id)
+
+
+def _store(directory: Path, name: str, content: bytes) -> str:
     directory.mkdir(parents=True, exist_ok=True)
-    path = directory / f"{job_id}.pdf"
+    path = directory / name
     path.write_bytes(content)
     # Health data at rest: the file is the owner's to read, nobody else's.
     path.chmod(0o600)
     return str(path)
 
 
-def read_pdf(file_path: str) -> bytes | None:
+def store_pdf(user_id: uuid.UUID, job_id: uuid.UUID, content: bytes) -> str:
+    return _store(reports_dir(user_id), f"{job_id}.pdf", content)
+
+
+def store_photo(user_id: uuid.UUID, photo_id: uuid.UUID, content: bytes) -> str:
+    return _store(photos_dir(user_id), f"{photo_id}.jpg", content)
+
+
+def read_file(file_path: str) -> bytes | None:
     path = Path(file_path)
     return path.read_bytes() if path.is_file() else None
 
