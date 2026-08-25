@@ -27,6 +27,25 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
+    // The dev server refuses any Host it does not know. The e2e run reaches it
+    // as http://web:5173 from inside the compose network, which is that case.
+    allowedHosts: ["web"],
+    watch: {
+      // Test output and tooling caches are not sources. Watching them makes the
+      // dev server reload the page mid-run, which aborts whatever the test had
+      // in flight and reads as a flaky failure.
+      ignored: ["**/test-results/**", "**/playwright-report/**", "**/.impeccable/**"],
+    },
+    proxy: {
+      "/api": { target: apiTarget, changeOrigin: true },
+      "/auth": { target: apiTarget, changeOrigin: true },
+    },
+  },
+  // The e2e suite targets the built app, not the dev server: no HMR reloading a
+  // page mid-test and no StrictMode double-effects, so a failure means a defect.
+  preview: {
+    port: 5173,
+    allowedHosts: ["web"],
     proxy: {
       "/api": { target: apiTarget, changeOrigin: true },
       "/auth": { target: apiTarget, changeOrigin: true },
@@ -37,5 +56,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     css: false,
+    // e2e/ belongs to Playwright, which runs a browser against the real stack.
+    include: ["src/**/*.test.{ts,tsx}"],
   },
 });
