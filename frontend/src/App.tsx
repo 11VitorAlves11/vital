@@ -1,28 +1,109 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy } from "react";
+import type { ReactNode } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-type ApiInfo = { name: string; version: string };
+import { AppShell } from "./components/layout/AppShell";
+import { Skeleton } from "./components/ui/Skeleton";
+import { useSession } from "./lib/session";
+import { Body } from "./pages/Body";
+import { Dashboard } from "./pages/Dashboard";
+import { Interventions } from "./pages/Interventions";
+import { Login } from "./pages/Login";
+import { Profile } from "./pages/Profile";
+import { ReportDetail } from "./pages/ReportDetail";
+import { Reports } from "./pages/Reports";
 
-/** Placeholder shell — confirms the web app is wired to the API. */
-export function App() {
-  const [info, setInfo] = useState<ApiInfo | null>(null);
-  const [error, setError] = useState(false);
+// Recharts is by far the heaviest dependency and only these two routes need it,
+// so it stays out of the bundle the dashboard loads on a phone.
+const BiomarkerDetail = lazy(() =>
+  import("./pages/BiomarkerDetail").then((module) => ({ default: module.BiomarkerDetail })),
+);
+const BodyMetricDetail = lazy(() =>
+  import("./pages/BodyMetricDetail").then((module) => ({ default: module.BodyMetricDetail })),
+);
 
-  useEffect(() => {
-    fetch("/api")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then(setInfo)
-      .catch(() => setError(true));
-  }, []);
+function RequireSession({ children }: { children: ReactNode }) {
+  const { user, loading } = useSession();
+  const location = useLocation();
 
+  if (loading) return <Skeleton className="p-8" lines={6} />;
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 p-8">
-      <h1 className="font-display text-3xl text-primary">Vital</h1>
-      <p className="text-ink-muted">
-        Tracking de biomarcadores, composição corporal e progresso físico.
-      </p>
-      <p className="data text-sm text-ink-muted">
-        {error ? "API indisponível" : info ? `API ${info.name} v${info.version}` : "A ligar à API…"}
-      </p>
-    </main>
+    <AppShell>
+      <Suspense fallback={<Skeleton lines={6} />}>{children}</Suspense>
+    </AppShell>
+  );
+}
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <RequireSession>
+            <Dashboard />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/biomarkers/:id"
+        element={
+          <RequireSession>
+            <BiomarkerDetail />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <RequireSession>
+            <Reports />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/reports/:id"
+        element={
+          <RequireSession>
+            <ReportDetail />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/interventions"
+        element={
+          <RequireSession>
+            <Interventions />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/body"
+        element={
+          <RequireSession>
+            <Body />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/body/:id"
+        element={
+          <RequireSession>
+            <BodyMetricDetail />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <RequireSession>
+            <Profile />
+          </RequireSession>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
