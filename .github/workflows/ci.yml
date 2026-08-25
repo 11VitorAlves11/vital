@@ -58,7 +58,7 @@ jobs:
         run: pytest --cov=app --cov-report=term-missing
 
   frontend:
-    name: Frontend (eslint · stylelint · tsc · vitest · build)
+    name: Frontend (eslint · stylelint · tsc · vitest · build · storybook)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -80,6 +80,10 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Build the design catalogue
+        # The stories are the design system's documentation. A story that no
+        # longer compiles is a component whose contract changed under it.
+        run: npm run build:storybook
 
   e2e:
     name: E2E (Playwright · axe)

@@ -1,0 +1,110 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundations/Overview" />
+
+# Fundações
+
+O design system do Vital vive **inteiramente em código**: a fonte de verdade são
+os tokens em `src/design/tokens.css` e os dois temas em `src/design/themes/`.
+Nenhum componente escreve um hex ou um px à mão — o `stylelint` bloqueia-o.
+
+Usa a barra de ferramentas para trocar **tema** e **idioma**: qualquer story tem
+de aguentar os quatro cruzamentos.
+
+## Paleta
+
+Estratégia contida: neutros frios mais um único acento. O azul marca o que é
+acionável e nada mais; a cor com significado clínico fica reservada aos flags.
+
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(11rem, 1fr))", gap: "0.75rem" }}>
+  {[
+    ["--color-primary", "Ações, links, ativo"],
+    ["--color-primary-deep", "Hover / pressed"],
+    ["--color-surface", "Fundo"],
+    ["--color-surface-raised", "Cards"],
+    ["--color-border", "Separadores decorativos"],
+    ["--color-border-strong", "Limites informativos (≥3:1)"],
+    ["--color-ink", "Texto principal"],
+    ["--color-ink-muted", "Terceiro nível: datas, proveniência"],
+    ["--color-band", "Banda de referência"],
+    ["--flag-normal", "Dentro do intervalo"],
+    ["--flag-warn", "Banda intermédia (só corpo)"],
+    ["--flag-alert", "Fora do intervalo"],
+    ["--logo-deep", "Traço profundo da marca"],
+    ["--logo-light", "Traço claro da marca"],
+  ].map(([token, use]) => (
+    <div key={token} style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+      <div style={{ background: `var(${token})`, height: "3rem" }} />
+      <div style={{ padding: "0.5rem 0.75rem" }}>
+        <code style={{ fontSize: "0.75rem", color: "var(--color-ink)" }}>{token}</code>
+        <p style={{ margin: "0.25rem 0 0", fontSize: "0.75rem", color: "var(--color-ink-muted)" }}>{use}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
+**Contraste**: todos os pares de texto cumprem WCAG AA (≥4.5:1) sobre `surface` e
+sobre `surface-raised`, nos dois temas; os limites informativos ≥3:1. Os flags em
+tema claro são deliberadamente mais escuros do que um verde/âmbar/vermelho
+"natural" — `#22A06B` mediria 3.19:1. Um token novo entra com o rácio medido, não
+com a cor que parece bem.
+
+## Tipografia
+
+Três famílias, cada uma com um trabalho:
+
+<div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+  <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-2xl)", color: "var(--color-ink)", margin: 0 }}>
+    Bricolage Grotesque — títulos e números-herói
+  </p>
+  <p style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-base)", color: "var(--color-ink)", margin: 0 }}>
+    Instrument Sans — corpo, rótulos, interface
+  </p>
+  <p style={{ fontFamily: "var(--font-data)", fontVariantNumeric: "tabular-nums", fontSize: "var(--text-base)", color: "var(--color-ink)", margin: 0 }}>
+    IBM Plex Mono — 10,5 · 13,4 · 218 · 2,1 (valores em coluna)
+  </p>
+</div>
+
+Valores clínicos em coluna usam `.data` (mono, tabular). Números-herói usam
+`.metric` (display, tabular): num mono, o separador decimal fica com uma célula
+inteira e "10,5" lê-se "10 , 5" àquele tamanho.
+
+## Espaçamento
+
+Base de 4px. Grupos são apertados, secções são separadas: um título leva sempre
+mais espaço acima do que abaixo.
+
+<div style={{ display: "flex", alignItems: "flex-end", gap: "0.75rem" }}>
+  {["--space-1", "--space-2", "--space-3", "--space-4", "--space-6", "--space-8", "--space-12"].map((token) => (
+    <div key={token} style={{ textAlign: "center" }}>
+      <div style={{ width: `var(${token})`, height: `var(${token})`, background: "var(--color-primary)", borderRadius: "var(--radius-sm)" }} />
+      <code style={{ fontSize: "0.625rem", color: "var(--color-ink-muted)" }}>{token.replace("--space-", "")}</code>
+    </div>
+  ))}
+</div>
+
+## Estados obrigatórios
+
+Toda a app lê de uma API, por isso **nenhuma vista tem só o estado "carregado"**.
+Cada vista de dados define os quatro, e as stories mostram-nos:
+
+| Estado | Padrão |
+|---|---|
+| Loading | `Skeleton` com a forma e a altura do conteúdo final, `aria-busy` |
+| Vazio | `EmptyState` com a ação seguinte explícita, não só "sem dados" |
+| Erro | Mensagem junto ao que falhou + ação de repetir; nunca só um toast |
+| Carregado | — |
+
+## Voz
+
+PT-PT europeu e clínico: *colheita*, *biomarcador*, *banda de referência*,
+*painel marcial*, *intervenção*. Nunca PT-BR. Nenhuma string existe só num
+idioma — PT-PT e EN saem sempre juntas.
+
+## Regras que o catálogo existe para vigiar
+
+- **A cor nunca é o único sinal.** O `FlagChip` mostra sempre o rótulo da banda.
+- **Alvo tátil de 44px** em qualquer interativo — é o piso de acessibilidade, não
+  uma preferência visual.
+- **Foco visível** em tudo, a partir de uma única regra em `index.css`.
+- **`domain` só consome `ui`; `ui` só consome os tokens.**
