@@ -220,6 +220,7 @@ describe("BiomarkerDetail", () => {
 describe("Reports", () => {
   it("lists collections with their result count", async () => {
     mockApi([
+      { pattern: /\/api\/features/, body: { extraction: false } },
       {
         pattern: /\/api\/reports/,
         body: [
@@ -232,6 +233,7 @@ describe("Reports", () => {
             notes: null,
             created_at: "2026-03-01T10:00:00Z",
             result_count: 3,
+            has_file: false,
           },
         ],
       },
@@ -243,6 +245,7 @@ describe("Reports", () => {
 
   it("opens the manual entry form", async () => {
     mockApi([
+      { pattern: /\/api\/features/, body: { extraction: false } },
       { pattern: /\/api\/reports/, body: [] },
       { pattern: /\/api\/biomarkers/, body: [HAEMOGLOBIN] },
     ]);

@@ -1,8 +1,9 @@
+import { FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { ResultRow } from "../components/domain/ResultRow";
-import { Button } from "../components/ui/Button";
+import { Button, buttonClasses } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { ErrorState } from "../components/ui/ErrorState";
 import { Skeleton } from "../components/ui/Skeleton";
@@ -40,9 +41,24 @@ export function ReportDetail() {
             {data.fasting === null ? "" : ` · ${t("reports.fasting")}: ${data.fasting ? t("common.yes") : t("common.no")}`}
           </p>
         </div>
-        <Button variant="danger" onClick={remove}>
-          {t("actions.delete")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {/* A plain link, not fetch: the browser renders the PDF itself, and
+              the session cookie rides along the way it does everywhere else. */}
+          {data.has_file ? (
+            <a
+              href={`/api/reports/${data.id}/file`}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonClasses("secondary")}
+            >
+              <FileText size={20} aria-hidden="true" />
+              {t("reports.openFile")}
+            </a>
+          ) : null}
+          <Button variant="danger" onClick={remove}>
+            {t("actions.delete")}
+          </Button>
+        </div>
       </header>
 
       {data.notes ? <p className="text-ink-muted">{data.notes}</p> : null}

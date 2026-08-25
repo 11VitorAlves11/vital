@@ -1,4 +1,4 @@
-import { query, request } from "./client";
+import { query, request, upload } from "./client";
 import type {
   Biomarker,
   BiomarkerSeries,
@@ -7,6 +7,8 @@ import type {
   BodyScan,
   BodySeries,
   Dashboard,
+  ExtractionJob,
+  Features,
   Intervention,
   InterventionKind,
   Report,
@@ -27,6 +29,36 @@ export const auth = {
   logout: () => request<void>("/auth/logout", { method: "POST" }),
   updateProfile: (payload: { name?: string | null; sex?: Sex | null }) =>
     request<User>("/api/users/me", { method: "PATCH", body: payload }),
+};
+
+export const features = {
+  read: () => request<Features>("/api/features"),
+};
+
+/**
+ * The PDF pipeline. `create` only ever produces a preview: nothing an extraction
+ * read reaches the history until `confirm` is called with what a human approved.
+ */
+export const extractions = {
+  create: (file: File) => upload<ExtractionJob>("/api/extractions", file),
+  read: (id: string) => request<ExtractionJob>(`/api/extractions/${id}`),
+  confirm: (
+    id: string,
+    payload: {
+      collected_on: string;
+      lab_name: string;
+      fasting?: boolean | null;
+      notes?: string | null;
+      results: {
+        biomarker_id: number;
+        value: number;
+        unit?: string | null;
+        ref_min?: number | null;
+        ref_max?: number | null;
+      }[];
+    },
+  ) => request<Report>(`/api/extractions/${id}/confirm`, { method: "POST", body: payload }),
+  discard: (id: string) => request<void>(`/api/extractions/${id}`, { method: "DELETE" }),
 };
 
 export const catalogue = {

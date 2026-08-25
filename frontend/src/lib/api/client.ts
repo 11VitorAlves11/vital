@@ -49,6 +49,16 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   return (await response.json()) as T;
 }
 
+export async function upload<T>(path: string, file: File): Promise<T> {
+  const form = new FormData();
+  form.append("file", file);
+  // No Content-Type header: the browser has to set it itself, because only it
+  // knows the multipart boundary it is about to generate.
+  const response = await fetch(path, { method: "POST", credentials: "include", body: form });
+  if (!response.ok) throw await errorFrom(response);
+  return (await response.json()) as T;
+}
+
 export function query(params: Record<string, string | undefined>): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {

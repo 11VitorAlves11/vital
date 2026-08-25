@@ -79,9 +79,47 @@ export type ReportSummary = {
   notes: string | null;
   created_at: string;
   result_count: number;
+  /** Whether the original PDF is still on the server for this report. */
+  has_file: boolean;
 };
 
 export type Report = Omit<ReportSummary, "result_count"> & { results: Result[] };
+
+export type ExtractionStatus = "pending" | "processing" | "preview" | "confirmed" | "failed";
+
+/** One line as the model read it, paired with the catalogue entry it matched.
+ *  `biomarker_id` is null when nothing matched — the row is shown anyway, for
+ *  the reader to match by hand or drop. */
+export type PreviewResult = {
+  biomarker_id: number | null;
+  biomarker_name: string | null;
+  biomarker_slug: string | null;
+  source_name: string;
+  value: string | null;
+  unit: string | null;
+  ref_min: string | null;
+  ref_max: string | null;
+};
+
+export type ExtractionPreview = {
+  collected_on: string | null;
+  lab_name: string | null;
+  fasting: boolean | null;
+  results: PreviewResult[];
+};
+
+export type ExtractionJob = {
+  id: string;
+  status: ExtractionStatus;
+  filename: string | null;
+  provider: string | null;
+  error: string | null;
+  report_id: string | null;
+  created_at: string;
+  preview: ExtractionPreview | null;
+};
+
+export type Features = { extraction: boolean };
 
 export type Intervention = {
   id: string;

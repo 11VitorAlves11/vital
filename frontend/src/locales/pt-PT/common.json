@@ -96,7 +96,23 @@
     "detailTitle": "Colheita de {{date}}",
     "deleted": "Colheita eliminada.",
     "created": "Colheita registada.",
-    "pickBiomarker": "Escolher biomarcador"
+    "pickBiomarker": "Escolher biomarcador",
+    "import": "Importar PDF",
+    "openFile": "Ver o boletim original"
+  },
+  "extraction": {
+    "title": "Importar PDF",
+    "description": "O modelo lê o boletim; tu confirmas o que fica guardado.",
+    "pickFile": "Escolher o PDF do boletim",
+    "pickHint": "Boletins com texto ou digitalizados. Nada é guardado antes de confirmares.",
+    "uploading": "A enviar o ficheiro…",
+    "reading": "A ler o boletim. Pode demorar até um minuto.",
+    "checkHint": "Confere cada linha contra o boletim antes de guardar. Corrige o que estiver errado e remove o que não quiseres.",
+    "unmatched": "{{count}} linha não corresponde a nenhum biomarcador do catálogo — escolhe um ou remove-a.",
+    "unmatched_other": "{{count}} linhas não correspondem a nenhum biomarcador do catálogo — escolhe um ou remove-as.",
+    "pickAtLeastOne": "Escolhe pelo menos um biomarcador com valor.",
+    "confirm": "Confirmar e guardar",
+    "tryAnotherFile": "Tentar outro ficheiro"
   },
   "interventions": {
     "title": "Intervenções",

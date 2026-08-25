@@ -96,7 +96,23 @@
     "detailTitle": "Collection of {{date}}",
     "deleted": "Collection deleted.",
     "created": "Collection recorded.",
-    "pickBiomarker": "Choose a biomarker"
+    "pickBiomarker": "Choose a biomarker",
+    "import": "Import a PDF",
+    "openFile": "View the original report"
+  },
+  "extraction": {
+    "title": "Import a PDF",
+    "description": "The model reads the report; you confirm what gets stored.",
+    "pickFile": "Choose the lab report PDF",
+    "pickHint": "Text reports or scans. Nothing is stored until you confirm it.",
+    "uploading": "Uploading the file…",
+    "reading": "Reading the report. This can take up to a minute.",
+    "checkHint": "Check every line against the report before saving. Correct what is wrong and remove what you do not want.",
+    "unmatched": "{{count}} line does not match any biomarker in the catalogue — pick one or remove it.",
+    "unmatched_other": "{{count}} lines do not match any biomarker in the catalogue — pick one or remove them.",
+    "pickAtLeastOne": "Pick at least one biomarker with a value.",
+    "confirm": "Confirm and save",
+    "tryAnotherFile": "Try another file"
   },
   "interventions": {
     "title": "Interventions",

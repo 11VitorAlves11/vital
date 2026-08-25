@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { FileUp, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -9,10 +9,11 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { Input } from "../components/ui/Input";
 import { Skeleton } from "../components/ui/Skeleton";
-import { reports } from "../lib/api";
+import { features, reports } from "../lib/api";
 import { formatDate } from "../lib/format";
 import { useAsync } from "../lib/useAsync";
 import { ReportCreate } from "./ReportCreate";
+import { ReportImport } from "./ReportImport";
 
 export function Reports() {
   const { t, i18n } = useTranslation();
@@ -20,6 +21,10 @@ export function Reports() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [creating, setCreating] = useState(false);
+  const [importing, setImporting] = useState(false);
+  // Self-hosted: whether this instance has a model configured is a fact to ask
+  // for, not one to assume. No model, no import button.
+  const { data: available } = useAsync(() => features.read());
   const { data, loading, error, reload } = useAsync(
     () => reports.list({ from: from || undefined, to: to || undefined }),
     [from, to],
@@ -31,9 +36,20 @@ export function Reports() {
         <h1 className="font-display text-2xl leading-tight font-medium text-ink">
           {t("reports.title")}
         </h1>
-        <Button icon={<Plus size={20} aria-hidden="true" />} onClick={() => setCreating(true)}>
-          {t("reports.new")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {available?.extraction ? (
+            <Button
+              variant="secondary"
+              icon={<FileUp size={20} aria-hidden="true" />}
+              onClick={() => setImporting(true)}
+            >
+              {t("reports.import")}
+            </Button>
+          ) : null}
+          <Button icon={<Plus size={20} aria-hidden="true" />} onClick={() => setCreating(true)}>
+            {t("reports.new")}
+          </Button>
+        </div>
       </header>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:max-w-md">
@@ -90,6 +106,7 @@ export function Reports() {
       </div>
 
       <ReportCreate open={creating} onOpenChange={setCreating} onCreated={reload} />
+      <ReportImport open={importing} onOpenChange={setImporting} onCreated={reload} />
     </section>
   );
 }
