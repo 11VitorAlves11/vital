@@ -1,0 +1,58 @@
+# Ambiente de desenvolvimento com hot-reload.
+#   cp .env.example .env && docker compose -f docker-compose.dev.yml up --build
+# API: http://localhost:8000/api · Web: http://localhost:5173
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vital}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vital}
+      POSTGRES_DB: ${POSTGRES_DB:-vital}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vital} -d ${POSTGRES_DB:-vital}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-vital}:${POSTGRES_PASSWORD:-vital}@db:5432/${POSTGRES_DB:-vital}
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/alembic:/app/alembic
+      - ./seed:/app/seed:ro
+      - storage:/storage
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_PROXY_TARGET: http://api:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - web_node_modules:/app/node_modules
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  storage:
+  web_node_modules:

@@ -1,0 +1,37 @@
+/* Dark theme — same token names, redefined values. */
+
+[data-theme="dark"] {
+  --color-primary: #2aa8ac;
+  --color-primary-deep: #1d8b8f;
+  --color-on-primary: #101b1b;
+  --color-surface: #101b1b;
+  --color-surface-raised: #182626;
+  --color-border: #2a3b3b;
+  --color-border-strong: #647b7c;
+  --color-focus-ring: #57d6da;
+  --color-ink: #e6eded;
+  --color-ink-muted: #9bb0b0;
+  --color-band: #2aa8ac26;
+  --flag-normal: #34c98a;
+  --flag-warn: #f0a33a;
+  --flag-alert: #f26b6b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #2aa8ac;
+    --color-primary-deep: #1d8b8f;
+    --color-on-primary: #101b1b;
+    --color-surface: #101b1b;
+    --color-surface-raised: #182626;
+    --color-border: #2a3b3b;
+    --color-border-strong: #647b7c;
+    --color-focus-ring: #57d6da;
+    --color-ink: #e6eded;
+    --color-ink-muted: #9bb0b0;
+    --color-band: #2aa8ac26;
+    --flag-normal: #34c98a;
+    --flag-warn: #f0a33a;
+    --flag-alert: #f26b6b;
+  }
+}

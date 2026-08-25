@@ -1,0 +1,521 @@
+[
+  {
+    "slug": "hemoglobina",
+    "name": "Hemoglobina",
+    "category": "hematologia",
+    "unit_default": "g/dL",
+    "ref_min_m": 13.0,
+    "ref_max_m": 17.0,
+    "ref_min_f": 12.0,
+    "ref_max_f": 15.0,
+    "aliases": [
+      "Hb",
+      "HGB",
+      "Hemoglobina total"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "hematocrito",
+    "name": "Hematócrito",
+    "category": "hematologia",
+    "unit_default": "%",
+    "ref_min_m": 40.0,
+    "ref_max_m": 52.0,
+    "ref_min_f": 36.0,
+    "ref_max_f": 46.0,
+    "aliases": [
+      "Ht",
+      "HCT",
+      "Volume globular"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "eritrocitos",
+    "name": "Eritrócitos",
+    "category": "hematologia",
+    "unit_default": "10^12/L",
+    "ref_min_m": 4.5,
+    "ref_max_m": 5.9,
+    "ref_min_f": 4.0,
+    "ref_max_f": 5.2,
+    "aliases": [
+      "Glóbulos vermelhos",
+      "RBC",
+      "Contagem de eritrócitos",
+      "Hemácias"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "leucocitos",
+    "name": "Leucócitos",
+    "category": "hematologia",
+    "unit_default": "10^9/L",
+    "ref_min_m": 4.0,
+    "ref_max_m": 11.0,
+    "ref_min_f": 4.0,
+    "ref_max_f": 11.0,
+    "aliases": [
+      "Glóbulos brancos",
+      "WBC",
+      "Contagem de leucócitos"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "plaquetas",
+    "name": "Plaquetas",
+    "category": "hematologia",
+    "unit_default": "10^9/L",
+    "ref_min_m": 150.0,
+    "ref_max_m": 400.0,
+    "ref_min_f": 150.0,
+    "ref_max_f": 400.0,
+    "aliases": [
+      "PLT",
+      "Trombócitos",
+      "Contagem de plaquetas"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "vgm",
+    "name": "VGM (volume globular médio)",
+    "category": "hematologia",
+    "unit_default": "fL",
+    "ref_min_m": 80.0,
+    "ref_max_m": 100.0,
+    "ref_min_f": 80.0,
+    "ref_max_f": 100.0,
+    "aliases": [
+      "VGM",
+      "MCV",
+      "Volume globular médio",
+      "Volume corpuscular médio"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "hgm",
+    "name": "HGM (hemoglobina globular média)",
+    "category": "hematologia",
+    "unit_default": "pg",
+    "ref_min_m": 27.0,
+    "ref_max_m": 33.0,
+    "ref_min_f": 27.0,
+    "ref_max_f": 33.0,
+    "aliases": [
+      "HGM",
+      "MCH",
+      "Hemoglobina globular média",
+      "Hemoglobina corpuscular média"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "vitamin-d-25-oh",
+    "name": "Vitamina D (25-OH)",
+    "category": "vitaminas",
+    "unit_default": "ng/mL",
+    "ref_min_m": 30.0,
+    "ref_max_m": 100.0,
+    "ref_min_f": 30.0,
+    "ref_max_f": 100.0,
+    "aliases": [
+      "25-hidroxivitamina D",
+      "25-OH-D",
+      "25(OH)D",
+      "Calcidiol",
+      "Vitamina D",
+      "Vitamina D3"
+    ],
+    "notes": "<20 ng/mL deficiência, 20–29 insuficiência, ≥30 suficiência. Ideal >30 ng/mL para desportistas."
+  },
+  {
+    "slug": "vitamin-b12",
+    "name": "Vitamina B12",
+    "category": "vitaminas",
+    "unit_default": "pg/mL",
+    "ref_min_m": 200.0,
+    "ref_max_m": 900.0,
+    "ref_min_f": 200.0,
+    "ref_max_f": 900.0,
+    "aliases": [
+      "B12",
+      "Cobalamina",
+      "Cianocobalamina",
+      "Vitamina B-12"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "acido-folico",
+    "name": "Ácido fólico",
+    "category": "vitaminas",
+    "unit_default": "ng/mL",
+    "ref_min_m": 3.0,
+    "ref_max_m": 17.0,
+    "ref_min_f": 3.0,
+    "ref_max_f": 17.0,
+    "aliases": [
+      "Folato",
+      "Folato sérico",
+      "Vitamina B9"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "ferritina",
+    "name": "Ferritina",
+    "category": "ferro",
+    "unit_default": "ng/mL",
+    "ref_min_m": 30.0,
+    "ref_max_m": 400.0,
+    "ref_min_f": 15.0,
+    "ref_max_f": 150.0,
+    "aliases": [
+      "Ferritina sérica"
+    ],
+    "notes": "Reagente de fase aguda: sobe com inflamação e infeção, podendo mascarar défice de ferro."
+  },
+  {
+    "slug": "ferro-serico",
+    "name": "Ferro sérico",
+    "category": "ferro",
+    "unit_default": "µg/dL",
+    "ref_min_m": 65.0,
+    "ref_max_m": 175.0,
+    "ref_min_f": 50.0,
+    "ref_max_f": 170.0,
+    "aliases": [
+      "Ferro",
+      "Sideremia",
+      "Fe sérico"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "transferrina",
+    "name": "Transferrina",
+    "category": "ferro",
+    "unit_default": "mg/dL",
+    "ref_min_m": 200.0,
+    "ref_max_m": 360.0,
+    "ref_min_f": 200.0,
+    "ref_max_f": 360.0,
+    "aliases": [
+      "Transferrina sérica",
+      "Siderofilina"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "saturacao-transferrina",
+    "name": "Saturação da transferrina",
+    "category": "ferro",
+    "unit_default": "%",
+    "ref_min_m": 20.0,
+    "ref_max_m": 50.0,
+    "ref_min_f": 15.0,
+    "ref_max_f": 45.0,
+    "aliases": [
+      "Índice de saturação da transferrina",
+      "IST",
+      "Saturação de transferrina",
+      "Coeficiente de saturação da transferrina"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "colesterol-total",
+    "name": "Colesterol total",
+    "category": "lipidos",
+    "unit_default": "mg/dL",
+    "ref_min_m": null,
+    "ref_max_m": 190.0,
+    "ref_min_f": null,
+    "ref_max_f": 190.0,
+    "aliases": [
+      "Colesterol",
+      "Colesterol total sérico",
+      "CT"
+    ],
+    "notes": "Limiar desejável <190 mg/dL (ESC/EAS). Interpretar sempre no contexto do risco cardiovascular global."
+  },
+  {
+    "slug": "ldl",
+    "name": "Colesterol LDL",
+    "category": "lipidos",
+    "unit_default": "mg/dL",
+    "ref_min_m": null,
+    "ref_max_m": 115.0,
+    "ref_min_f": null,
+    "ref_max_f": 115.0,
+    "aliases": [
+      "LDL",
+      "LDL-C",
+      "Colesterol LDL",
+      "Colesterol das LDL",
+      "c-LDL"
+    ],
+    "notes": "Alvo dependente do risco cardiovascular (ESC/EAS): <115 risco baixo, <100 moderado, <70 alto, <55 muito alto. O limiar do catálogo assume risco baixo."
+  },
+  {
+    "slug": "hdl",
+    "name": "Colesterol HDL",
+    "category": "lipidos",
+    "unit_default": "mg/dL",
+    "ref_min_m": 40.0,
+    "ref_max_m": null,
+    "ref_min_f": 50.0,
+    "ref_max_f": null,
+    "aliases": [
+      "HDL",
+      "HDL-C",
+      "Colesterol HDL",
+      "Colesterol das HDL",
+      "c-HDL"
+    ],
+    "notes": "Valores mais altos são favoráveis; só o limite inferior é clinicamente relevante."
+  },
+  {
+    "slug": "triglicerideos",
+    "name": "Triglicéridos",
+    "category": "lipidos",
+    "unit_default": "mg/dL",
+    "ref_min_m": null,
+    "ref_max_m": 150.0,
+    "ref_min_f": null,
+    "ref_max_f": 150.0,
+    "aliases": [
+      "TG",
+      "Triglicerídeos",
+      "Triglicéridos séricos"
+    ],
+    "notes": "Requer jejum de 12 h para interpretação fiável."
+  },
+  {
+    "slug": "creatinina",
+    "name": "Creatinina",
+    "category": "renal",
+    "unit_default": "mg/dL",
+    "ref_min_m": 0.7,
+    "ref_max_m": 1.2,
+    "ref_min_f": 0.5,
+    "ref_max_f": 1.0,
+    "aliases": [
+      "Creatinina sérica",
+      "Creat"
+    ],
+    "notes": "A suplementação com creatina eleva ligeiramente a creatinina sérica sem disfunção renal; o mesmo acontece com massa muscular elevada. Interpretar com TFG e cistatina C antes de assumir doença renal."
+  },
+  {
+    "slug": "ureia",
+    "name": "Ureia",
+    "category": "renal",
+    "unit_default": "mg/dL",
+    "ref_min_m": 17.0,
+    "ref_max_m": 43.0,
+    "ref_min_f": 17.0,
+    "ref_max_f": 43.0,
+    "aliases": [
+      "Ureia sérica",
+      "BUN",
+      "Azoto ureico"
+    ],
+    "notes": "Sobe com dietas hiperproteicas e desidratação, sem significar disfunção renal."
+  },
+  {
+    "slug": "tfg",
+    "name": "TFG (taxa de filtração glomerular estimada)",
+    "category": "renal",
+    "unit_default": "mL/min/1,73 m²",
+    "ref_min_m": 90.0,
+    "ref_max_m": null,
+    "ref_min_f": 90.0,
+    "ref_max_f": null,
+    "aliases": [
+      "TFG",
+      "TFGe",
+      "eGFR",
+      "GFR",
+      "Taxa de filtração glomerular",
+      "Filtração glomerular"
+    ],
+    "notes": "Estimada a partir da creatinina (CKD-EPI); herda o viés da creatinina em pessoas com massa muscular elevada ou a suplementar creatina."
+  },
+  {
+    "slug": "acido-urico",
+    "name": "Ácido úrico",
+    "category": "renal",
+    "unit_default": "mg/dL",
+    "ref_min_m": 3.4,
+    "ref_max_m": 7.0,
+    "ref_min_f": 2.4,
+    "ref_max_f": 6.0,
+    "aliases": [
+      "Uricemia",
+      "Urato",
+      "Ácido úrico sérico"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "alt",
+    "name": "ALT (TGP)",
+    "category": "hepatico",
+    "unit_default": "U/L",
+    "ref_min_m": 10.0,
+    "ref_max_m": 41.0,
+    "ref_min_f": 7.0,
+    "ref_max_f": 33.0,
+    "aliases": [
+      "ALT",
+      "TGP",
+      "GPT",
+      "Alanina aminotransferase",
+      "Transaminase pirúvica"
+    ],
+    "notes": "Elevações ligeiras e transitórias após treino intenso são comuns e não indicam doença hepática."
+  },
+  {
+    "slug": "ast",
+    "name": "AST (TGO)",
+    "category": "hepatico",
+    "unit_default": "U/L",
+    "ref_min_m": 10.0,
+    "ref_max_m": 40.0,
+    "ref_min_f": 9.0,
+    "ref_max_f": 32.0,
+    "aliases": [
+      "AST",
+      "TGO",
+      "GOT",
+      "Aspartato aminotransferase",
+      "Transaminase oxalacética"
+    ],
+    "notes": "Também libertada pelo músculo esquelético: sobe após exercício intenso, sem causa hepática."
+  },
+  {
+    "slug": "ggt",
+    "name": "GGT",
+    "category": "hepatico",
+    "unit_default": "U/L",
+    "ref_min_m": 10.0,
+    "ref_max_m": 71.0,
+    "ref_min_f": 6.0,
+    "ref_max_f": 42.0,
+    "aliases": [
+      "GGT",
+      "Gama-GT",
+      "Gama glutamil transferase",
+      "γ-GT",
+      "Gamaglutamiltransferase"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "fosfatase-alcalina",
+    "name": "Fosfatase alcalina",
+    "category": "hepatico",
+    "unit_default": "U/L",
+    "ref_min_m": 40.0,
+    "ref_max_m": 129.0,
+    "ref_min_f": 35.0,
+    "ref_max_f": 104.0,
+    "aliases": [
+      "FA",
+      "ALP",
+      "Fosfatase alcalina total"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "bilirrubina-total",
+    "name": "Bilirrubina total",
+    "category": "hepatico",
+    "unit_default": "mg/dL",
+    "ref_min_m": 0.2,
+    "ref_max_m": 1.2,
+    "ref_min_f": 0.2,
+    "ref_max_f": 1.2,
+    "aliases": [
+      "Bilirrubina",
+      "Bilirrubina total sérica",
+      "BT"
+    ],
+    "notes": null
+  },
+  {
+    "slug": "glicose",
+    "name": "Glicose (jejum)",
+    "category": "bioquimica",
+    "unit_default": "mg/dL",
+    "ref_min_m": 70.0,
+    "ref_max_m": 99.0,
+    "ref_min_f": 70.0,
+    "ref_max_f": 99.0,
+    "aliases": [
+      "Glicemia",
+      "Glucose",
+      "Glicose em jejum",
+      "Glicemia em jejum"
+    ],
+    "notes": "Intervalo válido apenas em jejum de 8 h. 100–125 mg/dL: anomalia da glicemia em jejum; ≥126 em duas ocasiões: critério de diabetes."
+  },
+  {
+    "slug": "hba1c",
+    "name": "Hemoglobina glicada (HbA1c)",
+    "category": "bioquimica",
+    "unit_default": "%",
+    "ref_min_m": 4.0,
+    "ref_max_m": 5.6,
+    "ref_min_f": 4.0,
+    "ref_max_f": 5.6,
+    "aliases": [
+      "HbA1c",
+      "A1c",
+      "Hemoglobina glicada",
+      "Hemoglobina glicosilada"
+    ],
+    "notes": "5,7–6,4 %: pré-diabetes; ≥6,5 %: critério de diabetes. Falseada por anemia e hemoglobinopatias."
+  },
+  {
+    "slug": "pcr",
+    "name": "PCR (proteína C reativa)",
+    "category": "bioquimica",
+    "unit_default": "mg/L",
+    "ref_min_m": null,
+    "ref_max_m": 5.0,
+    "ref_min_f": null,
+    "ref_max_f": 5.0,
+    "aliases": [
+      "PCR",
+      "CRP",
+      "Proteína C reativa",
+      "PCR de alta sensibilidade",
+      "hs-CRP",
+      "PCR-as"
+    ],
+    "notes": "Marcador de inflamação aguda inespecífico. Na variante de alta sensibilidade (risco cardiovascular): <1 baixo, 1–3 intermédio, >3 elevado. Sobe transitoriamente após treino intenso."
+  },
+  {
+    "slug": "tsh",
+    "name": "TSH",
+    "category": "hormonas",
+    "unit_default": "µUI/mL",
+    "ref_min_m": 0.27,
+    "ref_max_m": 4.2,
+    "ref_min_f": 0.27,
+    "ref_max_f": 4.2,
+    "aliases": [
+      "TSH",
+      "Tirotropina",
+      "Hormona estimulante da tiroide",
+      "Tireotropina"
+    ],
+    "notes": "Isolado é insuficiente: um TSH alterado deve ser interpretado com T4 livre."
+  }
+]

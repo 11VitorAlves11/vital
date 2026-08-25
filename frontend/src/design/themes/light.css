@@ -1,0 +1,18 @@
+/* Light theme — default. */
+
+:root {
+  --color-primary: #0D7377;
+  --color-primary-deep: #0A5A5E;
+  --color-on-primary: #FFFFFF;
+  --color-surface: #FAFAF8;
+  --color-surface-raised: #FFFFFF;
+  --color-border: #E2E6E5;
+  --color-border-strong: #7E8D8C;
+  --color-focus-ring: #0D7377;
+  --color-ink: #1A2E2E;
+  --color-ink-muted: #5C7070;
+  --color-band: #0D737714;
+  --flag-normal: #157347;
+  --flag-warn: #B45309;
+  --flag-alert: #DC2626;
+}

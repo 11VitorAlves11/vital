@@ -1,0 +1,350 @@
+[
+  {
+    "slug": "bmi",
+    "name": "IMC (índice de massa corporal)",
+    "unit": "kg/m²",
+    "source": "OMS",
+    "bands_m": [
+      {
+        "label": "Baixo peso",
+        "min": null,
+        "max": 18.5,
+        "flag": "warn"
+      },
+      {
+        "label": "Normal",
+        "min": 18.5,
+        "max": 25.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Pré-obesidade",
+        "min": 25.0,
+        "max": 30.0,
+        "flag": "warn"
+      },
+      {
+        "label": "Obesidade grau I",
+        "min": 30.0,
+        "max": 35.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Obesidade grau II",
+        "min": 35.0,
+        "max": 40.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Obesidade grau III",
+        "min": 40.0,
+        "max": null,
+        "flag": "alert"
+      }
+    ],
+    "bands_f": [
+      {
+        "label": "Baixo peso",
+        "min": null,
+        "max": 18.5,
+        "flag": "warn"
+      },
+      {
+        "label": "Normal",
+        "min": 18.5,
+        "max": 25.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Pré-obesidade",
+        "min": 25.0,
+        "max": 30.0,
+        "flag": "warn"
+      },
+      {
+        "label": "Obesidade grau I",
+        "min": 30.0,
+        "max": 35.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Obesidade grau II",
+        "min": 35.0,
+        "max": 40.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Obesidade grau III",
+        "min": 40.0,
+        "max": null,
+        "flag": "alert"
+      }
+    ],
+    "notes": "Classificação da OMS, igual para ambos os sexos. Não distingue massa gorda de massa muscular: em pessoas muito musculadas sobrestima a adiposidade — ler em conjunto com a percentagem de gordura corporal."
+  },
+  {
+    "slug": "body-fat-pct",
+    "name": "Gordura corporal",
+    "unit": "%",
+    "source": "ACE/ACSM",
+    "bands_m": [
+      {
+        "label": "Abaixo do essencial",
+        "min": null,
+        "max": 2.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Gordura essencial",
+        "min": 2.0,
+        "max": 6.0,
+        "flag": "warn"
+      },
+      {
+        "label": "Atleta",
+        "min": 6.0,
+        "max": 14.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Fitness",
+        "min": 14.0,
+        "max": 18.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Aceitável",
+        "min": 18.0,
+        "max": 25.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Obesidade",
+        "min": 25.0,
+        "max": null,
+        "flag": "alert"
+      }
+    ],
+    "bands_f": [
+      {
+        "label": "Abaixo do essencial",
+        "min": null,
+        "max": 10.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Gordura essencial",
+        "min": 10.0,
+        "max": 14.0,
+        "flag": "warn"
+      },
+      {
+        "label": "Atleta",
+        "min": 14.0,
+        "max": 21.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Fitness",
+        "min": 21.0,
+        "max": 25.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Aceitável",
+        "min": 25.0,
+        "max": 32.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Obesidade",
+        "min": 32.0,
+        "max": null,
+        "flag": "alert"
+      }
+    ],
+    "notes": "Categorias do American Council on Exercise. Estimativa por bioimpedância tem margem de erro considerável — a tendência na mesma balança e nas mesmas condições é o sinal fiável, não o valor absoluto. Gold standard: DEXA."
+  },
+  {
+    "slug": "waist-circumference",
+    "name": "Perímetro abdominal",
+    "unit": "cm",
+    "source": "OMS/IDF",
+    "bands_m": [
+      {
+        "label": "Sem risco acrescido",
+        "min": null,
+        "max": 94.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Risco aumentado",
+        "min": 94.0,
+        "max": 102.0,
+        "flag": "warn"
+      },
+      {
+        "label": "Risco elevado",
+        "min": 102.0,
+        "max": null,
+        "flag": "alert"
+      }
+    ],
+    "bands_f": [
+      {
+        "label": "Sem risco acrescido",
+        "min": null,
+        "max": 80.0,
+        "flag": "normal"
+      },
+      {
+        "label": "Risco aumentado",
+        "min": 80.0,
+        "max": 88.0,
+        "flag": "warn"
+      },
+      {
+        "label": "Risco elevado",
+        "min": 88.0,
+        "max": null,
+        "flag": "alert"
+      }
+    ],
+    "notes": "Medição manual (fita métrica) — não vem da balança. Limiares OMS/IDF para populações europeias. É o indicador clínico de gordura visceral, ao contrário do «índice» proprietário das balanças de bioimpedância."
+  },
+  {
+    "slug": "weight",
+    "name": "Peso",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: o peso isolado não é classificável. A leitura clínica é feita pelo IMC."
+  },
+  {
+    "slug": "fat-mass",
+    "name": "Massa gorda",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. A classificação faz-se pela percentagem de gordura corporal."
+  },
+  {
+    "slug": "fat-free-mass",
+    "name": "Massa livre de gordura",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "muscle-mass",
+    "name": "Massa muscular",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "muscle-rate",
+    "name": "Taxa muscular",
+    "unit": "%",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "skeletal-muscle-mass",
+    "name": "Massa muscular esquelética",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "bone-mass",
+    "name": "Massa óssea",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: a bioimpedância não mede densidade mineral óssea. A avaliação clínica do osso faz-se por DEXA."
+  },
+  {
+    "slug": "protein-mass",
+    "name": "Massa proteica",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "protein-pct",
+    "name": "Proteína",
+    "unit": "%",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "water-mass",
+    "name": "Água corporal (massa)",
+    "unit": "kg",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. Muito sensível ao estado de hidratação no momento da medição."
+  },
+  {
+    "slug": "water-pct",
+    "name": "Água corporal (percentagem)",
+    "unit": "%",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. Muito sensível ao estado de hidratação no momento da medição."
+  },
+  {
+    "slug": "subcutaneous-fat-pct",
+    "name": "Gordura subcutânea",
+    "unit": "%",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "visceral-fat-index",
+    "name": "Gordura visceral",
+    "unit": "índice",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: o «índice» é proprietário da balança e não é uma unidade clínica. A avaliação de gordura visceral faz-se por perímetro abdominal ou imagiologia."
+  },
+  {
+    "slug": "bmr",
+    "name": "TMB (taxa metabólica basal)",
+    "unit": "kcal",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: valor calculado por fórmula a partir das estimativas da balança, não medido por calorimetria."
+  },
+  {
+    "slug": "metabolic-age",
+    "name": "Idade metabólica",
+    "unit": "anos",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Trend-only: métrica proprietária da balança, sem definição clínica nem standard de referência."
+  }
+]

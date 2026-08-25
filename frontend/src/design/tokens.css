@@ -1,0 +1,52 @@
+/*
+ * Vital design tokens — the single source of truth for the design system.
+ * Components never use raw hex/px values; only these custom properties
+ * (enforced by stylelint).
+ */
+
+:root {
+  /* Type scale — base 16px, ratio 1.25 */
+  --text-sm: 0.8rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+
+  /* Font families */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Spacing — 4px base */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  /* Radii and elevation */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --shadow-card: 0 1px 2px rgb(26 46 46 / 6%), 0 4px 12px rgb(26 46 46 / 4%);
+
+  /* Layout */
+  --touch-target: 2.75rem; /* 44px a11y floor on mobile */
+  --content-max: 72rem;
+
+  /* Focus — WCAG 2.2 focus appearance: 2px perimeter, 3:1 against both the
+     adjacent surface and the component itself. Colour lives in the themes. */
+  --focus-width: 2px;
+  --focus-offset: 2px;
+
+  /* Motion — durations scale with the distance travelled, not one value for
+     everything. All of it is disabled under prefers-reduced-motion. */
+  --duration-fast: 120ms; /* state changes in place: hover, flag, checkbox */
+  --duration-base: 200ms; /* elements entering/leaving: toast, popover, tooltip */
+  --duration-slow: 320ms; /* full-surface travel: Sheet, Dialog, page transition */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* exits are faster than entrances */
+}

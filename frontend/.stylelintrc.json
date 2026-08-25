@@ -1,0 +1,38 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "color-no-hex": [
+      true,
+      {
+        "message": "Use a design token (var(--color-*)) instead of a hardcoded colour.",
+        "severity": "error"
+      }
+    ],
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "theme",
+          "apply",
+          "utility",
+          "variant",
+          "custom-variant",
+          "source"
+        ]
+      }
+    ],
+    "import-notation": null
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/design/tokens.css",
+        "src/design/themes/*.css"
+      ],
+      "rules": {
+        "color-no-hex": null,
+        "color-hex-length": null
+      }
+    }
+  ]
+}
