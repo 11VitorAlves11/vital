@@ -33,12 +33,27 @@ class Settings(BaseSettings):
     # Where the browser lands after an OIDC round-trip.
     frontend_url: str = "http://localhost:5173"
 
+    # Extraction (v1.1). The model is an env var precisely so the instance is not
+    # tied to one vendor or one generation; leaving it empty disables the feature.
     llm_model: str = ""
     llm_api_key: str | None = None
     llm_base_url: str | None = None
+    llm_timeout: int = 180
+
+    # A scanned report goes to the model as images, one per page. Both limits
+    # bound what a single upload can cost — in tokens and in memory.
+    extraction_max_pages: int = 20
+    # Below this many characters per page the PDF is a scan, not text.
+    extraction_text_threshold: int = 200
+    upload_max_bytes: int = 20 * 1024 * 1024
 
     storage_path: str = "/storage"
     cors_origins: list[str] = ["http://localhost:5173"]
+
+    @property
+    def extraction_enabled(self) -> bool:
+        """No model configured means no extraction — not a broken one."""
+        return bool(self.llm_model)
 
     @property
     def cookies_secure(self) -> bool:

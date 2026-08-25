@@ -18,6 +18,11 @@ dependencies = [
     "itsdangerous>=2.2",
     "starlette>=0.47",
     "bcrypt>=4.2",
+    # v1.1 extraction pipeline: LiteLLM keeps the provider an env var, PyMuPDF
+    # reads the PDF, python-multipart lets FastAPI accept the upload.
+    "litellm>=1.80",
+    "pymupdf>=1.25",
+    "python-multipart>=0.0.20",
 ]
 
 [project.optional-dependencies]

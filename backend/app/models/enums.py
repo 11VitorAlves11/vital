@@ -38,6 +38,17 @@ class ResultFlag(StrEnum):
     HIGH = "high"
 
 
+class ExtractionStatus(StrEnum):
+    """Where a PDF is in the pipeline. `preview` is the human gate: nothing
+    reaches `results` until someone confirms what the model read."""
+
+    PENDING = "pending"
+    PROCESSING = "processing"
+    PREVIEW = "preview"
+    CONFIRMED = "confirmed"
+    FAILED = "failed"
+
+
 class InterventionKind(StrEnum):
     SUPLEMENTO = "suplemento"
     MEDICACAO = "medicacao"

@@ -4,17 +4,19 @@ Every query is filtered by the session user: there is no endpoint here that can
 return another account's results, by id or otherwise.
 """
 
+import re
 import uuid
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, LabReport, Result
 from app.models.enums import ReportSource
 from app.schemas.reports import ReportCreate, ReportOut, ReportSummary, ResultOut
+from app.services import storage
 from app.services.flags import compute_flag, effective_range
 
 router = APIRouter(prefix="/reports", tags=["reports"])
@@ -136,6 +138,33 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
 @router.get("/{report_id}", response_model=ReportOut)
 async def read_report(report_id: uuid.UUID, user: CurrentUser, db: DbSession) -> ReportOut:
     return to_report_out(await _owned_report(report_id, user, db))
+
+
+@router.get("/{report_id}/file")
+async def read_report_file(report_id: uuid.UUID, user: CurrentUser, db: DbSession) -> Response:
+    """The original PDF, for a report that came from one.
+
+    Served through the API rather than from a static path: the file holds
+    someone's blood work, and the only thing standing between it and the open
+    internet is this ownership check.
+    """
+    report = await _owned_report(report_id, user, db)
+    content = storage.read_pdf(report.file_path) if report.file_path else None
+    if content is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No file for this report")
+    # The lab name is whatever the account typed, and it lands in a header:
+    # anything but plain characters is dropped rather than escaped.
+    label = re.sub(r"[^A-Za-z0-9 ._-]", "", report.lab_name).strip() or "report"
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={
+            # inline, so the browser shows it instead of downloading it, and a
+            # filename built from the report rather than from the upload.
+            "Content-Disposition": f'inline; filename="{report.collected_on}-{label}.pdf"',
+            "Cache-Control": "private, no-store",
+        },
+    )
 
 
 @router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
