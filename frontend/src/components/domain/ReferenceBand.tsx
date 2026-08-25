@@ -83,6 +83,10 @@ export function interventionOverlayElements({
   domainStart,
   domainEnd,
 }: OverlayOptions): ReactElement[] {
+  // A single data point gives the axis no width, and a zero-width band is a
+  // floating label pretending to be a period.
+  if (domainEnd <= domainStart) return [];
+
   return interventions.map((intervention) => {
     const start = Math.max(new Date(intervention.started_on).getTime(), domainStart);
     const end = Math.min(

@@ -35,7 +35,7 @@ export function BiomarkerCard({ item }: { item: DashboardItem }) {
 
       {/* The datum, at the scale it deserves on a page of measurements. */}
       <p className="flex items-baseline gap-1.5">
-        <span className="data text-3xl leading-none font-medium text-ink">
+        <span className="metric text-3xl leading-none font-medium text-ink">
           {formatValue(item.value, locale)}
         </span>
         <span className="text-sm text-ink">{item.unit}</span>
@@ -55,7 +55,7 @@ export function BiomarkerCard({ item }: { item: DashboardItem }) {
       <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-3 border-t border-border pt-3 text-sm">
         {range ? (
           <span className="text-ink">
-            {t("biomarker.reference")} <span className="data">{range}</span>
+            {t("biomarker.reference")} <span className="metric">{range}</span>
           </span>
         ) : (
           <span className="text-ink-muted">{t("biomarker.noRange")}</span>

@@ -13,6 +13,17 @@ import type { Intervention } from "../../lib/api/types";
 import { formatDate, formatValue } from "../../lib/format";
 import { interventionOverlayElements, referenceBandElements } from "./ReferenceBand";
 
+/** Pads the range, then rounds outward to a round step, so the axis reads
+ * "10" and "16" rather than "10,05" and "15,45". */
+function paddedDomain(low: number, high: number): [number, number] {
+  const spread = high - low || Math.abs(high) || 1;
+  const step = 10 ** Math.floor(Math.log10(spread * 0.2));
+  // Padding must not invent a negative axis under measurements that cannot be
+  // negative — it reads as an error and wastes half the plot.
+  const padded = low >= 0 ? Math.max(low - spread * 0.1, 0) : low - spread * 0.1;
+  return [Math.floor(padded / step) * step, Math.ceil((high + spread * 0.1) / step) * step];
+}
+
 export type TrendPoint = {
   /** Milliseconds, so intervention overlays land on a real time axis. */
   timestamp: number;
@@ -66,6 +77,16 @@ export function TrendChart({
   const domainStart = first?.timestamp ?? 0;
   const domainEnd = last?.timestamp ?? 0;
 
+  // The reference band is the signature element, so the axis has to contain it:
+  // scaled to the values alone, a limit outside their spread is simply not drawn.
+  const bounds = [
+    ...points.map((point) => point.value),
+    ...points.flatMap((point) => [point.refMin, point.refMax]),
+    canonicalMin,
+    canonicalMax,
+  ].filter((value): value is number => value !== null && Number.isFinite(value));
+  const yDomain = paddedDomain(Math.min(...bounds), Math.max(...bounds));
+
   return (
     <div
       role="img"
@@ -89,7 +110,8 @@ export function TrendChart({
             stroke="var(--color-border-strong)"
             tick={{ fill: "var(--color-ink-muted)", fontSize: 12 }}
             width={56}
-            domain={["auto", "auto"]}
+            domain={yDomain}
+            tickFormatter={(value: number) => formatValue(value, locale)}
           />
           {interventionOverlayElements({ interventions, domainStart, domainEnd })}
           {referenceBandElements({

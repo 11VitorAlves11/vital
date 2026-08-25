@@ -89,10 +89,19 @@ select {
   }
 }
 
-/* Tabular numerals wherever clinical values are shown. */
+/* Tabular numerals wherever clinical values are shown in columns. */
 .data {
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
+}
+
+/* Hero numbers use the display face: in a monospace, the decimal separator gets
+   a full cell of its own and "10,5" reads as "10 , 5" at this size. Columns
+   still align, because the digits stay tabular. */
+.metric {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 @media (prefers-reduced-motion: reduce) {

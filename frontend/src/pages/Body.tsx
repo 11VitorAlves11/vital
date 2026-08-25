@@ -79,7 +79,7 @@ export function Body() {
                 </div>
 
                 <p className="flex items-baseline gap-1.5">
-                  <span className="data text-3xl leading-none font-medium text-ink">
+                  <span className="metric text-3xl leading-none font-medium text-ink">
                     {formatValue(entry.latest.value, locale)}
                   </span>
                   <span className="text-sm text-ink">{entry.metric.unit}</span>

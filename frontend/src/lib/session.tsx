@@ -11,6 +11,8 @@ type Session = {
   user: User | null;
   mode: AuthMode | null;
   loading: boolean;
+  /** Set only when the session could not be checked — never when there is none. */
+  error: Error | null;
   setUser: (user: User | null) => void;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -22,14 +24,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [mode, setMode] = useState<AuthMode | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       setUser(await auth.me());
+      setError(null);
     } catch (cause) {
       // 401 is the normal "not signed in yet" answer, not a failure to report.
-      if (cause instanceof ApiError && cause.isUnauthorized) setUser(null);
-      else throw cause;
+      if (cause instanceof ApiError && cause.isUnauthorized) {
+        setUser(null);
+        setError(null);
+        return;
+      }
+      // Anything else means we do not know: say so rather than signing them out.
+      setError(cause instanceof Error ? cause : new Error(String(cause)));
     }
   }, []);
 
@@ -52,8 +61,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Session>(
-    () => ({ user, mode, loading, setUser, refresh, signOut }),
-    [user, mode, loading, refresh, signOut],
+    () => ({ user, mode, loading, error, setUser, refresh, signOut }),
+    [user, mode, loading, error, refresh, signOut],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

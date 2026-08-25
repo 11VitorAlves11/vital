@@ -20,7 +20,9 @@ export function Sparkline({
   width = 120,
   height = 32,
 }: SparklineProps) {
-  if (values.length === 0) return null;
+  // A single reading is not a trend, and an empty band where a line should be
+  // reads as something that failed to load.
+  if (values.length < 2) return null;
 
   const min = Math.min(...values);
   const max = Math.max(...values);

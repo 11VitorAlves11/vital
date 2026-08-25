@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AppShell } from "./components/layout/AppShell";
+import { ErrorState } from "./components/ui/ErrorState";
 import { Skeleton } from "./components/ui/Skeleton";
 import { useSession } from "./lib/session";
 import { Body } from "./pages/Body";
@@ -23,10 +24,19 @@ const BodyMetricDetail = lazy(() =>
 );
 
 function RequireSession({ children }: { children: ReactNode }) {
-  const { user, loading } = useSession();
+  const { user, loading, error, refresh } = useSession();
   const location = useLocation();
 
   if (loading) return <Skeleton className="p-8" lines={6} />;
+  // A session we could not check is not a session that does not exist: bouncing
+  // to the login screen on a network blip reads as being signed out.
+  if (error && !user) {
+    return (
+      <div className="p-8">
+        <ErrorState onRetry={() => void refresh()} />
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   return (
     <AppShell>

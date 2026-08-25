@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import type { Result } from "../../lib/api/types";
+import { cn } from "../../lib/cn";
 import { formatRange, formatValue } from "../../lib/format";
 import { FlagChip } from "../ui/FlagChip";
 
@@ -20,7 +21,12 @@ export function ResultRow({ result }: { result: Result }) {
         <span className="data text-ink">
           {formatValue(result.value, locale)} <span className="text-ink-muted">{result.unit}</span>
         </span>
-        <span className="data hidden text-sm text-ink-muted sm:inline">
+        <span
+          className={cn(
+            "hidden text-sm text-ink-muted sm:inline",
+            range && "data",
+          )}
+        >
           {range ?? t("biomarker.noRange")}
         </span>
         <FlagChip

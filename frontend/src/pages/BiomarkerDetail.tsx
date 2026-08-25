@@ -111,9 +111,14 @@ export function BiomarkerDetail() {
                         <td className="data py-2">
                           {formatValue(point.value, locale)} {point.unit}
                         </td>
-                        <td className="data py-2 text-ink-muted">
-                          {formatRange(point.ref_min, point.ref_max, locale) ??
-                            t("biomarker.noRange")}
+                        <td className="py-2 text-ink-muted">
+                          {formatRange(point.ref_min, point.ref_max, locale) ? (
+                            <span className="data">
+                              {formatRange(point.ref_min, point.ref_max, locale)}
+                            </span>
+                          ) : (
+                            t("biomarker.noRange")
+                          )}
                         </td>
                         <td className="py-2 text-ink-muted">{point.lab_name}</td>
                         <td className="py-2">
