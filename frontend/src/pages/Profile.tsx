@@ -44,7 +44,9 @@ export function Profile() {
   }
 
   return (
-    <section className="flex max-w-lg flex-col gap-6">
+    // A narrow column on a wide shell: centred, or it hangs off the left edge
+    // of a page whose other views fill the full content width.
+    <section className="mx-auto flex w-full max-w-lg flex-col gap-6">
       <h1 className="font-display text-2xl leading-tight font-medium text-ink">{t("profile.title")}</h1>
 
       <Card>
