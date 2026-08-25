@@ -12,6 +12,7 @@ from app.api.routes import (
     catalog,
     dashboard,
     extractions,
+    features,
     health,
     interventions,
     reports,
@@ -60,6 +61,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/api")
+app.include_router(features.router, prefix="/api")
 app.include_router(auth.router)
 app.include_router(auth.config_router, prefix="/api")
 app.include_router(users.router, prefix="/api")

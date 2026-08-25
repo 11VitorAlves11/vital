@@ -431,3 +431,20 @@ class TestParsing:
         payload = extraction_service.parse_answer('{"results": []}')
         assert payload.results == []
         assert payload.collected_on is None
+
+
+class TestFeatures:
+    async def test_reports_extraction_as_available_when_a_model_is_configured(
+        self, user_client: AsyncClient
+    ) -> None:
+        assert (await user_client.get("/api/features")).json() == {"extraction": True}
+
+    async def test_reports_extraction_as_unavailable_without_one(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(get_settings(), "llm_model", "", raising=False)
+
+        assert (await user_client.get("/api/features")).json() == {"extraction": False}
+
+    async def test_needs_a_session(self, client: AsyncClient) -> None:
+        assert (await client.get("/api/features")).status_code == 401

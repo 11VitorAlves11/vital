@@ -62,6 +62,9 @@ class ReportSummary(BaseModel):
     notes: str | None
     created_at: datetime
     result_count: int
+    # Whether GET /reports/{id}/file has anything to serve. The path itself never
+    # leaves the server: it says where someone's blood work sits on disk.
+    has_file: bool
 
 
 class ReportOut(BaseModel):
@@ -72,4 +75,5 @@ class ReportOut(BaseModel):
     source: ReportSource
     notes: str | None
     created_at: datetime
+    has_file: bool
     results: list[ResultOut]

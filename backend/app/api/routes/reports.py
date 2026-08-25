@@ -46,6 +46,7 @@ def to_report_out(report: LabReport) -> ReportOut:
         source=report.source,
         notes=report.notes,
         created_at=report.created_at,
+        has_file=bool(report.file_path),
         results=[to_result_out(result) for result in report.results],
     )
 
@@ -85,6 +86,7 @@ async def list_reports(
             notes=report.notes,
             created_at=report.created_at,
             result_count=len(report.results),
+            has_file=bool(report.file_path),
         )
         for report in reports
     ]
