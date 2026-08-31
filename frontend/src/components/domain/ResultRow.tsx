@@ -5,6 +5,7 @@ import type { Result } from "../../lib/api/types";
 import { cn } from "../../lib/cn";
 import { formatRange, formatValue } from "../../lib/format";
 import { FlagChip } from "../ui/FlagChip";
+import { Markdown } from "../ui/Markdown";
 import { CaveatList } from "./CaveatList";
 import { NoteEditor } from "./NoteEditor";
 
@@ -58,7 +59,7 @@ export function ResultRow({ result, onAnnotate }: ResultRowProps) {
           onSave={onAnnotate}
         />
       ) : result.note ? (
-        <p className="mt-1.5 max-w-prose whitespace-pre-line text-sm text-ink">{result.note}</p>
+        <Markdown className="mt-1.5 text-sm">{result.note}</Markdown>
       ) : null}
     </div>
   );

@@ -276,6 +276,7 @@
     "edit": "Edit note",
     "writtenAt": "Written {{when}}",
     "reportPlaceholder": "How the set reads: what moved, what is left to repeat.",
-    "resultPlaceholder": "Context for this one value, e.g. drawn at 11:30, outside the recommended window."
+    "resultPlaceholder": "Context for this one value, e.g. drawn at 11:30, outside the recommended window.",
+    "markdownHint": "Simple Markdown is accepted: **bold**, *italic*, lists and links."
   }
 }

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { formatDateTime } from "../../lib/format";
 import { Button } from "../ui/Button";
+import { Markdown } from "../ui/Markdown";
 
 type NoteEditorProps = {
   note: string | null;
@@ -43,9 +44,7 @@ export function NoteEditor({ note, noteAt, label, placeholder, onSave }: NoteEdi
       <div className="flex flex-col items-start gap-1">
         {note ? (
           <>
-            {/* whitespace-pre-line, not a markdown renderer: what someone typed
-                is shown back exactly, paragraph breaks and all. */}
-            <p className="max-w-prose whitespace-pre-line text-ink">{note}</p>
+            <Markdown>{note}</Markdown>
             {noteAt ? (
               <p className="text-sm text-ink-muted">
                 {t("notes.writtenAt", { when: formatDateTime(noteAt, locale) })}
@@ -71,6 +70,7 @@ export function NoteEditor({ note, noteAt, label, placeholder, onSave }: NoteEdi
     <div className="flex flex-col gap-2">
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium text-ink">{label}</span>
+        <span className="text-sm text-ink-muted">{t("notes.markdownHint")}</span>
         <textarea
           rows={4}
           autoFocus

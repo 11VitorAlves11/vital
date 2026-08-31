@@ -276,6 +276,7 @@
     "edit": "Editar nota",
     "writtenAt": "Escrita em {{when}}",
     "reportPlaceholder": "Leitura do conjunto: o que mudou, o que ficou por repetir.",
-    "resultPlaceholder": "Contexto pontual, por exemplo: colheita às 11:30, fora da janela recomendada."
+    "resultPlaceholder": "Contexto pontual, por exemplo: colheita às 11:30, fora da janela recomendada.",
+    "markdownHint": "Aceita Markdown simples: **negrito**, *itálico*, listas e ligações."
   }
 }
