@@ -186,8 +186,10 @@ async def confirm_extraction(
     report = LabReport(
         user_id=user.id,
         collected_on=payload.collected_on,
+        collected_at=payload.collected_at,
         lab_name=payload.lab_name,
-        fasting=payload.fasting,
+        fasting_state=payload.fasting_state,
+        fasting_hours=payload.fasting_hours,
         notes=payload.notes,
         # The stored PDF becomes the report's own, so the original stays one
         # click from the values that were read off it.
@@ -200,7 +202,13 @@ async def confirm_extraction(
         # is never asked to classify or convert, only to transcribe.
         report.results.append(
             result_service.build(
-                biomarker, user.sex, entry.value, entry.unit, entry.ref_min, entry.ref_max
+                biomarker,
+                user.sex,
+                entry.value,
+                entry.unit,
+                entry.ref_min,
+                entry.ref_max,
+                entry.method,
             )
         )
 

@@ -91,8 +91,17 @@ def build(
     unit: str | None,
     ref_min: Decimal | None,
     ref_max: Decimal | None,
+    method: str | None = None,
 ) -> Result:
     """A new, fully classified result for `biomarker`."""
-    result = Result(biomarker_id=biomarker.id, value=value, ref_min=ref_min, ref_max=ref_max)
+    result = Result(
+        biomarker_id=biomarker.id,
+        value=value,
+        ref_min=ref_min,
+        ref_max=ref_max,
+        # Recorded as the report wrote it: what makes two draws comparable or
+        # not is which assay produced them, not our normalisation of its name.
+        method=method,
+    )
     apply(result, classify(biomarker, sex, value, unit, ref_min, ref_max))
     return result

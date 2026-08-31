@@ -2,11 +2,12 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.enums import ReferenceKind, ResultFlag
 from app.schemas.catalog import BiomarkerOut, BodyMetricOut
 from app.schemas.interventions import InterventionOut
+from app.schemas.reports import CaveatOut
 
 
 class BiomarkerPoint(BaseModel):
@@ -25,6 +26,9 @@ class BiomarkerPoint(BaseModel):
     canonical_ref_max: Decimal | None = None
     reference_kind: ReferenceKind
     band_label: str | None = None
+    method: str | None = None
+    #: Why this point may not be strictly comparable to the one before it.
+    caveats: list[CaveatOut] = Field(default_factory=list)
     flag: ResultFlag | None = None
     report_id: str
 

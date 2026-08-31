@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import time
 from pathlib import Path
 from typing import Any
 
@@ -65,6 +66,7 @@ def check_biomarkers(entries: list[dict[str, Any]]) -> None:
                 fail(f"biomarcador {slug}: ref_min_{sex} ({lo}) >= ref_max_{sex} ({hi})")
         check_units(slug, entry)
         check_reference_kind(slug, entry)
+        check_preanalytics(slug, entry)
 
 
 def check_units(slug: str, entry: dict[str, Any]) -> None:
@@ -82,6 +84,36 @@ def check_units(slug: str, entry: dict[str, Any]) -> None:
             fail(f"biomarcador {slug}: fator de conversão inválido para {unit!r}: {factor!r}")
         if unit == entry.get("canonical_unit"):
             fail(f"biomarcador {slug}: {unit!r} é a unidade canónica e não precisa de fator")
+
+
+def check_preanalytics(slug: str, entry: dict[str, Any]) -> None:
+    """A sensitivity flag with nothing behind it is a warning nobody can act on."""
+    if entry.get("fasting_min_hours") is not None and not entry.get("fasting_sensitive"):
+        fail(f"biomarcador {slug}: 'fasting_min_hours' sem 'fasting_sensitive'")
+
+    window = [entry.get("time_window_start"), entry.get("time_window_end")]
+    if any(edge is not None for edge in window) and not entry.get("time_sensitive"):
+        fail(f"biomarcador {slug}: janela horária sem 'time_sensitive'")
+    if entry.get("time_sensitive") and any(edge is None for edge in window):
+        fail(f"biomarcador {slug}: 'time_sensitive' exige janela horária completa")
+    for edge in window:
+        if edge is None:
+            continue
+        try:
+            time.fromisoformat(edge)
+        except (TypeError, ValueError):
+            fail(f"biomarcador {slug}: hora inválida {edge!r} (esperado HH:MM)")
+    if all(edge is not None for edge in window):
+        start, end = (time.fromisoformat(edge) for edge in window)
+        if start >= end:
+            fail(f"biomarcador {slug}: janela horária com início depois do fim")
+
+    methods = entry.get("low_reliability_methods")
+    if methods is not None and not isinstance(methods, list):
+        fail(f"biomarcador {slug}: 'low_reliability_methods' tem de ser uma lista")
+    elif methods and not entry.get("notes"):
+        # Naming an assay unreliable without saying why is an accusation, not data.
+        fail(f"biomarcador {slug}: métodos de baixa fiabilidade exigem 'notes' a explicar porquê")
 
 
 def check_reference_kind(slug: str, entry: dict[str, Any]) -> None:

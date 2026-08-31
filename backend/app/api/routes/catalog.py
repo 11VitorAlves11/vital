@@ -14,7 +14,9 @@ from app.models import Biomarker, BodyMetric, LabReport, Result, User
 from app.models.enums import BiomarkerCategory
 from app.schemas.catalog import BandOut, BiomarkerOut, BodyMetricOut, ReferenceBandOut
 from app.schemas.interventions import InterventionOut
+from app.schemas.reports import CaveatOut
 from app.schemas.series import BiomarkerPoint, BiomarkerSeries
+from app.services import caveats
 from app.services.bands import bands_for
 from app.services.flags import Reference, band_label, canonical_reference
 from app.services.overlay import overlapping_interventions
@@ -93,7 +95,13 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
         .order_by(LabReport.collected_on)
     )
     rows = (await db.execute(statement)).all()
-    points = [_to_point(result, report) for result, report in rows]
+    # The previous draw's assay travels forward, so a change of method shows as a
+    # discontinuity on the point where it happened rather than nowhere at all.
+    methods = [None, *(result.method for result, _ in rows)]
+    points = [
+        _to_point(result, report, previous)
+        for (result, report), previous in zip(rows, methods, strict=False)
+    ]
     interventions = await overlapping_interventions(
         db,
         user.id,
@@ -109,7 +117,7 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
     )
 
 
-def _to_point(result: Result, report: LabReport) -> BiomarkerPoint:
+def _to_point(result: Result, report: LabReport, previous_method: str | None) -> BiomarkerPoint:
     reference = Reference(
         result.reference_kind, result.ref_min, result.ref_max, result.reference_bands
     )
@@ -129,6 +137,11 @@ def _to_point(result: Result, report: LabReport) -> BiomarkerPoint:
             if result.canonical_value is not None
             else None
         ),
+        method=result.method,
+        caveats=[
+            CaveatOut(code=caveat.code, values=caveat.values)
+            for caveat in caveats.for_point(result, report, previous_method)
+        ],
         flag=result.flag,
         report_id=str(report.id),
     )

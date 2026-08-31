@@ -38,6 +38,18 @@ class ResultFlag(StrEnum):
     HIGH = "high"
 
 
+class FastingState(StrEnum):
+    """Whether the draw was fasted.
+
+    Three states, not a nullable boolean: "nobody recorded it" is a different
+    fact from "they had eaten", and only the first is worth prompting about.
+    """
+
+    FASTING = "fasting"
+    NOT_FASTING = "not_fasting"
+    UNKNOWN = "unknown"
+
+
 class ReferenceKind(StrEnum):
     """The shape of the interval a value is read against.
 

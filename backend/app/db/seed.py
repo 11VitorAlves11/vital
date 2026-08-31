@@ -7,6 +7,7 @@ without renumbering ids that results already point at.
 
 import asyncio
 import json
+from datetime import time
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -32,11 +33,26 @@ BIOMARKER_FIELDS = (
     "ref_min_f",
     "ref_max_f",
     "ordinal_bands",
+    "fasting_sensitive",
+    "fasting_min_hours",
+    "time_sensitive",
+    "time_window_start",
+    "time_window_end",
+    "low_reliability_methods",
     "aliases",
     "notes",
 )
 BODY_METRIC_FIELDS = ("slug", "name", "unit", "bands_m", "bands_f", "source", "notes")
 DECIMAL_FIELDS = frozenset({"ref_min_m", "ref_max_m", "ref_min_f", "ref_max_f"})
+TIME_FIELDS = frozenset({"time_window_start", "time_window_end"})
+#: Columns the JSON may leave out, with what "left out" means for each.
+DEFAULTS: dict[str, Any] = {
+    "unit_conversions": {},
+    "reference_kind": ReferenceKind.TWO_SIDED.value,
+    "fasting_sensitive": False,
+    "time_sensitive": False,
+    "low_reliability_methods": [],
+}
 
 
 def seed_dir() -> Path:
@@ -59,14 +75,18 @@ def _row(entry: dict[str, Any], fields: tuple[str, ...]) -> dict[str, Any]:
         if row[field] is not None:
             # Through str, so 0.1 stays 0.1 instead of the nearest binary float.
             row[field] = Decimal(str(row[field]))
-    # The common case is a marker reported in one unit with a two-sided range, so
-    # the entries that are only that say nothing about it.
+    for field in TIME_FIELDS & row.keys():
+        written = row[field]
+        if written is not None:
+            row[field] = time.fromisoformat(str(written))
+    # The common case is a marker reported in one unit, on a two-sided range,
+    # that nothing about the collection disturbs — so the entries that are only
+    # that say nothing about any of it.
     if "canonical_unit" in row and row["canonical_unit"] is None:
         row["canonical_unit"] = entry["unit_default"]
-    if "unit_conversions" in row and row["unit_conversions"] is None:
-        row["unit_conversions"] = {}
-    if "reference_kind" in row and row["reference_kind"] is None:
-        row["reference_kind"] = ReferenceKind.TWO_SIDED.value
+    for field, default in DEFAULTS.items():
+        if field in row and row[field] is None:
+            row[field] = default
     return row
 
 

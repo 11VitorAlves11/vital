@@ -3,13 +3,22 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Date,
+    DateTime,
+    ForeignKey,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import VALUE, Base
 from app.models.biomarker import Biomarker
-from app.models.enums import ReferenceKind, ReportSource, ResultFlag, pg_enum
+from app.models.enums import FastingState, ReferenceKind, ReportSource, ResultFlag, pg_enum
 
 
 class LabReport(Base):
@@ -22,9 +31,18 @@ class LabReport(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     collected_on: Mapped[date] = mapped_column(Date, nullable=False)
+    # The wall-clock moment of the draw, without a zone: the diurnal peaks this
+    # exists to catch are at a local hour, and a report never states an offset.
+    # Its date always equals `collected_on`, which stays the column everything
+    # sorts and filters by.
+    collected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False))
     lab_name: Mapped[str] = mapped_column(String, nullable=False)
     file_path: Mapped[str | None] = mapped_column(String)
-    fasting: Mapped[bool | None] = mapped_column(Boolean)
+    fasting_state: Mapped[FastingState] = mapped_column(
+        pg_enum(FastingState, "fasting_state"), nullable=False, default=FastingState.UNKNOWN
+    )
+    #: Hours since the last meal, when the report or the reader states it.
+    fasting_hours: Mapped[int | None] = mapped_column(SmallInteger)
     source: Mapped[ReportSource] = mapped_column(
         pg_enum(ReportSource, "report_source"), nullable=False, default=ReportSource.MANUAL
     )
@@ -66,6 +84,10 @@ class Result(Base):
     conversion_factor: Mapped[Decimal | None] = mapped_column(VALUE)
     ref_min: Mapped[Decimal | None] = mapped_column(VALUE)
     ref_max: Mapped[Decimal | None] = mapped_column(VALUE)
+    # The assay behind the number ("hexoquinase", "picrato alcalino cinético").
+    # Two labs measuring the same blood with different methods can differ by more
+    # than the change being watched for, so the method travels with the result.
+    method: Mapped[str | None] = mapped_column(String(120))
     #: Which of the four interval shapes `ref_min`/`ref_max`/`reference_bands` form.
     reference_kind: Mapped[ReferenceKind] = mapped_column(
         pg_enum(ReferenceKind, "reference_kind"), nullable=False, default=ReferenceKind.NONE

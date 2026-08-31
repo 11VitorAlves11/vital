@@ -1,7 +1,8 @@
+from datetime import time
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import String, Text
+from sqlalchemy import Boolean, SmallInteger, String, Text, Time, false
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -43,5 +44,25 @@ class Biomarker(Base):
     # `[{label, min, max, flag}]` in `canonical_unit`, for the markers whose
     # reading is a named band rather than a pass/fail interval. NULL for the rest.
     ordinal_bands: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
+    # Pre-analytical sensitivity: which markers a missing or wrong collection
+    # context actually changes. Flagged per marker rather than per report,
+    # because a non-fasted draw invalidates triglycerides and says nothing at
+    # all about haemoglobin.
+    fasting_sensitive: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    #: Hours of fasting the marker needs, when it needs any.
+    fasting_min_hours: Mapped[int | None] = mapped_column(SmallInteger)
+    time_sensitive: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    #: Local wall-clock window the draw should fall in, for the diurnal markers.
+    time_window_start: Mapped[time | None] = mapped_column(Time)
+    time_window_end: Mapped[time | None] = mapped_column(Time)
+    # Assays whose result is worth reading with a caveat — never a reason to
+    # hide the value, only to say why two labs may disagree about it.
+    low_reliability_methods: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), nullable=False, default=list, server_default="{}"
+    )
     aliases: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, default=list)
     notes: Mapped[str | None] = mapped_column(Text)

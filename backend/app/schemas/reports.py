@@ -5,8 +5,25 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.models.enums import BiomarkerCategory, ReferenceKind, ReportSource, ResultFlag
+from app.models.enums import (
+    BiomarkerCategory,
+    FastingState,
+    ReferenceKind,
+    ReportSource,
+    ResultFlag,
+)
 from app.schemas.catalog import ReferenceBandOut
+
+#: Longest fast worth recording. Beyond four days it is a clinical event of its
+#: own, not the context of a blood draw, and the value is far likelier a typo.
+MAX_FASTING_HOURS = 96
+
+
+class CaveatOut(BaseModel):
+    """A reason to read the value with care. The wording is the client's."""
+
+    code: str
+    values: dict[str, str] = Field(default_factory=dict)
 
 
 class ResultIn(BaseModel):
@@ -16,6 +33,8 @@ class ResultIn(BaseModel):
     unit: str | None = Field(default=None, max_length=50)
     ref_min: Decimal | None = None
     ref_max: Decimal | None = None
+    #: The assay, as the report names it.
+    method: str | None = Field(default=None, max_length=120)
 
     @model_validator(mode="after")
     def _check_range(self) -> Self:
@@ -24,10 +43,30 @@ class ResultIn(BaseModel):
         return self
 
 
-class ReportCreate(BaseModel):
+class CollectionContext(BaseModel):
+    """The pre-analytical half of a report, shared by manual entry and confirmation."""
+
     collected_on: date
+    #: Wall-clock moment of the draw. Its date has to be `collected_on`.
+    collected_at: datetime | None = None
+    fasting_state: FastingState = FastingState.UNKNOWN
+    fasting_hours: int | None = Field(default=None, ge=0, le=MAX_FASTING_HOURS)
+
+    @model_validator(mode="after")
+    def _check_collection(self) -> Self:
+        if self.collected_at is not None:
+            if self.collected_at.tzinfo is not None:
+                raise ValueError("collected_at is a local wall-clock time, without an offset")
+            if self.collected_at.date() != self.collected_on:
+                raise ValueError("collected_at must fall on collected_on")
+        # Hours of a fast nobody claims happened describe nothing.
+        if self.fasting_hours is not None and self.fasting_state is not FastingState.FASTING:
+            raise ValueError("fasting_hours only applies when fasting_state is 'fasting'")
+        return self
+
+
+class ReportCreate(CollectionContext):
     lab_name: str = Field(min_length=1, max_length=200)
-    fasting: bool | None = None
     notes: str | None = None
     results: list[ResultIn] = Field(min_length=1)
 
@@ -60,14 +99,19 @@ class ResultOut(BaseModel):
     reference_bands: list[ReferenceBandOut] | None = None
     #: Which step of that scale it landed on ("insuficiência"), for ordinal markers.
     band_label: str | None = None
+    method: str | None = None
+    #: What the collection context, or the assay, means for reading this value.
+    caveats: list[CaveatOut] = Field(default_factory=list)
     flag: ResultFlag | None
 
 
 class ReportSummary(BaseModel):
     id: uuid.UUID
     collected_on: date
+    collected_at: datetime | None
     lab_name: str
-    fasting: bool | None
+    fasting_state: FastingState
+    fasting_hours: int | None
     source: ReportSource
     notes: str | None
     created_at: datetime
@@ -80,8 +124,10 @@ class ReportSummary(BaseModel):
 class ReportOut(BaseModel):
     id: uuid.UUID
     collected_on: date
+    collected_at: datetime | None
     lab_name: str
-    fasting: bool | None
+    fasting_state: FastingState
+    fasting_hours: int | None
     source: ReportSource
     notes: str | None
     created_at: datetime

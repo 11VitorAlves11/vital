@@ -5,7 +5,8 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.models.enums import ExtractionStatus
+from app.models.enums import ExtractionStatus, FastingState
+from app.schemas.reports import CollectionContext
 
 
 def _decimal_or_none(value: object) -> Decimal | None:
@@ -33,15 +34,17 @@ class ExtractedResult(BaseModel):
     unit: str | None = Field(default=None, max_length=50)
     ref_min: Decimal | None = None
     ref_max: Decimal | None = None
+    #: The assay, when the report prints one next to the line.
+    method: str | None = Field(default=None, max_length=120)
 
     @field_validator("value", "ref_min", "ref_max", mode="before")
     @classmethod
     def _coerce(cls, value: object) -> Decimal | None:
         return _decimal_or_none(value)
 
-    @field_validator("unit", mode="before")
+    @field_validator("unit", "method", mode="before")
     @classmethod
-    def _blank_unit_is_none(cls, value: object) -> object:
+    def _blank_string_is_none(cls, value: object) -> object:
         return value or None
 
 
@@ -50,11 +53,13 @@ class ExtractionPayload(BaseModel):
     date is still worth previewing, with the date left for a human to fill in."""
 
     collected_on: date | None = None
+    #: Wall-clock moment of the draw, when the report states one.
+    collected_at: datetime | None = None
     lab_name: str | None = Field(default=None, max_length=200)
     fasting: bool | None = None
     results: list[ExtractedResult] = Field(default_factory=list)
 
-    @field_validator("collected_on", mode="before")
+    @field_validator("collected_on", "collected_at", mode="before")
     @classmethod
     def _blank_date_is_none(cls, value: object) -> object:
         return value or None
@@ -81,12 +86,15 @@ class PreviewResult(BaseModel):
     unit: str | None
     ref_min: Decimal | None
     ref_max: Decimal | None
+    method: str | None
 
 
 class ExtractionPreview(BaseModel):
     collected_on: date | None
+    collected_at: datetime | None
     lab_name: str | None
-    fasting: bool | None
+    #: The model's boolean, widened into the three states the report stores.
+    fasting_state: FastingState
     results: list[PreviewResult]
 
 
@@ -110,6 +118,7 @@ class ConfirmResult(BaseModel):
     unit: str | None = Field(default=None, max_length=50)
     ref_min: Decimal | None = None
     ref_max: Decimal | None = None
+    method: str | None = Field(default=None, max_length=120)
 
     @model_validator(mode="after")
     def _check_range(self) -> Self:
@@ -118,7 +127,7 @@ class ConfirmResult(BaseModel):
         return self
 
 
-class ExtractionConfirm(BaseModel):
+class ExtractionConfirm(CollectionContext):
     """What the human approved, which is what actually gets stored.
 
     It is a full payload rather than a diff: the reader may have corrected a
@@ -126,9 +135,7 @@ class ExtractionConfirm(BaseModel):
     not, and the endpoint should not have to guess which.
     """
 
-    collected_on: date
     lab_name: str = Field(min_length=1, max_length=200)
-    fasting: bool | None = None
     notes: str | None = None
     results: list[ConfirmResult] = Field(min_length=1)
 

@@ -16,15 +16,15 @@ from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, LabReport, Result
 from app.models.enums import ReportSource
 from app.schemas.catalog import ReferenceBandOut
-from app.schemas.reports import ReportCreate, ReportOut, ReportSummary, ResultOut
+from app.schemas.reports import CaveatOut, ReportCreate, ReportOut, ReportSummary, ResultOut
+from app.services import caveats, storage
 from app.services import results as result_service
-from app.services import storage
 from app.services.flags import Reference, band_label
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 
-def to_result_out(result: Result) -> ResultOut:
+def to_result_out(result: Result, report: LabReport) -> ResultOut:
     reference = Reference(
         result.reference_kind, result.ref_min, result.ref_max, result.reference_bands
     )
@@ -53,6 +53,11 @@ def to_result_out(result: Result) -> ResultOut:
             if result.canonical_value is not None
             else None
         ),
+        method=result.method,
+        caveats=[
+            CaveatOut(code=caveat.code, values=caveat.values)
+            for caveat in caveats.for_result(result, report)
+        ],
         flag=result.flag,
     )
 
@@ -61,13 +66,15 @@ def to_report_out(report: LabReport) -> ReportOut:
     return ReportOut(
         id=report.id,
         collected_on=report.collected_on,
+        collected_at=report.collected_at,
         lab_name=report.lab_name,
-        fasting=report.fasting,
+        fasting_state=report.fasting_state,
+        fasting_hours=report.fasting_hours,
         source=report.source,
         notes=report.notes,
         created_at=report.created_at,
         has_file=bool(report.file_path),
-        results=[to_result_out(result) for result in report.results],
+        results=[to_result_out(result, report) for result in report.results],
     )
 
 
@@ -100,8 +107,10 @@ async def list_reports(
         ReportSummary(
             id=report.id,
             collected_on=report.collected_on,
+            collected_at=report.collected_at,
             lab_name=report.lab_name,
-            fasting=report.fasting,
+            fasting_state=report.fasting_state,
+            fasting_hours=report.fasting_hours,
             source=report.source,
             notes=report.notes,
             created_at=report.created_at,
@@ -132,8 +141,10 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
     report = LabReport(
         user_id=user.id,
         collected_on=payload.collected_on,
+        collected_at=payload.collected_at,
         lab_name=payload.lab_name,
-        fasting=payload.fasting,
+        fasting_state=payload.fasting_state,
+        fasting_hours=payload.fasting_hours,
         notes=payload.notes,
         source=ReportSource.MANUAL,
     )
@@ -141,7 +152,13 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
         biomarker = catalogue[entry.biomarker_id]
         report.results.append(
             result_service.build(
-                biomarker, user.sex, entry.value, entry.unit, entry.ref_min, entry.ref_max
+                biomarker,
+                user.sex,
+                entry.value,
+                entry.unit,
+                entry.ref_min,
+                entry.ref_max,
+                entry.method,
             )
         )
 

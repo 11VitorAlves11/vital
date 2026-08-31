@@ -11,7 +11,7 @@ async def _create(ac: AsyncClient, catalogue: dict[str, Any], **overrides: Any) 
     payload: dict[str, Any] = {
         "collected_on": "2026-03-01",
         "lab_name": "Synlab Braga",
-        "fasting": True,
+        "fasting_state": "fasting",
         "results": [{"biomarker_id": catalogue["biomarkers"]["hemoglobina"]["id"], "value": 14.1}],
     }
     payload.update(overrides)

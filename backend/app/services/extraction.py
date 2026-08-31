@@ -18,6 +18,7 @@ from pydantic import ValidationError
 
 from app.core.config import Settings
 from app.models.biomarker import Biomarker
+from app.models.enums import FastingState
 from app.schemas.extractions import (
     ExtractedResult,
     ExtractionPayload,
@@ -31,15 +32,25 @@ PROMPT = """Extrai todos os resultados de análises clínicas deste documento.
 Responde APENAS com JSON válido, sem markdown:
 {
   "collected_on": "YYYY-MM-DD",
+  "collected_at": "YYYY-MM-DDTHH:MM",
   "lab_name": "...",
   "fasting": true,
   "results": [
     {"biomarker": "...", "value": 0.0, "unit": "...",
-     "ref_min": 0.0, "ref_max": 0.0}
+     "ref_min": 0.0, "ref_max": 0.0, "method": "..."}
   ]
 }
+"collected_at" é a hora da colheita impressa no relatório, sem fuso horário.
+"method" é o método analítico indicado para a linha, se o relatório o indicar.
 Usa null quando um campo não constar. Converte vírgulas decimais para ponto.
 Não inventes valores: transcreve apenas o que está no documento."""
+
+
+_FASTING_STATES = {
+    True: FastingState.FASTING,
+    False: FastingState.NOT_FASTING,
+    None: FastingState.UNKNOWN,
+}
 
 
 class ExtractionError(RuntimeError):
@@ -170,8 +181,11 @@ def build_preview(payload: ExtractionPayload, biomarkers: list[Biomarker]) -> Ex
     index = build_index(biomarkers)
     return ExtractionPreview(
         collected_on=payload.collected_on,
+        collected_at=payload.collected_at,
         lab_name=payload.lab_name,
-        fasting=payload.fasting,
+        # A model that did not find the answer leaves it unknown, which is a
+        # thing the reader can be asked about; `false` would not be.
+        fasting_state=_FASTING_STATES[payload.fasting],
         results=[
             PreviewResult(
                 biomarker_id=matched.id if matched else None,
@@ -181,6 +195,7 @@ def build_preview(payload: ExtractionPayload, biomarkers: list[Biomarker]) -> Ex
                 value=result.value,
                 # The lab's own wording wins; the catalogue unit is the fallback.
                 unit=result.unit or (matched.unit_default if matched else None),
+                method=result.method,
                 ref_min=result.ref_min,
                 ref_max=result.ref_max,
             )

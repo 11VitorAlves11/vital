@@ -177,7 +177,7 @@ class TestPreview:
         preview = (await user_client.get(f"/api/extractions/{job['id']}")).json()["preview"]
         assert preview["collected_on"] == "2026-02-14"
         assert preview["lab_name"] == "Unilabs"
-        assert preview["fasting"] is True
+        assert preview["fasting_state"] == "fasting"
         haemoglobin = next(r for r in preview["results"] if r["source_name"] == "Hemoglobina")
         assert Decimal(haemoglobin["value"]) == Decimal("10.5")
 
@@ -219,7 +219,7 @@ class TestConfirm:
             json={
                 "collected_on": "2026-02-14",
                 "lab_name": "Unilabs",
-                "fasting": True,
+                "fasting_state": "fasting",
                 "results": [
                     {
                         "biomarker_id": haemoglobin["id"],
