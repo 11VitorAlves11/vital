@@ -18,6 +18,7 @@ from app.api.routes import (
     photos,
     providers,
     reports,
+    timeline,
     users,
 )
 from app.core.config import get_settings
@@ -85,6 +86,7 @@ app.include_router(interventions.router, prefix="/api")
 app.include_router(body.router, prefix="/api")
 app.include_router(photos.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(timeline.router, prefix="/api")
 
 
 @app.get("/api")

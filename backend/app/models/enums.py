@@ -99,6 +99,26 @@ class ScanSource(StrEnum):
     IMPORT = "import"
 
 
+class TimelineKind(StrEnum):
+    """What a row on the timeline is, and therefore its icon and its colour.
+
+    `intervention` stands where the backlog wrote `supplementation`: the model
+    behind it already records diets and training blocks as well as supplements
+    and medication, and calling a training block a supplement to fit the name
+    would be worse than widening it. The specific kind travels in the detail.
+
+    `appointment` and `imaging` are named because the taxonomy is theirs, but
+    nothing produces them yet — there is no model to produce them from.
+    """
+
+    LAB_REPORT = "lab_report"
+    BODY_COMPOSITION = "body_composition"
+    PROGRESS_PHOTO = "progress_photo"
+    APPOINTMENT = "appointment"
+    IMAGING = "imaging"
+    INTERVENTION = "intervention"
+
+
 class BandFlag(StrEnum):
     """Body-composition band classification — multi-class, so it does have `warn`."""
 
