@@ -223,7 +223,17 @@
     "email": "Email",
     "language": "Language",
     "saved": "Profile updated.",
-    "sexNote": "Changing the sex re-classifies the whole history."
+    "sexNote": "Changing the sex re-classifies the whole history.",
+    "birthDate": "Date of birth",
+    "birthDateHint": "Used by the references that depend on age.",
+    "ageIs": "{{count}} years old.",
+    "ageIs_one": "{{count}} year old.",
+    "height": "Height",
+    "heightHint": "Turns weight into BMI and fat-free mass into FFMI — where almost every body-composition reference is defined.",
+    "weight": "Latest weight",
+    "noWeight": "No weigh-ins recorded yet.",
+    "weightNote": "From the last weigh-in, not editable here: weight is a measurement with a history.",
+    "derived": "Computed from {{source}} and your height"
   },
   "flags": {
     "low": "Low",

@@ -61,6 +61,9 @@ export type User = {
   name: string | null;
   sex: Sex | null;
   birth_date: string | null;
+  /** Decimal string, in centimetres. What turns a weight into a BMI and a
+   *  fat-free mass into an FFMI — where the references actually live. */
+  height_cm: string | null;
   created_at: string;
 };
 
@@ -236,7 +239,8 @@ export type Intervention = {
 };
 
 export type ScanValue = {
-  id: string;
+  /** Null for a derived index, which is computed on read and never stored. */
+  id: string | null;
   metric_id: number;
   metric_slug: string;
   metric_name: string;
@@ -244,6 +248,9 @@ export type ScanValue = {
   value: string;
   flag: BandFlag | null;
   label: string | null;
+  /** The metric this was computed from, for the indices height makes possible.
+   *  Null on a measured value — the distinction is the reader's to see. */
+  derived_from: string | null;
 };
 
 export type BodyScan = {
@@ -326,12 +333,7 @@ export type DashboardItem = {
  *  `intervention` covers everything the intervention model records — supplements,
  *  medication, diets, training blocks — with the specific kind alongside it. */
 export type TimelineKind =
-  | "lab_report"
-  | "body_composition"
-  | "progress_photo"
-  | "appointment"
-  | "imaging"
-  | "intervention";
+  "lab_report" | "body_composition" | "progress_photo" | "appointment" | "imaging" | "intervention";
 
 export type TimelineSummaryItem = {
   label: string;

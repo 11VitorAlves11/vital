@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import {
   SESSION_ROUTES,
+  USER,
   mockApi,
   renderWithProviders,
   renderWithSession,
@@ -505,6 +506,82 @@ describe("Profile", () => {
     await waitFor(() => {
       const patch = fetchMock.mock.calls.find(([, init]) => init?.method === "PATCH");
       expect(patch?.[1]?.body).toContain('"sex":"M"');
+    });
+  });
+
+  it("carries everything the body-composition references key on", async () => {
+    // Sex, age and height: without them BMI, FFMI and every age-specific
+    // reference have nothing to be computed against.
+    mockApi([
+      {
+        pattern: /\/api\/users\/me/,
+        body: { ...USER, birth_date: "1992-04-15", height_cm: "178.0" },
+      },
+      ...SESSION_ROUTES,
+      { pattern: /\/api\/body\/summary/, body: [] },
+    ]);
+    renderWithSession(<Profile />);
+    await waitFor(() => expect(screen.getByLabelText("Altura")).toHaveValue(178));
+    expect(screen.getByLabelText("Data de nascimento")).toHaveValue("1992-04-15");
+    // The age is read back from the date rather than asked for separately —
+    // storing both would let the two disagree.
+    expect(screen.getByText(/34 anos/)).toBeInTheDocument();
+  });
+
+  it("shows the latest weight without offering to edit it", async () => {
+    mockApi([
+      ...SESSION_ROUTES,
+      {
+        pattern: /\/api\/body\/summary/,
+        body: [
+          {
+            metric: {
+              id: 4,
+              slug: "weight",
+              name: "Peso",
+              unit: "kg",
+              bands: null,
+              source: null,
+              notes: null,
+            },
+            latest: {
+              id: "v1",
+              metric_id: 4,
+              metric_slug: "weight",
+              metric_name: "Peso",
+              unit: "kg",
+              value: "77.2000",
+              flag: null,
+              label: null,
+              derived_from: null,
+            },
+            measured_at: "2026-05-04T08:00:00Z",
+            sparkline: [],
+          },
+        ],
+      },
+    ]);
+    renderWithSession(<Profile />);
+    expect(await screen.findByText(/77,2 kg/)).toBeInTheDocument();
+    // Weight is a measurement with a history; two places to change it would
+    // mean two answers to what someone weighs.
+    expect(screen.queryByLabelText(/peso mais recente/i)).not.toBeInTheDocument();
+  });
+
+  it("sends null rather than zero when the height is cleared", async () => {
+    const fetchMock = mockApi([
+      { pattern: /\/api\/users\/me/, body: { ...USER, height_cm: "178.0" } },
+      ...SESSION_ROUTES,
+      { pattern: /\/api\/body\/summary/, body: [] },
+    ]);
+    renderWithSession(<Profile />);
+    await waitFor(() => expect(screen.getByLabelText("Altura")).toHaveValue(178));
+    await userEvent.clear(screen.getByLabelText("Altura"));
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+
+    await waitFor(() => {
+      const patch = fetchMock.mock.calls.find(([, init]) => init?.method === "PATCH");
+      expect(JSON.parse(String(patch?.[1]?.body)).height_cm).toBeNull();
     });
   });
 

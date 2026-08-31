@@ -223,7 +223,17 @@
     "email": "Email",
     "language": "Idioma",
     "saved": "Perfil atualizado.",
-    "sexNote": "Alterar o sexo volta a classificar todo o histórico."
+    "sexNote": "Alterar o sexo volta a classificar todo o histórico.",
+    "birthDate": "Data de nascimento",
+    "birthDateHint": "Usada para as referências que dependem da idade.",
+    "ageIs": "{{count}} anos.",
+    "ageIs_one": "{{count}} ano.",
+    "height": "Altura",
+    "heightHint": "Converte o peso em IMC e a massa magra em IMLG — é aí que quase todas as referências de composição corporal estão definidas.",
+    "weight": "Peso mais recente",
+    "noWeight": "Ainda não há pesagens registadas.",
+    "weightNote": "Vem da última pesagem, não se edita aqui: o peso é uma medição com histórico.",
+    "derived": "Calculado a partir de {{source}} e da altura"
   },
   "flags": {
     "low": "Baixo",

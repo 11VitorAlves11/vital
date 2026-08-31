@@ -40,8 +40,12 @@ export const auth = {
   register: (payload: { email: string; password: string; name?: string; sex?: Sex | null }) =>
     request<User>("/auth/register", { method: "POST", body: payload }),
   logout: () => request<void>("/auth/logout", { method: "POST" }),
-  updateProfile: (payload: { name?: string | null; sex?: Sex | null }) =>
-    request<User>("/api/users/me", { method: "PATCH", body: payload }),
+  updateProfile: (payload: {
+    name?: string | null;
+    sex?: Sex | null;
+    birth_date?: string | null;
+    height_cm?: number | null;
+  }) => request<User>("/api/users/me", { method: "PATCH", body: payload }),
 };
 
 export const features = {

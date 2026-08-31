@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Plus, Sigma } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -24,6 +24,9 @@ export function Body() {
   const { user } = useSession();
   const [recording, setRecording] = useState(false);
   const { data, loading, error, reload } = useAsync(() => body.summary());
+  // The name of a derived index's source, so the card can say "from fat-free
+  // mass" rather than repeating a slug at the reader.
+  const metricNames = new Map((data ?? []).map((item) => [item.metric.slug, item.metric.name]));
 
   return (
     <section>
@@ -94,16 +97,26 @@ export function Body() {
                   <span className="text-sm text-ink">{entry.metric.unit}</span>
                 </p>
 
+                {/* A computed index says so. It is as real as a measurement, but
+                    it moves when the height on the profile does, and a reader
+                    comparing it to what the scale showed deserves to know why. */}
+                {entry.latest.derived_from ? (
+                  <p className="flex items-center gap-1.5 text-sm text-ink-muted">
+                    <Sigma size={14} aria-hidden="true" className="shrink-0" />
+                    {t("profile.derived", {
+                      source:
+                        metricNames.get(entry.latest.derived_from) ?? entry.latest.derived_from,
+                    })}
+                  </p>
+                ) : null}
+
                 <Sparkline
                   values={entry.sparkline.map((point) => toNumber(point.value))}
                   summary={t("dashboard.sparklineSummary", {
                     count: entry.sparkline.length,
                     name: entry.metric.name,
                     first: formatValue(entry.sparkline[0]?.value, locale),
-                    last: formatValue(
-                      entry.sparkline[entry.sparkline.length - 1]?.value,
-                      locale,
-                    ),
+                    last: formatValue(entry.sparkline[entry.sparkline.length - 1]?.value, locale),
                     unit: entry.metric.unit,
                   })}
                 />
