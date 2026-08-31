@@ -21,6 +21,8 @@ import type {
   Result,
   ResultPrefill,
   Sex,
+  Timeline,
+  TimelineKind,
   User,
 } from "./types";
 
@@ -75,10 +77,8 @@ type ReportPayload = {
 export const extractions = {
   create: (file: File) => upload<ExtractionJob>("/api/extractions", file),
   read: (id: string) => request<ExtractionJob>(`/api/extractions/${id}`),
-  confirm: (
-    id: string,
-    payload: ReportPayload,
-  ) => request<Report>(`/api/extractions/${id}/confirm`, { method: "POST", body: payload }),
+  confirm: (id: string, payload: ReportPayload) =>
+    request<Report>(`/api/extractions/${id}/confirm`, { method: "POST", body: payload }),
   discard: (id: string) => request<void>(`/api/extractions/${id}`, { method: "DELETE" }),
 };
 
@@ -96,6 +96,14 @@ export const catalogue = {
 
 export const dashboard = {
   read: () => request<Dashboard>("/api/dashboard"),
+};
+
+/** Everything that happened, newest first. Paged by date rather than by offset:
+ *  the history grows at the recent end, and an offset would shift every page
+ *  under the reader the moment a report is added. */
+export const timeline = {
+  read: (filter: { kinds?: TimelineKind[]; before?: string } = {}) =>
+    request<Timeline>(`/api/timeline${query({ kinds: filter.kinds, before: filter.before })}`),
 };
 
 export const biomarkers = {

@@ -13,7 +13,9 @@
     "theme": "Toggle theme",
     "themeDark": "Use dark theme",
     "themeLight": "Use light theme",
-    "bodySection": "Body section"
+    "bodySection": "Body section",
+    "timeline": "Timeline",
+    "timelineSection": "Timeline and interventions"
   },
   "actions": {
     "save": "Save",
@@ -279,5 +281,25 @@
     "reportPlaceholder": "How the set reads: what moved, what is left to repeat.",
     "resultPlaceholder": "Context for this one value, e.g. drawn at 11:30, outside the recommended window.",
     "markdownHint": "Simple Markdown is accepted: **bold**, *italic*, lists and links."
+  },
+  "timeline": {
+    "title": "Timeline",
+    "filter": "Filter by type",
+    "emptyTitle": "Nothing recorded yet",
+    "emptyDescription": "Collections, weigh-ins, photos and interventions appear here in order.",
+    "expand": "Show detail",
+    "collapse": "Close",
+    "open": "Open",
+    "loadMore": "Load more",
+    "ongoing": "ongoing",
+    "until": "until {{date}}"
+  },
+  "timelineKinds": {
+    "lab_report": "Lab results",
+    "body_composition": "Body composition",
+    "progress_photo": "Photo",
+    "appointment": "Appointment",
+    "imaging": "Imaging",
+    "intervention": "Intervention"
   }
 }

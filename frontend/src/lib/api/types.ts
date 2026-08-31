@@ -319,6 +319,51 @@ export type DashboardItem = {
   sparkline: { date: string; value: string }[];
 };
 
+/** What a row on the timeline is, and therefore its icon and its colour.
+ *  `intervention` covers everything the intervention model records — supplements,
+ *  medication, diets, training blocks — with the specific kind alongside it. */
+export type TimelineKind =
+  | "lab_report"
+  | "body_composition"
+  | "progress_photo"
+  | "appointment"
+  | "imaging"
+  | "intervention";
+
+export type TimelineSummaryItem = {
+  label: string;
+  value: string;
+  flag: ResultFlag | null;
+};
+
+/** Already worded for display: the server is the only place that can phrase a
+ *  summary once for every client. */
+export type TimelineEvent = {
+  id: string;
+  kind: TimelineKind;
+  occurred_on: string;
+  /** The hour, only where it means something. */
+  occurred_at: string | null;
+  ended_on: string | null;
+  /** A period rather than a moment — drawn as a bar, not a node. */
+  has_duration: boolean;
+  title: string;
+  subtitle: string | null;
+  summary: TimelineSummaryItem[];
+  href: string | null;
+  intervention_kind: InterventionKind | null;
+  pose: Pose | null;
+  photo_id: string | null;
+};
+
+export type Timeline = {
+  events: TimelineEvent[];
+  /** Only the kinds this account has anything of; the filter offers no others. */
+  available_kinds: TimelineKind[];
+  /** The cursor for the next page, or null at the end of the history. */
+  next_before: string | null;
+};
+
 export type Dashboard = {
   categories: { category: BiomarkerCategory; items: DashboardItem[] }[];
   last_report_on: string | null;

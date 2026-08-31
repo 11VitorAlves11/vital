@@ -14,6 +14,7 @@ import { Photos } from "./pages/Photos";
 import { Profile } from "./pages/Profile";
 import { ReportDetail } from "./pages/ReportDetail";
 import { Reports } from "./pages/Reports";
+import { Timeline } from "./pages/Timeline";
 
 // Recharts is by far the heaviest dependency and only these two routes need it,
 // so it stays out of the bundle the dashboard loads on a phone.
@@ -63,6 +64,14 @@ export function App() {
         element={
           <RequireSession>
             <BiomarkerDetail />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/timeline"
+        element={
+          <RequireSession>
+            <Timeline />
           </RequireSession>
         }
       />

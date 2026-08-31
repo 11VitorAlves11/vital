@@ -68,10 +68,14 @@ export async function uploadWithFields<T>(
   return (await response.json()) as T;
 }
 
-export function query(params: Record<string, string | undefined>): string {
+export function query(params: Record<string, string | string[] | undefined>): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value) search.set(key, value);
+    // A list repeats the key, which is what FastAPI reads back as a list. An
+    // empty one contributes nothing, so "no filter" and "filter on nothing"
+    // stay the same request.
+    if (Array.isArray(value)) value.forEach((item) => search.append(key, item));
+    else if (value) search.set(key, value);
   }
   const rendered = search.toString();
   return rendered ? `?${rendered}` : "";

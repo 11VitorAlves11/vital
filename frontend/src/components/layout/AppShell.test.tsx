@@ -56,7 +56,7 @@ describe("AppShell", () => {
         <p>conteúdo</p>
       </AppShell>,
     );
-    for (const label of ["Início", "Análises", "Corpo", "Intervenções", "Perfil"]) {
+    for (const label of ["Início", "Cronologia", "Análises", "Corpo", "Perfil"]) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
   });

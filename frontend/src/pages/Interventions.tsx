@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import { SubNav } from "../components/layout/SubNav";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -70,6 +71,14 @@ export function Interventions() {
 
   return (
     <section>
+      <SubNav
+        label={t("nav.timelineSection")}
+        items={[
+          { to: "/timeline", label: t("timeline.title") },
+          { to: "/interventions", label: t("interventions.title") },
+        ]}
+      />
+
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl leading-tight font-medium text-ink">
           {t("interventions.title")}

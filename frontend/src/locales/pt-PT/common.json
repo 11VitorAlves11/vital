@@ -13,7 +13,9 @@
     "theme": "Alternar tema",
     "themeDark": "Ativar tema escuro",
     "themeLight": "Ativar tema claro",
-    "bodySection": "Secção do corpo"
+    "bodySection": "Secção do corpo",
+    "timeline": "Cronologia",
+    "timelineSection": "Cronologia e intervenções"
   },
   "actions": {
     "save": "Guardar",
@@ -279,5 +281,25 @@
     "reportPlaceholder": "Leitura do conjunto: o que mudou, o que ficou por repetir.",
     "resultPlaceholder": "Contexto pontual, por exemplo: colheita às 11:30, fora da janela recomendada.",
     "markdownHint": "Aceita Markdown simples: **negrito**, *itálico*, listas e ligações."
+  },
+  "timeline": {
+    "title": "Cronologia",
+    "filter": "Filtrar por tipo",
+    "emptyTitle": "Ainda não há nada registado",
+    "emptyDescription": "Colheitas, pesagens, fotografias e intervenções aparecem aqui por ordem.",
+    "expand": "Ver detalhe",
+    "collapse": "Fechar",
+    "open": "Abrir",
+    "loadMore": "Carregar mais",
+    "ongoing": "em curso",
+    "until": "até {{date}}"
+  },
+  "timelineKinds": {
+    "lab_report": "Análises",
+    "body_composition": "Composição corporal",
+    "progress_photo": "Fotografia",
+    "appointment": "Consulta",
+    "imaging": "Imagiologia",
+    "intervention": "Intervenção"
   }
 }
