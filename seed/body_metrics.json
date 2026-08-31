@@ -231,6 +231,15 @@
     "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. A classificação faz-se pela percentagem de gordura corporal."
   },
   {
+    "slug": "fmi",
+    "name": "IMG (índice de massa gorda)",
+    "unit": "kg/m²",
+    "source": null,
+    "bands_m": null,
+    "bands_f": null,
+    "notes": "Massa gorda a dividir pela altura ao quadrado. Ao contrário da percentagem de gordura, não muda quando só a massa magra muda — o que o torna melhor para seguir a gordura ao longo do tempo. Trend-only: os percentis publicados são de DXA e a leitura é de bioimpedância."
+  },
+  {
     "slug": "fat-free-mass",
     "name": "Massa livre de gordura",
     "unit": "kg",
@@ -238,6 +247,41 @@
     "bands_m": null,
     "bands_f": null,
     "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+  },
+  {
+    "slug": "ffmi",
+    "name": "IMLG (índice de massa livre de gordura)",
+    "unit": "kg/m²",
+    "source": "GLIM/ESPEN",
+    "bands_m": [
+      {
+        "label": "Massa magra reduzida",
+        "min": null,
+        "max": 17.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Acima do limiar",
+        "min": 17.0,
+        "max": null,
+        "flag": "normal"
+      }
+    ],
+    "bands_f": [
+      {
+        "label": "Massa magra reduzida",
+        "min": null,
+        "max": 15.0,
+        "flag": "alert"
+      },
+      {
+        "label": "Acima do limiar",
+        "min": 15.0,
+        "max": null,
+        "flag": "normal"
+      }
+    ],
+    "notes": "Massa livre de gordura a dividir pela altura ao quadrado. Limiares GLIM/ESPEN para massa muscular reduzida no diagnóstico de desnutrição: <17 kg/m² (homens) e <15 kg/m² (mulheres). São limiares de rastreio clínico, não escalões de aptidão: acima deles não há gradação — só diz que não está reduzida. Derivado da altura do perfil; o valor vem da balança e a bioimpedância sobrestima a massa magra face ao DXA."
   },
   {
     "slug": "muscle-mass",
@@ -264,7 +308,7 @@
     "source": null,
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+    "notes": "Trend-only, e deliberadamente sem os limiares do EWGSOP2. Os cut-offs de 7,0 kg/m² (homens) e 5,5 kg/m² (mulheres) são para o índice de massa muscular *apendicular* — só braços e pernas, cerca de três quartos deste valor. Aplicá-los à massa muscular total daria quase toda a gente como normal, incluindo quem tem massa muscular reduzida. Para rastreio, ver o IMLG (limiares GLIM/ESPEN), que é definido sobre a massa livre de gordura que a balança realmente reporta."
   },
   {
     "slug": "bone-mass",

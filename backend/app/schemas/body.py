@@ -29,7 +29,8 @@ class BodyScanCreate(BaseModel):
 
 
 class ScanValueOut(BaseModel):
-    id: uuid.UUID
+    #: Null for a derived index, which is computed on read and never stored.
+    id: uuid.UUID | None = None
     metric_id: int
     metric_slug: str
     metric_name: str
@@ -39,6 +40,9 @@ class ScanValueOut(BaseModel):
     # there is no honest way to pick between the male and female band sets.
     flag: Literal["normal", "warn", "alert"] | None = None
     label: str | None = None
+    # The metric this was computed from, for the indices height makes possible.
+    # Null on a measured value — the distinction is the reader's to see.
+    derived_from: str | None = None
 
 
 class BodyScanOut(BaseModel):

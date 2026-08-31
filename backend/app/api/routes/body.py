@@ -22,6 +22,7 @@ from app.schemas.body import (
 from app.schemas.dashboard import SPARKLINE_POINTS
 from app.schemas.interventions import InterventionOut
 from app.schemas.series import BodyPoint, BodySeries
+from app.services import anthropometrics
 from app.services.bands import bands_for, classify
 from app.services.overlay import overlapping_interventions
 
@@ -44,14 +45,51 @@ def to_value_out(value: BodyScanValue, user: User) -> ScanValueOut:
     )
 
 
-def to_scan_out(scan: BodyScan, user: User) -> BodyScanOut:
+def derived_values(
+    scan: BodyScan, user: User, catalogue: dict[str, BodyMetric]
+) -> list[ScanValueOut]:
+    """The indices height makes computable, classified like any other value.
+
+    Computed on read: a stored one would need chasing down every time someone
+    corrected their height, and would sit in the measurements table looking
+    exactly like a measurement.
+    """
+    measured = {value.metric.slug: value.value for value in scan.values}
+    out: list[ScanValueOut] = []
+    for item in anthropometrics.derive(measured, user.height_cm):
+        metric = catalogue.get(item.metric_slug)
+        if metric is None:
+            continue
+        flag, label = classify(item.value, bands_for(metric, user.sex))
+        out.append(
+            ScanValueOut(
+                metric_id=metric.id,
+                metric_slug=metric.slug,
+                metric_name=metric.name,
+                unit=metric.unit,
+                value=item.value,
+                flag=flag,  # type: ignore[arg-type]
+                label=label,
+                derived_from=item.source_slug,
+            )
+        )
+    return out
+
+
+async def metric_catalogue(db: DbSession) -> dict[str, BodyMetric]:
+    metrics = (await db.execute(select(BodyMetric))).scalars().all()
+    return {metric.slug: metric for metric in metrics}
+
+
+def to_scan_out(scan: BodyScan, user: User, catalogue: dict[str, BodyMetric]) -> BodyScanOut:
     return BodyScanOut(
         id=scan.id,
         measured_at=scan.measured_at,
         source=scan.source,
         device=scan.device,
         notes=scan.notes,
-        values=[to_value_out(value, user) for value in scan.values],
+        values=[to_value_out(value, user) for value in scan.values]
+        + derived_values(scan, user, catalogue),
     )
 
 
@@ -74,7 +112,8 @@ async def list_scans(
             BodyScan.measured_at <= datetime.combine(date_to, time.max, tzinfo=UTC)
         )
     scans = (await db.execute(statement)).scalars().all()
-    return [to_scan_out(scan, user) for scan in scans]
+    metrics = await metric_catalogue(db)
+    return [to_scan_out(scan, user, metrics) for scan in scans]
 
 
 @router.post("/scans", response_model=BodyScanOut, status_code=status.HTTP_201_CREATED)
@@ -112,7 +151,27 @@ async def create_scan(payload: BodyScanCreate, user: CurrentUser, db: DbSession)
     db.add(scan)
     await db.commit()
     await db.refresh(scan)
-    return to_scan_out(scan, user)
+    return to_scan_out(scan, user, await metric_catalogue(db))
+
+
+async def _readings(
+    user: User, db: DbSession, metrics: dict[str, BodyMetric]
+) -> list[tuple[datetime, list[ScanValueOut]]]:
+    """Every weigh-in oldest first, each with its measured and derived values.
+
+    Grouped by scan rather than by metric because a derived index is a fact
+    about one weigh-in: it needs that weigh-in's other values to exist at all.
+    """
+    statement = select(BodyScan).where(BodyScan.user_id == user.id).order_by(BodyScan.measured_at)
+    scans = (await db.execute(statement)).scalars().all()
+    return [
+        (
+            scan.measured_at,
+            [to_value_out(value, user) for value in scan.values]
+            + derived_values(scan, user, metrics),
+        )
+        for scan in scans
+    ]
 
 
 @router.get("/metrics/{metric_id}/series", response_model=BodySeries)
@@ -122,23 +181,18 @@ async def metric_series(metric_id: int, user: CurrentUser, db: DbSession) -> Bod
     if metric is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Body metric not found")
 
-    statement = (
-        select(BodyScanValue, BodyScan)
-        .join(BodyScan, BodyScanValue.scan_id == BodyScan.id)
-        .where(BodyScan.user_id == user.id, BodyScanValue.metric_id == metric_id)
-        .order_by(BodyScan.measured_at)
-    )
-    rows = (await db.execute(statement)).all()
-    bands = bands_for(metric, user.sex)
+    readings = await _readings(user, db, await metric_catalogue(db))
     points = [
         BodyPoint(
-            date=scan.measured_at,
+            date=measured_at,
             value=value.value,
             flag=value.flag,
-            label=classify(value.value, bands)[1],
-            scan_id=str(scan.id),
+            label=value.label,
+            scan_id=str(value.id) if value.id else "",
         )
-        for value, scan in rows
+        for measured_at, values in readings
+        for value in values
+        if value.metric_id == metric_id
     ]
     interventions = await overlapping_interventions(
         db,
@@ -156,17 +210,13 @@ async def metric_series(metric_id: int, user: CurrentUser, db: DbSession) -> Bod
 @router.get("/summary", response_model=list[BodyMetricSummary])
 async def body_summary(user: CurrentUser, db: DbSession) -> list[BodyMetricSummary]:
     """The metrics grid: latest reading, its clinical band, and a short sparkline."""
-    statement = (
-        select(BodyScanValue, BodyScan)
-        .join(BodyScan, BodyScanValue.scan_id == BodyScan.id)
-        .where(BodyScan.user_id == user.id)
-        .order_by(BodyScan.measured_at)
-    )
-    rows = (await db.execute(statement)).all()
+    catalogue = await metric_catalogue(db)
+    readings = await _readings(user, db, catalogue)
 
-    history: dict[int, list[tuple[datetime, BodyScanValue]]] = defaultdict(list)
-    for value, scan in rows:
-        history[value.metric_id].append((scan.measured_at, value))
+    history: dict[int, list[tuple[datetime, ScanValueOut]]] = defaultdict(list)
+    for measured_at, values in readings:
+        for value in values:
+            history[value.metric_id].append((measured_at, value))
 
     metrics = (await db.execute(select(BodyMetric).order_by(BodyMetric.id))).scalars().all()
     summaries: list[BodyMetricSummary] = []
@@ -178,7 +228,7 @@ async def body_summary(user: CurrentUser, db: DbSession) -> list[BodyMetricSumma
         summaries.append(
             BodyMetricSummary(
                 metric=to_body_metric_out(metric, user),
-                latest=to_value_out(latest, user),
+                latest=latest,
                 measured_at=measured_at,
                 sparkline=[
                     BodySparkPoint(date=moment, value=value.value)

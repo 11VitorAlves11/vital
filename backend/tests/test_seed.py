@@ -20,8 +20,12 @@ async def test_row_counts_match_the_json_exactly(database: None) -> None:
     async with get_sessionmaker()() as db:
         assert await db.scalar(select(func.count()).select_from(Biomarker)) == len(biomarkers)
         assert await db.scalar(select(func.count()).select_from(BodyMetric)) == len(body_metrics)
-    assert len(biomarkers) == 31
-    assert len(body_metrics) == 18
+    # A floor, not a census: the assertions above already tie the tables to the
+    # JSON exactly. This one only catches the file being truncated or emptied,
+    # which an exact count would too — at the price of a test edit every time
+    # the catalogue legitimately grows.
+    assert len(biomarkers) >= 31
+    assert len(body_metrics) >= 18
 
 
 async def test_loading_twice_inserts_nothing_new(database: None) -> None:
@@ -81,6 +85,11 @@ async def test_trend_only_metrics_are_sql_null_not_json_null(database: None) -> 
             .scalars()
             .all()
         )
-    expected = {entry["slug"] for entry in _seed("body_metrics.json") if entry["bands_m"] is None}
+    entries = _seed("body_metrics.json")
+    expected = {entry["slug"] for entry in entries if entry["bands_m"] is None}
+    banded = {entry["slug"] for entry in entries if entry["bands_m"] is not None}
     assert {row.slug for row in trend_only} == expected
-    assert len(expected) == 15
+    # Both directions, rather than a count that goes stale every time the
+    # catalogue grows: nothing banded may be NULL, and something must be banded.
+    assert expected and banded
+    assert not (banded & {row.slug for row in trend_only})

@@ -1,7 +1,8 @@
 import uuid
 from datetime import date, datetime
+from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, String, func
+from sqlalchemy import Date, DateTime, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -22,6 +23,11 @@ class User(Base):
     # silently applies the wrong reference ranges. Unknown means "no flag", never a default.
     sex: Mapped[Sex | None] = mapped_column(pg_enum(Sex, "sex"))
     birth_date: Mapped[date | None] = mapped_column(Date)
+    # Height turns weight into BMI and fat-free mass into FFMI, which is where
+    # almost every body-composition reference actually lives. Nullable for the
+    # same reason as sex: without it those indices are not computed at all,
+    # rather than computed against a guess.
+    height_cm: Mapped[Decimal | None] = mapped_column(Numeric(4, 1))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
