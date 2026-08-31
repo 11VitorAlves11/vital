@@ -11,8 +11,13 @@ const RESULT: Result = {
   category: "hematologia",
   value: "10.5",
   unit: "g/dL",
+  canonical_value: "10.5",
+  canonical_unit: "g/dL",
   ref_min: "12",
   ref_max: "15.5",
+  reference_kind: "two_sided",
+  reference_bands: null,
+  band_label: null,
   flag: "low",
 };
 

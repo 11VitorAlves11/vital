@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Area, ReferenceArea, ReferenceLine } from "recharts";
 
-import type { Intervention } from "../../lib/api/types";
+import type { Intervention, ReferenceBand } from "../../lib/api/types";
 
 type BandOptions = {
   /** Per-point range the lab reported, plotted as a shaded area. */
@@ -11,6 +11,17 @@ type BandOptions = {
   canonicalMax: number | null;
   minLabel: (value: number) => string;
   maxLabel: (value: number) => string;
+  /** An ordinal scale, which replaces the range rather than joining it. */
+  bands?: ReferenceBand[] | null;
+};
+
+/** Tint per step of an ordinal scale. Faint enough that the line stays the
+ *  signal, and never the only thing distinguishing one step from the next —
+ *  every band is labelled and separated by a visible edge. */
+const BAND_TINT: Record<ReferenceBand["flag"], string> = {
+  low: "var(--flag-warn)",
+  normal: "var(--flag-normal)",
+  high: "var(--flag-alert)",
 };
 
 /**
@@ -28,7 +39,12 @@ export function referenceBandElements({
   canonicalMax,
   minLabel,
   maxLabel,
+  bands = null,
 }: BandOptions): ReactElement[] {
+  // An ordinal scale is the whole reference: drawing a range on top of it would
+  // put two different readings of the same value on one chart.
+  if (bands && bands.length > 0) return ordinalBandElements(bands);
+
   const elements: ReactElement[] = [];
 
   if (hasLabRange) {
@@ -68,6 +84,29 @@ export function referenceBandElements({
   }
 
   return elements;
+}
+
+/** Horizontal strips across the plot, one per named step, each carrying its name.
+ *  The unbounded first and last steps are left to the axis to close. */
+function ordinalBandElements(bands: ReferenceBand[]): ReactElement[] {
+  return bands.map((band, index) => (
+    <ReferenceArea
+      key={`${band.label}-${index}`}
+      y1={band.min ?? undefined}
+      y2={band.max ?? undefined}
+      fill={BAND_TINT[band.flag]}
+      fillOpacity={0.08}
+      stroke={BAND_TINT[band.flag]}
+      strokeOpacity={0.3}
+      ifOverflow="hidden"
+      label={{
+        value: band.label,
+        position: "insideLeft",
+        fill: "var(--color-ink-muted)",
+        fontSize: 11,
+      }}
+    />
+  ));
 }
 
 type OverlayOptions = {

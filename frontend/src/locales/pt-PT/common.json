@@ -72,7 +72,10 @@
     "emptyDescription": "Aparece aqui assim que registares uma colheita que o inclua.",
     "canonicalRange": "Intervalo de referência do catálogo (tracejado)",
     "labRange": "Intervalo reportado pelo laboratório",
-    "noRange": "Sem intervalo de referência"
+    "noRange": "Sem intervalo de referência",
+    "ordinalScale": "Escala de referência",
+    "unconvertedPoints": "{{count}} valor fora do gráfico: unidade sem conversão conhecida para {{unit}}.",
+    "unconvertedPoints_other": "{{count}} valores fora do gráfico: unidade sem conversão conhecida para {{unit}}."
   },
   "reports": {
     "title": "Análises",

@@ -10,7 +10,9 @@ import { FlagChip } from "../ui/FlagChip";
 export function ResultRow({ result }: { result: Result }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
-  const range = formatRange(result.ref_min, result.ref_max, locale);
+  // On a named scale the step is the reference; the two numbers around it read
+  // as a pass/fail the marker deliberately is not.
+  const range = result.band_label ?? formatRange(result.ref_min, result.ref_max, locale);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border py-3">
@@ -24,7 +26,8 @@ export function ResultRow({ result }: { result: Result }) {
         <span
           className={cn(
             "hidden text-sm text-ink-muted sm:inline",
-            range && "data",
+            // Tabular figures are for numbers; a band name is prose.
+            range && !result.band_label && "data",
           )}
         >
           {range ?? t("biomarker.noRange")}

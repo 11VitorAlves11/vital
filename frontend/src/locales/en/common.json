@@ -72,7 +72,10 @@
     "emptyDescription": "It shows up here as soon as you record a collection that includes it.",
     "canonicalRange": "Catalogue reference range (dashed)",
     "labRange": "Range reported by the laboratory",
-    "noRange": "No reference range"
+    "noRange": "No reference range",
+    "ordinalScale": "Reference scale",
+    "unconvertedPoints": "{{count}} value left off the chart: its unit has no known conversion to {{unit}}.",
+    "unconvertedPoints_other": "{{count}} values left off the chart: their unit has no known conversion to {{unit}}."
   },
   "reports": {
     "title": "Lab reports",

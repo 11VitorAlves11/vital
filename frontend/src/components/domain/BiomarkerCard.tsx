@@ -16,7 +16,10 @@ export function BiomarkerCard({ item }: { item: DashboardItem }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
   const values = item.sparkline.map((point) => toNumber(point.value));
-  const range = formatRange(item.biomarker.ref_min, item.biomarker.ref_max, locale);
+  // On a named scale the step is the reference — "insuficiência" says more than
+  // the two numbers around it, and the numbers alone would say the wrong thing.
+  const range =
+    item.band_label ?? formatRange(item.biomarker.ref_min, item.biomarker.ref_max, locale);
 
   return (
     <Card className="flex flex-col gap-3">
@@ -55,7 +58,8 @@ export function BiomarkerCard({ item }: { item: DashboardItem }) {
       <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-3 border-t border-border pt-3 text-sm">
         {range ? (
           <span className="text-ink">
-            {t("biomarker.reference")} <span className="metric">{range}</span>
+            {t("biomarker.reference")}{" "}
+            <span className={item.band_label ? undefined : "metric"}>{range}</span>
           </span>
         ) : (
           <span className="text-ink-muted">{t("biomarker.noRange")}</span>

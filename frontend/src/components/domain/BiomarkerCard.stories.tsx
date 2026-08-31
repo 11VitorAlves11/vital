@@ -9,8 +9,11 @@ const HAEMOGLOBIN: Biomarker = {
   name: "Hemoglobina",
   category: "hematologia",
   unit_default: "g/dL",
+  canonical_unit: "g/dL",
+  reference_kind: "two_sided",
   ref_min: "12",
   ref_max: "15.5",
+  reference_bands: null,
   aliases: ["Hb", "HGB"],
   notes: null,
 };
@@ -20,6 +23,7 @@ const ITEM: DashboardItem = {
   value: "10.5",
   unit: "g/dL",
   flag: "low",
+  band_label: null,
   collected_on: "2026-02-14",
   lab_name: "Unilabs",
   sparkline: [

@@ -4,6 +4,10 @@ export type Sex = "M" | "F";
 export type ResultFlag = "low" | "normal" | "high";
 export type BandFlag = "normal" | "warn" | "alert";
 
+/** The shape of the interval a value is read against. `none` means no interval
+ *  applies — the value is charted, never classified. */
+export type ReferenceKind = "two_sided" | "upper_bound" | "lower_bound" | "ordinal_bands" | "none";
+
 export type BiomarkerCategory =
   | "hematologia"
   | "bioquimica"
@@ -33,15 +37,30 @@ export type Band = {
   flag: BandFlag;
 };
 
+/** One step of an ordinal scale, in the biomarker's canonical unit. */
+export type ReferenceBand = {
+  label: string;
+  min: number | null;
+  max: number | null;
+  flag: ResultFlag;
+};
+
 export type Biomarker = {
   id: number;
   slug: string;
   name: string;
   category: BiomarkerCategory;
   unit_default: string;
+  /** The unit every series of this marker is charted in. */
+  canonical_unit: string;
+  /** The shape that applies to the caller — `none` when their sex is unknown
+   *  and the catalogue only offers sex-specific ranges. */
+  reference_kind: ReferenceKind;
   /** Canonical range for the caller's sex; null when their sex is unknown. */
   ref_min: string | null;
   ref_max: string | null;
+  /** Set only for `ordinal_bands` markers, where the scale replaces the range. */
+  reference_bands: ReferenceBand[] | null;
   aliases: string[];
   notes: string | null;
 };
@@ -63,10 +82,18 @@ export type Result = {
   biomarker_slug: string;
   biomarker_name: string;
   category: BiomarkerCategory;
+  /** As the laboratory reported it — the number the report itself shows. */
   value: string;
   unit: string;
+  /** The same reading in the catalogue's unit; null when it was not convertible. */
+  canonical_value: string | null;
+  canonical_unit: string | null;
   ref_min: string | null;
   ref_max: string | null;
+  reference_kind: ReferenceKind;
+  reference_bands: ReferenceBand[] | null;
+  /** Which step of an ordinal scale it landed on ("insuficiência"). */
+  band_label: string | null;
   flag: ResultFlag | null;
 };
 
@@ -176,11 +203,19 @@ export type BodyMetricSummary = {
 
 export type BiomarkerPoint = {
   date: string;
+  /** As reported, in `unit` — what the table and the tooltip show. */
   value: string;
   unit: string;
+  /** In the series' own unit — what the line is plotted from. */
+  canonical_value: string | null;
   lab_name: string;
   ref_min: string | null;
   ref_max: string | null;
+  /** The lab's limits on the series' scale, so band and line share an axis. */
+  canonical_ref_min: string | null;
+  canonical_ref_max: string | null;
+  reference_kind: ReferenceKind;
+  band_label: string | null;
   flag: ResultFlag | null;
   report_id: string;
 };
@@ -188,6 +223,10 @@ export type BiomarkerPoint = {
 export type BiomarkerSeries = {
   biomarker: Biomarker;
   points: BiomarkerPoint[];
+  /** The unit the whole series is plotted in, whatever the reports used. */
+  unit: string;
+  /** True when a point could not be converted into it, so the line has a gap. */
+  has_unconverted_points: boolean;
   interventions: Intervention[];
 };
 
@@ -210,6 +249,7 @@ export type DashboardItem = {
   value: string;
   unit: string;
   flag: ResultFlag | null;
+  band_label: string | null;
   collected_on: string;
   lab_name: string;
   sparkline: { date: string; value: string }[];

@@ -29,12 +29,22 @@ export function BiomarkerDetail() {
   if (error || !data) return <ErrorState onRetry={reload} />;
 
   const { biomarker, points, interventions } = data;
-  const unit = points[0]?.unit ?? biomarker.unit_default;
+  // The whole series is plotted on one scale, whatever unit each report used.
+  const unit = data.unit;
   const canonical = formatRange(biomarker.ref_min, biomarker.ref_max, locale);
   const newestFirst = [...points].reverse();
+  // A point in a unit the catalogue cannot convert has no place on that scale,
+  // so it is left out of the line rather than plotted at the wrong height.
+  const plotted = points.filter((point) => point.canonical_value !== null);
 
   const flagLabel = (point: BiomarkerPoint) =>
     point.flag ? t(`flags.${point.flag}`) : t("flags.unclassified");
+
+  /** What the reference column says, which depends on the shape of the interval. */
+  const referenceLabel = (point: BiomarkerPoint) => {
+    if (point.reference_kind === "ordinal_bands") return point.band_label;
+    return formatRange(point.ref_min, point.ref_max, locale);
+  };
 
   return (
     <section className="flex flex-col gap-6">
@@ -42,9 +52,15 @@ export function BiomarkerDetail() {
         <h1 className="font-display text-2xl leading-tight font-medium text-ink">{biomarker.name}</h1>
         <p className="text-sm text-ink-muted">
           {t(`categories.${biomarker.category}`)}
-          {canonical
-            ? ` · ${t("biomarker.canonicalRange")}: ${canonical} ${biomarker.unit_default}`
-            : ""}
+          {/* A marker read on a named scale has no single range to quote: the
+              steps are the reference, and they are drawn on the chart below. */}
+          {biomarker.reference_bands
+            ? ` · ${t("biomarker.ordinalScale")}: ${biomarker.reference_bands
+                .map((band) => band.label)
+                .join(" · ")}`
+            : canonical
+              ? ` · ${t("biomarker.canonicalRange")}: ${canonical} ${biomarker.canonical_unit}`
+              : ""}
         </p>
         {biomarker.notes ? <p className="text-sm text-ink-muted">{biomarker.notes}</p> : null}
       </header>
@@ -63,14 +79,23 @@ export function BiomarkerDetail() {
               unit={unit}
               canonicalMin={biomarker.ref_min === null ? null : toNumber(biomarker.ref_min)}
               canonicalMax={biomarker.ref_max === null ? null : toNumber(biomarker.ref_max)}
+              bands={biomarker.reference_bands}
               interventions={interventions}
-              points={points.map((point) => ({
+              points={plotted.map((point) => ({
                 timestamp: new Date(point.date).getTime(),
-                value: toNumber(point.value),
-                refMin: point.ref_min === null ? null : toNumber(point.ref_min),
-                refMax: point.ref_max === null ? null : toNumber(point.ref_max),
+                value: toNumber(point.canonical_value),
+                refMin: point.canonical_ref_min === null ? null : toNumber(point.canonical_ref_min),
+                refMax: point.canonical_ref_max === null ? null : toNumber(point.canonical_ref_max),
               }))}
             />
+            {data.has_unconverted_points ? (
+              <p className="mt-2 text-sm text-ink-muted">
+                {t("biomarker.unconvertedPoints", {
+                  count: points.length - plotted.length,
+                  unit,
+                })}
+              </p>
+            ) : null}
             {interventions.length > 0 ? (
               <p className="mt-2 text-sm text-ink-muted">
                 {t("chart.interventions")}:{" "}
@@ -112,9 +137,9 @@ export function BiomarkerDetail() {
                           {formatValue(point.value, locale)} {point.unit}
                         </td>
                         <td className="py-2 text-ink-muted">
-                          {formatRange(point.ref_min, point.ref_max, locale) ? (
-                            <span className="data">
-                              {formatRange(point.ref_min, point.ref_max, locale)}
+                          {referenceLabel(point) ? (
+                            <span className={point.band_label ? undefined : "data"}>
+                              {referenceLabel(point)}
                             </span>
                           ) : (
                             t("biomarker.noRange")
@@ -141,6 +166,7 @@ export function BiomarkerDetail() {
                     </div>
                     <p className="text-sm text-ink-muted">
                       {formatDate(point.date, locale)} · {point.lab_name}
+                      {point.band_label ? ` · ${point.band_label}` : ""}
                     </p>
                   </li>
                 ))}

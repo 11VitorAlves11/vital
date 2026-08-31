@@ -9,9 +9,25 @@ import {
   YAxis,
 } from "recharts";
 
-import type { Intervention } from "../../lib/api/types";
+import type { Intervention, ReferenceBand } from "../../lib/api/types";
 import { formatDate, formatValue } from "../../lib/format";
 import { interventionOverlayElements, referenceBandElements } from "./ReferenceBand";
+
+/** The edges of the steps the data actually touches.
+ *
+ * All of them would stretch the axis over a scale the reader is nowhere near —
+ * vitamin D runs to 100 ng/mL and most histories sit around 30 — while none of
+ * them hides the boundary the values are closest to, which is the only reason
+ * the scale is on the chart. */
+function touchedBandEdges(values: number[], bands: ReferenceBand[]): number[] {
+  const touched = bands.filter((band) =>
+    values.some(
+      (value) =>
+        (band.min === null || value >= band.min) && (band.max === null || value < band.max),
+    ),
+  );
+  return touched.flatMap((band) => [band.min, band.max]).filter((edge) => edge !== null);
+}
 
 /** Pads the range, then rounds outward to a round step, so the axis reads
  * "10" and "16" rather than "10,05" and "15,45". */
@@ -40,6 +56,8 @@ type TrendChartProps = {
   interventions: Intervention[];
   canonicalMin?: number | null;
   canonicalMax?: number | null;
+  /** An ordinal scale, drawn instead of the range when the marker has one. */
+  bands?: ReferenceBand[] | null;
 };
 
 export function TrendChart({
@@ -49,6 +67,7 @@ export function TrendChart({
   interventions,
   canonicalMin = null,
   canonicalMax = null,
+  bands = null,
 }: TrendChartProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
@@ -79,11 +98,13 @@ export function TrendChart({
 
   // The reference band is the signature element, so the axis has to contain it:
   // scaled to the values alone, a limit outside their spread is simply not drawn.
+  const values = points.map((point) => point.value);
   const bounds = [
-    ...points.map((point) => point.value),
+    ...values,
     ...points.flatMap((point) => [point.refMin, point.refMax]),
     canonicalMin,
     canonicalMax,
+    ...(bands ? touchedBandEdges(values, bands) : []),
   ].filter((value): value is number => value !== null && Number.isFinite(value));
   const yDomain = paddedDomain(Math.min(...bounds), Math.max(...bounds));
 
@@ -120,6 +141,7 @@ export function TrendChart({
             canonicalMax,
             minLabel: (value) => t("chart.min", { value: formatValue(value, locale) }),
             maxLabel: (value) => t("chart.max", { value: formatValue(value, locale) }),
+            bands,
           })}
           <Line
             type="monotone"

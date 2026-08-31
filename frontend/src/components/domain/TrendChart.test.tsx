@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import type { Intervention } from "../../lib/api/types";
+import type { Intervention, ReferenceBand } from "../../lib/api/types";
 import { renderWithProviders, usePortuguese } from "../../test/utils";
 import { interventionOverlayElements, referenceBandElements } from "./ReferenceBand";
 import { TrendChart } from "./TrendChart";
@@ -19,6 +19,12 @@ const CREATINE: Intervention = {
 const POINTS = [
   { timestamp: Date.parse("2026-01-15"), value: 14, refMin: 13, refMax: 17 },
   { timestamp: Date.parse("2026-06-15"), value: 15.5, refMin: 13, refMax: 17 },
+];
+
+const VITAMIN_D_BANDS: ReferenceBand[] = [
+  { label: "insuficiência", min: null, max: 30, flag: "low" },
+  { label: "suficiência", min: 30, max: 100, flag: "normal" },
+  { label: "excesso", min: 100, max: null, flag: "high" },
 ];
 
 beforeAll(async () => {
@@ -71,6 +77,40 @@ describe("referenceBandElements", () => {
       maxLabel: String,
     });
     expect(elements).toHaveLength(0);
+  });
+
+  it("draws a single dashed line for a one-sided reference", () => {
+    const elements = referenceBandElements({
+      hasLabRange: false,
+      canonicalMin: 40,
+      canonicalMax: null,
+      minLabel: (value) => `Mín. ${value}`,
+      maxLabel: String,
+    });
+    expect(elements.map((element) => element.key)).toEqual(["canonical-min"]);
+  });
+
+  it("draws an ordinal scale as one labelled strip per step", () => {
+    const elements = referenceBandElements({
+      hasLabRange: true,
+      canonicalMin: 30,
+      canonicalMax: 100,
+      minLabel: String,
+      maxLabel: String,
+      bands: VITAMIN_D_BANDS,
+    });
+    // The scale replaces the range: a value read against named steps must not
+    // also be read against two numbers on the same chart.
+    expect(elements).toHaveLength(VITAMIN_D_BANDS.length);
+    expect(elements.map((element) => element.props.label.value)).toEqual([
+      "insuficiência",
+      "suficiência",
+      "excesso",
+    ]);
+    const [insufficient, , excess] = elements;
+    expect(insufficient.props.y1).toBeUndefined();
+    expect(insufficient.props.y2).toBe(30);
+    expect(excess.props.y2).toBeUndefined();
   });
 });
 
