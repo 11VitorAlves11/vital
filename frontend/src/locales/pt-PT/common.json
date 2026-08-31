@@ -113,7 +113,8 @@
     "doctorName": "Médico",
     "filterLab": "Laboratório",
     "allLabs": "Todos os laboratórios",
-    "resultNote": "Nota sobre este resultado"
+    "resultNote": "Nota sobre este resultado",
+    "prefilledFrom": "Pré-preenchido a partir de {{source}}."
   },
   "extraction": {
     "title": "Importar PDF",

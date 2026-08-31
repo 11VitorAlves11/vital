@@ -47,6 +47,22 @@ export function formatRange(
   return null;
 }
 
+/** Whether two typed names mean the same thing — the same fold the server
+ *  applies when it resolves a laboratory to an entity: case, accents and
+ *  punctuation ignored, runs of anything else squashed to one space. */
+export function sameName(a: string, b: string): boolean {
+  return foldName(a) === foldName(b) && foldName(a) !== "";
+}
+
+function foldName(name: string): string {
+  return name
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 /** Datetime-local inputs want "YYYY-MM-DDTHH:mm" in local time. */
 export function toLocalInputValue(date: Date): string {
   const offset = date.getTimezoneOffset() * 60_000;

@@ -137,6 +137,22 @@ export type Result = {
   flag: ResultFlag | null;
 };
 
+/** What the last reading of a marker looked like — a suggestion the form fills
+ *  in and the reader can overwrite. Nothing here is applied server-side. */
+export type ResultPrefill = {
+  biomarker_id: number;
+  unit: string;
+  ref_min: string | null;
+  ref_max: string | null;
+  method: string | null;
+  /** Where and when it comes from, so it can be shown and doubted. */
+  lab_name: string;
+  collected_on: string;
+  /** Whether it came from the laboratory this report is for. A range from
+   *  another laboratory is that laboratory's and must not be carried across. */
+  same_lab: boolean;
+};
+
 export type ReportSummary = CollectionContext & {
   id: string;
   lab_id: string;

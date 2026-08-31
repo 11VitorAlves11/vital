@@ -19,6 +19,7 @@ import type {
   Report,
   ReportSummary,
   Result,
+  ResultPrefill,
   Sex,
   User,
 } from "./types";
@@ -112,6 +113,11 @@ export const reports = {
       })}`,
     ),
   read: (id: string) => request<Report>(`/api/reports/${id}`),
+  /** The last reading of every marker, to fill a new entry in. Narrowed to one
+   *  laboratory when known, because a reference range belongs to the lab that
+   *  issued it and carrying one across is how a history acquires a wrong one. */
+  prefill: (labId?: string) =>
+    request<ResultPrefill[]>(`/api/reports/prefill${query({ lab_id: labId })}`),
   update: (id: string, payload: { notes?: string | null; doctor_name?: string | null }) =>
     request<Report>(`/api/reports/${id}`, { method: "PATCH", body: payload }),
   annotate: (reportId: string, resultId: string, note: string | null) =>

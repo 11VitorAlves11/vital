@@ -15,7 +15,7 @@ import { Select } from "../components/ui/Select";
 import { useToast } from "../components/ui/Toast";
 import { catalogue, providers, reports } from "../lib/api";
 import { ApiError } from "../lib/api/client";
-import { todayInputValue } from "../lib/format";
+import { sameName, todayInputValue } from "../lib/format";
 import { useAsync } from "../lib/useAsync";
 
 type Row = {
@@ -26,10 +26,21 @@ type Row = {
   refMax: string;
   method: string;
   note: string;
+  /** Where the range and unit on this row came from, when they were suggested. */
+  from: string | null;
 };
 
 function emptyRow(key: number): Row {
-  return { key, biomarkerId: "", value: "", refMin: "", refMax: "", method: "", note: "" };
+  return {
+    key,
+    biomarkerId: "",
+    value: "",
+    refMin: "",
+    refMax: "",
+    method: "",
+    note: "",
+    from: null,
+  };
 }
 
 type ReportCreateProps = {
@@ -55,6 +66,11 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // The laboratory is typed, not picked, so the match back to an entity is the
+  // same fold the server applies. No match simply means no suggestions yet.
+  const lab = (labs ?? []).find((candidate) => sameName(candidate.name, labName));
+  const { data: suggestions } = useAsync(() => reports.prefill(lab?.id), [lab?.id]);
+
   const options = (biomarkers ?? []).map((biomarker) => ({
     value: String(biomarker.id),
     label: `${biomarker.name} (${biomarker.unit_default})`,
@@ -62,6 +78,41 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
 
   function update(key: number, patch: Partial<Row>) {
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
+  }
+
+  /**
+   * Fill a row from the last reading of the marker just chosen.
+   *
+   * Only into fields still empty: a suggestion may never overwrite something
+   * someone typed. The value itself is never suggested — it is the one thing
+   * that has to be read off the report.
+   */
+  function pickBiomarker(key: number, biomarkerId: string) {
+    const suggestion = (suggestions ?? []).find(
+      (candidate) => String(candidate.biomarker_id) === biomarkerId,
+    );
+    setRows((current) =>
+      current.map((row) => {
+        if (row.key !== key) return row;
+        if (!suggestion) return { ...row, biomarkerId, from: null };
+        // The unit and the assay travel between laboratories; the reference
+        // range does not. From another laboratory, the range is left blank
+        // rather than carried across as if it applied here.
+        const range = suggestion.same_lab
+          ? {
+              refMin: row.refMin || (suggestion.ref_min ?? ""),
+              refMax: row.refMax || (suggestion.ref_max ?? ""),
+            }
+          : {};
+        return {
+          ...row,
+          biomarkerId,
+          ...range,
+          method: row.method || (suggestion.method ?? ""),
+          from: `${suggestion.lab_name} · ${suggestion.collected_on}`,
+        };
+      }),
+    );
   }
 
   async function submit(event: FormEvent) {
@@ -157,8 +208,13 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
                   placeholder={t("reports.pickBiomarker")}
                   options={options}
                   value={row.biomarkerId}
-                  onChange={(event) => update(row.key, { biomarkerId: event.target.value })}
+                  onChange={(event) => pickBiomarker(row.key, event.target.value)}
                 />
+                {row.from ? (
+                  <p className="text-sm text-ink-muted">
+                    {t("reports.prefilledFrom", { source: row.from })}
+                  </p>
+                ) : null}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   <Input
                     label={t("reports.value")}
