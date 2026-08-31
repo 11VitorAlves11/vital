@@ -6,7 +6,7 @@ return another account's results, by id or otherwise.
 
 import re
 import uuid
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Response, status
@@ -16,12 +16,26 @@ from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, LabReport, Result
 from app.models.enums import ReportSource
 from app.schemas.catalog import ReferenceBandOut
-from app.schemas.reports import CaveatOut, ReportCreate, ReportOut, ReportSummary, ResultOut
-from app.services import caveats, storage
+from app.schemas.reports import (
+    CaveatOut,
+    ReportCreate,
+    ReportOut,
+    ReportPatch,
+    ReportSummary,
+    ResultOut,
+    ResultPatch,
+)
+from app.services import caveats, providers, storage
 from app.services import results as result_service
 from app.services.flags import Reference, band_label
 
 router = APIRouter(prefix="/reports", tags=["reports"])
+
+
+def utcnow() -> datetime:
+    """When a note was written. Stored with a zone, unlike the collection hour:
+    this is a moment in the log, not a local time on a clock."""
+    return datetime.now(UTC)
 
 
 def to_result_out(result: Result, report: LabReport) -> ResultOut:
@@ -54,6 +68,8 @@ def to_result_out(result: Result, report: LabReport) -> ResultOut:
             else None
         ),
         method=result.method,
+        note=result.note,
+        note_at=result.note_at,
         caveats=[
             CaveatOut(code=caveat.code, values=caveat.values)
             for caveat in caveats.for_result(result, report)
@@ -67,11 +83,15 @@ def to_report_out(report: LabReport) -> ReportOut:
         id=report.id,
         collected_on=report.collected_on,
         collected_at=report.collected_at,
-        lab_name=report.lab_name,
+        lab_id=report.lab_id,
+        lab_name=report.lab.name,
+        doctor_id=report.doctor_id,
+        doctor_name=report.doctor.name if report.doctor else None,
         fasting_state=report.fasting_state,
         fasting_hours=report.fasting_hours,
         source=report.source,
         notes=report.notes,
+        notes_at=report.notes_at,
         created_at=report.created_at,
         has_file=bool(report.file_path),
         results=[to_result_out(result, report) for result in report.results],
@@ -92,6 +112,8 @@ async def list_reports(
     db: DbSession,
     date_from: Annotated[date | None, Query(alias="from")] = None,
     date_to: Annotated[date | None, Query(alias="to")] = None,
+    lab_id: Annotated[uuid.UUID | None, Query()] = None,
+    doctor_id: Annotated[uuid.UUID | None, Query()] = None,
 ) -> list[ReportSummary]:
     statement = (
         select(LabReport)
@@ -102,17 +124,27 @@ async def list_reports(
         statement = statement.where(LabReport.collected_on >= date_from)
     if date_to is not None:
         statement = statement.where(LabReport.collected_on <= date_to)
+    # Filtering by origin: the lab id came from this account's own list, and the
+    # user_id above still bounds the query, so an id from elsewhere finds nothing.
+    if lab_id is not None:
+        statement = statement.where(LabReport.lab_id == lab_id)
+    if doctor_id is not None:
+        statement = statement.where(LabReport.doctor_id == doctor_id)
     reports = (await db.execute(statement)).scalars().all()
     return [
         ReportSummary(
             id=report.id,
             collected_on=report.collected_on,
             collected_at=report.collected_at,
-            lab_name=report.lab_name,
+            lab_id=report.lab_id,
+            lab_name=report.lab.name,
+            doctor_id=report.doctor_id,
+            doctor_name=report.doctor.name if report.doctor else None,
             fasting_state=report.fasting_state,
             fasting_hours=report.fasting_hours,
             source=report.source,
             notes=report.notes,
+            notes_at=report.notes_at,
             created_at=report.created_at,
             result_count=len(report.results),
             has_file=bool(report.file_path),
@@ -138,29 +170,34 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
             detail=f"Unknown biomarker ids: {unknown}",
         )
 
+    lab = await providers.lab_for(db, user.id, payload.lab_name)
+    doctor = await providers.doctor_for(db, user.id, payload.doctor_name)
     report = LabReport(
         user_id=user.id,
         collected_on=payload.collected_on,
         collected_at=payload.collected_at,
-        lab_name=payload.lab_name,
+        lab_id=lab.id,
+        doctor_id=doctor.id if doctor else None,
         fasting_state=payload.fasting_state,
         fasting_hours=payload.fasting_hours,
         notes=payload.notes,
+        notes_at=utcnow() if payload.notes else None,
         source=ReportSource.MANUAL,
     )
     for entry in payload.results:
         biomarker = catalogue[entry.biomarker_id]
-        report.results.append(
-            result_service.build(
-                biomarker,
-                user.sex,
-                entry.value,
-                entry.unit,
-                entry.ref_min,
-                entry.ref_max,
-                entry.method,
-            )
+        result = result_service.build(
+            biomarker,
+            user.sex,
+            entry.value,
+            entry.unit,
+            entry.ref_min,
+            entry.ref_max,
+            entry.method,
         )
+        if entry.note:
+            result.note, result.note_at = entry.note, utcnow()
+        report.results.append(result)
 
     db.add(report)
     await db.commit()
@@ -171,6 +208,55 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
 @router.get("/{report_id}", response_model=ReportOut)
 async def read_report(report_id: uuid.UUID, user: CurrentUser, db: DbSession) -> ReportOut:
     return to_report_out(await _owned_report(report_id, user, db))
+
+
+@router.patch("/{report_id}", response_model=ReportOut)
+async def update_report(
+    report_id: uuid.UUID, payload: ReportPatch, user: CurrentUser, db: DbSession
+) -> ReportOut:
+    """The interpretive note on the collection, and who ordered it.
+
+    Only the fields a reader adds after the fact. The values themselves are not
+    editable: a wrong number is a wrong reading, and correcting it in place would
+    leave no trace that it was ever anything else.
+    """
+    report = await _owned_report(report_id, user, db)
+    fields = payload.model_dump(exclude_unset=True)
+
+    # Stamped only when the text actually moves, so re-saving an unchanged note
+    # does not make a year-old reading look like today's.
+    if "notes" in fields and fields["notes"] != report.notes:
+        report.notes, report.notes_at = fields["notes"], utcnow()
+    if "doctor_name" in fields:
+        doctor = await providers.doctor_for(db, user.id, fields["doctor_name"])
+        report.doctor_id = doctor.id if doctor else None
+
+    await db.commit()
+    await db.refresh(report)
+    return to_report_out(report)
+
+
+@router.patch("/{report_id}/results/{result_id}", response_model=ResultOut)
+async def update_result(
+    report_id: uuid.UUID,
+    result_id: uuid.UUID,
+    payload: ResultPatch,
+    user: CurrentUser,
+    db: DbSession,
+) -> ResultOut:
+    """A note against one value — "colheita às 11:30, fora da janela"."""
+    report = await _owned_report(report_id, user, db)
+    result = next((item for item in report.results if item.id == result_id), None)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Result not found")
+
+    fields = payload.model_dump(exclude_unset=True)
+    if "note" in fields and fields["note"] != result.note:
+        result.note, result.note_at = fields["note"], utcnow()
+
+    await db.commit()
+    await db.refresh(result)
+    return to_result_out(result, report)
 
 
 @router.get("/{report_id}/file")
@@ -187,7 +273,7 @@ async def read_report_file(report_id: uuid.UUID, user: CurrentUser, db: DbSessio
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No file for this report")
     # The lab name is whatever the account typed, and it lands in a header:
     # anything but plain characters is dropped rather than escaped.
-    label = re.sub(r"[^A-Za-z0-9 ._-]", "", report.lab_name).strip() or "report"
+    label = re.sub(r"[^A-Za-z0-9 ._-]", "", report.lab.name).strip() or "report"
     return Response(
         content=content,
         media_type="application/pdf",

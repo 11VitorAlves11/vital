@@ -19,6 +19,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import VALUE, Base
 from app.models.biomarker import Biomarker
 from app.models.enums import FastingState, ReferenceKind, ReportSource, ResultFlag, pg_enum
+from app.models.provider import Doctor, Lab
 
 
 class LabReport(Base):
@@ -36,7 +37,13 @@ class LabReport(Base):
     # Its date always equals `collected_on`, which stays the column everything
     # sorts and filters by.
     collected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False))
-    lab_name: Mapped[str] = mapped_column(String, nullable=False)
+    lab_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("labs.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    #: Who ordered the analyses, when the report says. Rarely on the boletim.
+    doctor_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("doctors.id", ondelete="SET NULL"), index=True
+    )
     file_path: Mapped[str | None] = mapped_column(String)
     fasting_state: Mapped[FastingState] = mapped_column(
         pg_enum(FastingState, "fasting_state"), nullable=False, default=FastingState.UNKNOWN
@@ -46,11 +53,16 @@ class LabReport(Base):
     source: Mapped[ReportSource] = mapped_column(
         pg_enum(ReportSource, "report_source"), nullable=False, default=ReportSource.MANUAL
     )
+    # The interpretive note on the collection as a whole. Markdown, as typed.
     notes: Mapped[str | None] = mapped_column(Text)
+    #: When the note was last written, so an old reading is not read as current.
+    notes_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
+    lab: Mapped[Lab] = relationship(lazy="joined")
+    doctor: Mapped[Doctor | None] = relationship(lazy="joined")
     results: Mapped[list["Result"]] = relationship(
         back_populates="report", cascade="all, delete-orphan", lazy="selectin"
     )
@@ -99,6 +111,10 @@ class Result(Base):
     # Computed server-side on write; NULL when neither the lab nor the catalogue
     # provides a range to compare against.
     flag: Mapped[ResultFlag | None] = mapped_column(pg_enum(ResultFlag, "result_flag"))
+    # A note about this one value — "colheita às 11:30, fora da janela" — as
+    # against the report's note, which is about the collection as a whole.
+    note: Mapped[str | None] = mapped_column(Text)
+    note_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     report: Mapped[LabReport] = relationship(back_populates="results")
     biomarker: Mapped[Biomarker] = relationship(lazy="joined")

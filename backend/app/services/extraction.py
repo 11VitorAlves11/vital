@@ -10,7 +10,6 @@ import base64
 import json
 import logging
 import re
-import unicodedata
 from typing import Any
 
 import pymupdf
@@ -25,6 +24,7 @@ from app.schemas.extractions import (
     ExtractionPreview,
     PreviewResult,
 )
+from app.services.text import normalise
 
 logger = logging.getLogger(__name__)
 
@@ -150,17 +150,6 @@ async def ask_model(content: list[dict[str, Any]], settings: Settings) -> tuple[
     if not answer.strip():
         raise ExtractionError("The model returned an empty answer")
     return answer, settings.llm_model
-
-
-def normalise(name: str) -> str:
-    """Fold to something two spellings of the same marker can both reach.
-
-    Portuguese lab reports vary in accents, case, punctuation and parentheses —
-    "Vitamina D (25-OH)", "VITAMINA D 25 OH" and "vitamina d 25-oh" are one marker.
-    """
-    folded = unicodedata.normalize("NFKD", name.casefold())
-    folded = "".join(char for char in folded if not unicodedata.combining(char))
-    return " ".join(re.sub(r"[^a-z0-9]+", " ", folded).split())
 
 
 def build_index(biomarkers: list[Biomarker]) -> dict[str, Biomarker]:

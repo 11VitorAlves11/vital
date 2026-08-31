@@ -126,7 +126,7 @@ def _to_point(result: Result, report: LabReport, previous_method: str | None) ->
         value=result.value,
         unit=result.unit,
         canonical_value=result.canonical_value,
-        lab_name=report.lab_name,
+        lab_name=report.lab.name,
         ref_min=result.ref_min,
         ref_max=result.ref_max,
         canonical_ref_min=convert_bound(result.ref_min, result.conversion_factor),

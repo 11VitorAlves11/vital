@@ -4,6 +4,7 @@ A caveat never changes a flag or hides a number. It says the thing the reader
 would otherwise have to hold in their head.
 """
 
+import uuid
 from datetime import date, datetime, time
 from decimal import Decimal
 
@@ -81,7 +82,7 @@ def _report(**overrides: object) -> LabReport:
     fields: dict[str, object] = {
         "collected_on": date(2026, 3, 1),
         "collected_at": None,
-        "lab_name": "Synlab",
+        "lab_id": uuid.uuid4(),
         "fasting_state": FastingState.UNKNOWN,
         "fasting_hours": None,
     }

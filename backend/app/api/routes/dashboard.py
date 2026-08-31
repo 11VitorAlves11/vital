@@ -61,7 +61,7 @@ async def dashboard(user: CurrentUser, db: DbSession) -> DashboardOut:
                 flag=latest.flag,
                 band_label=_band_label(latest),
                 collected_on=latest_report.collected_on,
-                lab_name=latest_report.lab_name,
+                lab_name=latest_report.lab.name,
                 # Canonical, so a sparkline crossing a change of unit still shows
                 # the shape of the history rather than a step that never happened.
                 sparkline=[

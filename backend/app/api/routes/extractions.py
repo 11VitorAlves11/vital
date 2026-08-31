@@ -24,15 +24,15 @@ from fastapi import (
 from sqlalchemy import select
 
 from app.api.deps import AppSettings, CurrentUser, DbSession
-from app.api.routes.reports import to_report_out
+from app.api.routes.reports import to_report_out, utcnow
 from app.core.config import get_settings
 from app.db.session import get_sessionmaker
 from app.models import Biomarker, ExtractionJob, LabReport
 from app.models.enums import ExtractionStatus, ReportSource
 from app.schemas.extractions import ExtractionConfirm, ExtractionOut, ExtractionPayload
 from app.schemas.reports import ReportOut
+from app.services import providers, storage
 from app.services import results as result_service
-from app.services import storage
 from app.services.extraction import (
     ExtractionError,
     ask_model,
@@ -187,10 +187,11 @@ async def confirm_extraction(
         user_id=user.id,
         collected_on=payload.collected_on,
         collected_at=payload.collected_at,
-        lab_name=payload.lab_name,
+        lab_id=(await providers.lab_for(db, user.id, payload.lab_name)).id,
         fasting_state=payload.fasting_state,
         fasting_hours=payload.fasting_hours,
         notes=payload.notes,
+        notes_at=utcnow() if payload.notes else None,
         # The stored PDF becomes the report's own, so the original stays one
         # click from the values that were read off it.
         file_path=job.file_path,

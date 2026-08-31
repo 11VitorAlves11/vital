@@ -35,6 +35,8 @@ class ResultIn(BaseModel):
     ref_max: Decimal | None = None
     #: The assay, as the report names it.
     method: str | None = Field(default=None, max_length=120)
+    #: Context for this one value, as against the report's own note.
+    note: str | None = Field(default=None, max_length=2000)
 
     @model_validator(mode="after")
     def _check_range(self) -> Self:
@@ -66,8 +68,10 @@ class CollectionContext(BaseModel):
 
 
 class ReportCreate(CollectionContext):
+    #: Resolved to the account's own laboratory entity, created on first sight.
     lab_name: str = Field(min_length=1, max_length=200)
-    notes: str | None = None
+    doctor_name: str | None = Field(default=None, max_length=200)
+    notes: str | None = Field(default=None, max_length=8000)
     results: list[ResultIn] = Field(min_length=1)
 
     @model_validator(mode="after")
@@ -76,6 +80,21 @@ class ReportCreate(CollectionContext):
         if len(seen) != len(self.results):
             raise ValueError("a report cannot carry the same biomarker twice")
         return self
+
+
+class ReportPatch(BaseModel):
+    """What can be corrected after the fact.
+
+    Not the values: a wrong number is a wrong reading and belongs in a corrected
+    report, not in an edit that leaves no trace of what was there before.
+    """
+
+    notes: str | None = Field(default=None, max_length=8000)
+    doctor_name: str | None = Field(default=None, max_length=200)
+
+
+class ResultPatch(BaseModel):
+    note: str | None = Field(default=None, max_length=2000)
 
 
 class ResultOut(BaseModel):
@@ -100,6 +119,9 @@ class ResultOut(BaseModel):
     #: Which step of that scale it landed on ("insuficiência"), for ordinal markers.
     band_label: str | None = None
     method: str | None = None
+    #: Context someone wrote against this one value, and when.
+    note: str | None = None
+    note_at: datetime | None = None
     #: What the collection context, or the assay, means for reading this value.
     caveats: list[CaveatOut] = Field(default_factory=list)
     flag: ResultFlag | None
@@ -109,11 +131,15 @@ class ReportSummary(BaseModel):
     id: uuid.UUID
     collected_on: date
     collected_at: datetime | None
+    lab_id: uuid.UUID
     lab_name: str
+    doctor_id: uuid.UUID | None
+    doctor_name: str | None
     fasting_state: FastingState
     fasting_hours: int | None
     source: ReportSource
     notes: str | None
+    notes_at: datetime | None
     created_at: datetime
     result_count: int
     # Whether GET /reports/{id}/file has anything to serve. The path itself never
@@ -125,11 +151,15 @@ class ReportOut(BaseModel):
     id: uuid.UUID
     collected_on: date
     collected_at: datetime | None
+    lab_id: uuid.UUID
     lab_name: str
+    doctor_id: uuid.UUID | None
+    doctor_name: str | None
     fasting_state: FastingState
     fasting_hours: int | None
     source: ReportSource
     notes: str | None
+    notes_at: datetime | None
     created_at: datetime
     has_file: bool
     results: list[ResultOut]

@@ -16,6 +16,7 @@ from app.api.routes import (
     health,
     interventions,
     photos,
+    providers,
     reports,
     users,
 )
@@ -78,6 +79,7 @@ app.include_router(auth.config_router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(catalog.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
+app.include_router(providers.router, prefix="/api")
 app.include_router(extractions.router, prefix="/api")
 app.include_router(interventions.router, prefix="/api")
 app.include_router(body.router, prefix="/api")
