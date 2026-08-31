@@ -292,6 +292,9 @@ export type BiomarkerSeries = {
   /** True when a point could not be converted into it, so the line has a gap. */
   has_unconverted_points: boolean;
   interventions: Intervention[];
+  /** Point events inside the same period, drawn as vertical marks. Lab reports
+   *  are absent on purpose: on this chart they are the points themselves. */
+  moments: TimelineEvent[];
 };
 
 export type BodyPoint = {

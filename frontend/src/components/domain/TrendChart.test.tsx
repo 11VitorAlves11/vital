@@ -148,3 +148,36 @@ describe("interventionOverlayElements", () => {
     expect(band.props.x2).toBe(domainEnd);
   });
 });
+
+describe("ordinal bands against the axis", () => {
+  it("drops a step the axis never reaches", () => {
+    // "excesso" starts at 100; on a chart topping out at 42 its shading would
+    // be invisible while its label still named a stretch of the plot.
+    const elements = referenceBandElements({
+      hasLabRange: false,
+      canonicalMin: null,
+      canonicalMax: null,
+      minLabel: String,
+      maxLabel: String,
+      bands: VITAMIN_D_BANDS,
+      domain: [7, 42],
+    });
+    expect(elements.map((element) => element.props.label.value)).toEqual([
+      "insuficiência",
+      "suficiência",
+    ]);
+  });
+
+  it("keeps every step when the axis spans them all", () => {
+    const elements = referenceBandElements({
+      hasLabRange: false,
+      canonicalMin: null,
+      canonicalMax: null,
+      minLabel: String,
+      maxLabel: String,
+      bands: VITAMIN_D_BANDS,
+      domain: [0, 140],
+    });
+    expect(elements).toHaveLength(VITAMIN_D_BANDS.length);
+  });
+});

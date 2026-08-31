@@ -13,6 +13,8 @@ type BandOptions = {
   maxLabel: (value: number) => string;
   /** An ordinal scale, which replaces the range rather than joining it. */
   bands?: ReferenceBand[] | null;
+  /** The y-axis, so a step entirely off it is not drawn against the wrong values. */
+  domain?: [number, number];
 };
 
 /** Tint per step of an ordinal scale. Faint enough that the line stays the
@@ -40,10 +42,11 @@ export function referenceBandElements({
   minLabel,
   maxLabel,
   bands = null,
+  domain,
 }: BandOptions): ReactElement[] {
   // An ordinal scale is the whole reference: drawing a range on top of it would
   // put two different readings of the same value on one chart.
-  if (bands && bands.length > 0) return ordinalBandElements(bands);
+  if (bands && bands.length > 0) return ordinalBandElements(bands, domain);
 
   const elements: ReactElement[] = [];
 
@@ -88,8 +91,20 @@ export function referenceBandElements({
 
 /** Horizontal strips across the plot, one per named step, each carrying its name.
  *  The unbounded first and last steps are left to the axis to close. */
-function ordinalBandElements(bands: ReferenceBand[]): ReactElement[] {
-  return bands.map((band, index) => (
+function ordinalBandElements(
+  bands: ReferenceBand[],
+  domain: [number, number] | undefined,
+): ReactElement[] {
+  // A step the axis does not reach is dropped rather than clipped: its shading
+  // would be invisible but its label would still be placed, naming a stretch of
+  // the chart after a band nothing on it is anywhere near.
+  const visible = domain
+    ? bands.filter(
+        (band) => (band.min ?? -Infinity) < domain[1] && (band.max ?? Infinity) > domain[0],
+      )
+    : bands;
+
+  return visible.map((band, index) => (
     <ReferenceArea
       key={`${band.label}-${index}`}
       y1={band.min ?? undefined}
@@ -101,12 +116,41 @@ function ordinalBandElements(bands: ReferenceBand[]): ReactElement[] {
       ifOverflow="hidden"
       label={{
         value: band.label,
-        position: "insideLeft",
+        // Right-hand edge, anchored to the band's floor. The left already
+        // carries the axis numbers and the intervention labels; the floor,
+        // because the band the values sit in is usually the one whose ceiling
+        // is off the top of the axis — and that is the label worth having.
+        position: "insideBottomRight",
         fill: "var(--color-ink-muted)",
         fontSize: 11,
       }}
     />
   ));
+}
+
+/** Vertical rules for the point events inside the plotted period — a weigh-in,
+ *  a photo — so a change in the line can be read against what else happened.
+ *
+ * Thin and unlabelled by default: they are context, and a chart with a caption
+ * on every one of them stops being a chart of the biomarker. */
+export function momentElements(
+  moments: { id: string; timestamp: number; label: string }[],
+  domainStart: number,
+  domainEnd: number,
+): ReactElement[] {
+  return moments
+    .filter((moment) => moment.timestamp >= domainStart && moment.timestamp <= domainEnd)
+    .map((moment) => (
+      <ReferenceLine
+        key={moment.id}
+        x={moment.timestamp}
+        stroke="var(--color-border-strong)"
+        strokeDasharray="2 4"
+        // The label is on the accessible summary, not painted over the plot:
+        // four of these across a narrow chart is an unreadable smear.
+        aria-label={moment.label}
+      />
+    ));
 }
 
 type OverlayOptions = {

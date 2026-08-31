@@ -82,6 +82,11 @@ export function BiomarkerDetail() {
               canonicalMax={biomarker.ref_max === null ? null : toNumber(biomarker.ref_max)}
               bands={biomarker.reference_bands}
               interventions={interventions}
+              moments={data.moments.map((event) => ({
+                id: event.id,
+                timestamp: new Date(event.occurred_on).getTime(),
+                label: `${t(`timelineKinds.${event.kind}`)} · ${formatDate(event.occurred_on, locale)}`,
+              }))}
               points={plotted.map((point) => ({
                 timestamp: new Date(point.date).getTime(),
                 value: toNumber(point.canonical_value),
@@ -89,6 +94,19 @@ export function BiomarkerDetail() {
                 refMax: point.canonical_ref_max === null ? null : toNumber(point.canonical_ref_max),
               }))}
             />
+            {/* Named under the chart rather than painted across it: four
+                captions on a narrow plot is an unreadable smear. */}
+            {data.moments.length > 0 ? (
+              <p className="mt-2 text-sm text-ink-muted">
+                {t("chart.moments")}:{" "}
+                {data.moments
+                  .map(
+                    (event) =>
+                      `${t(`timelineKinds.${event.kind}`)} (${formatDate(event.occurred_on, locale)})`,
+                  )
+                  .join(" · ")}
+              </p>
+            ) : null}
             {data.has_unconverted_points ? (
               <p className="mt-2 text-sm text-ink-muted">
                 {t("biomarker.unconvertedPoints", {

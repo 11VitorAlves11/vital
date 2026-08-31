@@ -247,7 +247,8 @@
     "referenceBand": "Reference band",
     "min": "Min {{value}}",
     "max": "Max {{value}}",
-    "interventions": "Overlaid interventions"
+    "interventions": "Overlaid interventions",
+    "moments": "Other events in the period"
   },
   "errors": {
     "generic": "Something went wrong. Try again.",

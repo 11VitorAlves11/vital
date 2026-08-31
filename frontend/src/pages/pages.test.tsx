@@ -250,6 +250,23 @@ describe("BiomarkerDetail", () => {
           ],
           unit: "g/dL",
           has_unconverted_points: false,
+          moments: [
+            {
+              id: "body_composition:s1",
+              kind: "body_composition",
+              occurred_on: "2026-01-15",
+              occurred_at: null,
+              ended_on: null,
+              has_duration: false,
+              title: "Tanita",
+              subtitle: null,
+              summary: [],
+              href: "/body",
+              intervention_kind: null,
+              pose: null,
+              photo_id: null,
+            },
+          ],
           interventions: [
             {
               id: "i1",
@@ -276,6 +293,9 @@ describe("BiomarkerDetail", () => {
     expect(screen.getByText(/Ferro/)).toBeInTheDocument();
     // A caveat is shown beside the point it qualifies, not as a page-level alert.
     expect(screen.getByText(/não ficou registado se a colheita foi em jejum/i)).toBeInTheDocument();
+    // What else happened in the period, named under the chart rather than
+    // painted across it.
+    expect(screen.getByText(/Composição corporal/)).toBeInTheDocument();
   });
 
   it("shows the history as a dense table on a desktop", async () => {
@@ -306,6 +326,7 @@ describe("BiomarkerDetail", () => {
           ],
           unit: "g/dL",
           has_unconverted_points: false,
+          moments: [],
           interventions: [],
         },
       },

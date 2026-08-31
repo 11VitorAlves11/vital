@@ -11,22 +11,33 @@ import {
 
 import type { Intervention, ReferenceBand } from "../../lib/api/types";
 import { formatDate, formatValue } from "../../lib/format";
-import { interventionOverlayElements, referenceBandElements } from "./ReferenceBand";
+import {
+  interventionOverlayElements,
+  momentElements,
+  referenceBandElements,
+} from "./ReferenceBand";
 
-/** The edges of the steps the data actually touches.
+/** A point event drawn as a vertical rule: a weigh-in, a photo, anything that
+ *  happened inside the plotted period but is not a point of this series. */
+export type TrendMoment = { id: string; timestamp: number; label: string };
+
+/** The step boundaries near enough to the data to be worth an axis.
  *
- * All of them would stretch the axis over a scale the reader is nowhere near —
- * vitamin D runs to 100 ng/mL and most histories sit around 30 — while none of
- * them hides the boundary the values are closest to, which is the only reason
- * the scale is on the chart. */
-function touchedBandEdges(values: number[], bands: ReferenceBand[]): number[] {
-  const touched = bands.filter((band) =>
-    values.some(
-      (value) =>
-        (band.min === null || value >= band.min) && (band.max === null || value < band.max),
-    ),
-  );
-  return touched.flatMap((band) => [band.min, band.max]).filter((edge) => edge !== null);
+ * Every edge would stretch the axis over a scale the reader is nowhere near:
+ * vitamin D's "suficiência" runs to 100 ng/mL, and a history sitting between 18
+ * and 38 would be squeezed into the bottom third of the plot to make room for a
+ * limit it never approaches. One data range's worth of headroom keeps the
+ * boundaries the values are actually near — which is the only reason the scale
+ * is on the chart — and drops the ones they are not.
+ */
+function nearbyBandEdges(values: number[], bands: ReferenceBand[]): number[] {
+  if (values.length === 0) return [];
+  const low = Math.min(...values);
+  const high = Math.max(...values);
+  const reach = high - low || Math.abs(high) || 1;
+  return bands
+    .flatMap((band) => [band.min, band.max])
+    .filter((edge): edge is number => edge !== null && edge >= low - reach && edge <= high + reach);
 }
 
 /** Pads the range, then rounds outward to a round step, so the axis reads
@@ -58,6 +69,7 @@ type TrendChartProps = {
   canonicalMax?: number | null;
   /** An ordinal scale, drawn instead of the range when the marker has one. */
   bands?: ReferenceBand[] | null;
+  moments?: TrendMoment[];
 };
 
 export function TrendChart({
@@ -68,6 +80,7 @@ export function TrendChart({
   canonicalMin = null,
   canonicalMax = null,
   bands = null,
+  moments = [],
 }: TrendChartProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
@@ -104,7 +117,7 @@ export function TrendChart({
     ...points.flatMap((point) => [point.refMin, point.refMax]),
     canonicalMin,
     canonicalMax,
-    ...(bands ? touchedBandEdges(values, bands) : []),
+    ...(bands ? nearbyBandEdges(values, bands) : []),
   ].filter((value): value is number => value !== null && Number.isFinite(value));
   const yDomain = paddedDomain(Math.min(...bounds), Math.max(...bounds));
 
@@ -135,6 +148,7 @@ export function TrendChart({
             tickFormatter={(value: number) => formatValue(value, locale)}
           />
           {interventionOverlayElements({ interventions, domainStart, domainEnd })}
+          {momentElements(moments, domainStart, domainEnd)}
           {referenceBandElements({
             hasLabRange: data.some((point) => point.range !== null),
             canonicalMin,
@@ -142,6 +156,7 @@ export function TrendChart({
             minLabel: (value) => t("chart.min", { value: formatValue(value, locale) }),
             maxLabel: (value) => t("chart.max", { value: formatValue(value, locale) }),
             bands,
+            domain: yDomain,
           })}
           <Line
             type="monotone"

@@ -247,7 +247,8 @@
     "referenceBand": "Banda de referência",
     "min": "Mín. {{value}}",
     "max": "Máx. {{value}}",
-    "interventions": "Intervenções sobrepostas"
+    "interventions": "Intervenções sobrepostas",
+    "moments": "Outros eventos no período"
   },
   "errors": {
     "generic": "Algo correu mal. Tenta novamente.",
