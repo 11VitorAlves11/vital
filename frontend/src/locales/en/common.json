@@ -60,7 +60,9 @@
     "reportCount_other": "{{count}} collections recorded",
     "emptyTitle": "No lab results yet",
     "emptyDescription": "Record your first collection to see trends and reference ranges.",
-    "sparklineSummary": "Last {{count}} values for {{name}}: from {{first}} to {{last}} {{unit}}."
+    "sparklineSummary": "Last {{count}} values for {{name}}: from {{first}} to {{last}} {{unit}}.",
+    "outOfRange": "{{count}} value out of range",
+    "outOfRange_other": "{{count}} values out of range"
   },
   "biomarker": {
     "history": "History",

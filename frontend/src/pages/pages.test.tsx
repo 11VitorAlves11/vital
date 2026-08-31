@@ -100,6 +100,7 @@ describe("Dashboard", () => {
                   value: "11.0000",
                   unit: "g/dL",
                   flag: "low",
+                  band_label: null,
                   collected_on: "2026-03-01",
                   lab_name: "Synlab",
                   sparkline: [
@@ -117,9 +118,88 @@ describe("Dashboard", () => {
     ]);
     renderWithProviders(<Dashboard />);
     expect(await screen.findByRole("heading", { name: "Hematologia" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Hemoglobina" })).toBeInTheDocument();
-    expect(screen.getByText("11")).toBeInTheDocument();
-    expect(screen.getByText("Baixo")).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Hemoglobina" })).toHaveLength(2);
+    expect(screen.getAllByText("Baixo")).toHaveLength(2);
+  });
+
+  it("lifts what is out of range above the panels", async () => {
+    // The reason most sessions are opened. The card is repeated rather than
+    // moved, so its panel does not end up with a hole where it used to be.
+    mockApi([
+      {
+        pattern: /\/api\/dashboard/,
+        body: {
+          categories: [
+            {
+              category: "hematologia",
+              items: [
+                {
+                  biomarker: HAEMOGLOBIN,
+                  value: "11.0000",
+                  unit: "g/dL",
+                  flag: "low",
+                  band_label: null,
+                  collected_on: "2026-03-01",
+                  lab_name: "Synlab",
+                  sparkline: [],
+                },
+                {
+                  biomarker: { ...HAEMOGLOBIN, id: 2, slug: "plaquetas", name: "Plaquetas" },
+                  value: "250.0000",
+                  unit: "10^9/L",
+                  flag: "normal",
+                  band_label: null,
+                  collected_on: "2026-03-01",
+                  lab_name: "Synlab",
+                  sparkline: [],
+                },
+              ],
+            },
+          ],
+          last_report_on: "2026-03-01",
+          report_count: 1,
+        },
+      },
+    ]);
+    renderWithProviders(<Dashboard />);
+    expect(
+      await screen.findByRole("heading", { name: "1 valor fora do intervalo" }),
+    ).toBeInTheDocument();
+    // Only the flagged one is lifted; the normal one stays in its panel alone.
+    expect(screen.getAllByRole("link", { name: "Hemoglobina" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Plaquetas" })).toHaveLength(1);
+  });
+
+  it("says nothing about range when nothing is out of it", async () => {
+    mockApi([
+      {
+        pattern: /\/api\/dashboard/,
+        body: {
+          categories: [
+            {
+              category: "hematologia",
+              items: [
+                {
+                  biomarker: HAEMOGLOBIN,
+                  value: "14.0000",
+                  unit: "g/dL",
+                  flag: "normal",
+                  band_label: null,
+                  collected_on: "2026-03-01",
+                  lab_name: "Synlab",
+                  sparkline: [],
+                },
+              ],
+            },
+          ],
+          last_report_on: "2026-03-01",
+          report_count: 1,
+        },
+      },
+    ]);
+    renderWithProviders(<Dashboard />);
+    await screen.findByRole("heading", { name: "Hematologia" });
+    expect(screen.queryByText(/fora do intervalo/)).not.toBeInTheDocument();
   });
 
   it("points at the next action when there is nothing recorded", async () => {
@@ -291,9 +371,7 @@ describe("Reports", () => {
       { pattern: /\/api\/biomarkers/, body: [HAEMOGLOBIN] },
     ]);
     renderWithProviders(<Reports />);
-    await userEvent.click(
-      (await screen.findAllByRole("button", { name: "Registar colheita" }))[0],
-    );
+    await userEvent.click((await screen.findAllByRole("button", { name: "Registar colheita" }))[0]);
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(screen.getByLabelText("Data da colheita")).toBeInTheDocument();
     expect(screen.getByLabelText("Biomarcador")).toBeInTheDocument();

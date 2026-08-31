@@ -60,7 +60,9 @@
     "reportCount_other": "{{count}} colheitas registadas",
     "emptyTitle": "Ainda não há análises",
     "emptyDescription": "Regista a primeira colheita para veres tendências e intervalos de referência.",
-    "sparklineSummary": "Últimos {{count}} valores de {{name}}: de {{first}} a {{last}} {{unit}}."
+    "sparklineSummary": "Últimos {{count}} valores de {{name}}: de {{first}} a {{last}} {{unit}}.",
+    "outOfRange": "{{count}} valor fora do intervalo",
+    "outOfRange_other": "{{count}} valores fora do intervalo"
   },
   "biomarker": {
     "history": "Histórico",

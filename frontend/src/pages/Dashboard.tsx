@@ -1,4 +1,4 @@
-import { FlaskConical } from "lucide-react";
+import { FlaskConical, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { BiomarkerCard } from "../components/domain/BiomarkerCard";
@@ -7,13 +7,26 @@ import { ErrorState } from "../components/ui/ErrorState";
 import { LinkButton } from "../components/ui/LinkButton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { dashboard } from "../lib/api";
+import type { Dashboard as DashboardData, DashboardItem } from "../lib/api/types";
 import { formatDate } from "../lib/format";
 import { useAsync } from "../lib/useAsync";
+
+/** Everything currently outside its interval, worst-first within a panel.
+ *
+ * Derived rather than fetched: the rule is "the flag is not normal", the data
+ * is already on the page, and a second endpoint would be a second place for
+ * "needs attention" to be defined. */
+function outOfRange(data: DashboardData): DashboardItem[] {
+  return data.categories
+    .flatMap((group) => group.items)
+    .filter((item) => item.flag === "low" || item.flag === "high");
+}
 
 export function Dashboard() {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
   const { data, loading, error, reload } = useAsync(() => dashboard.read());
+  const flagged = data ? outOfRange(data) : [];
 
   return (
     <section>
@@ -50,6 +63,24 @@ export function Dashboard() {
             description={t("dashboard.emptyDescription")}
             action={<LinkButton to="/reports">{t("reports.new")}</LinkButton>}
           />
+        ) : null}
+
+        {/* What is out of range, before the panels — it is the reason most
+            sessions are opened, and hunting for it across nine panels is the
+            work the dashboard exists to remove. The cards are the same ones,
+            repeated here rather than moved, so a panel never has a hole in it. */}
+        {flagged.length > 0 ? (
+          <section className="mb-12">
+            <h2 className="mb-4 flex items-center gap-2 border-b border-border pb-2 font-display text-lg font-medium text-ink">
+              <TriangleAlert size={20} aria-hidden="true" className="text-flag-alert" />
+              {t("dashboard.outOfRange", { count: flagged.length })}
+            </h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {flagged.map((item) => (
+                <BiomarkerCard key={`flagged-${item.biomarker.id}`} item={item} />
+              ))}
+            </div>
+          </section>
         ) : null}
 
         {/* Each panel is separated far more than the cards inside it, so the
