@@ -24,6 +24,7 @@ from app.schemas.reports import (
     ReportSummary,
     ResultOut,
     ResultPatch,
+    ResultPrefill,
 )
 from app.services import caveats, providers, storage
 from app.services import results as result_service
@@ -150,6 +151,49 @@ async def list_reports(
             has_file=bool(report.file_path),
         )
         for report in reports
+    ]
+
+
+@router.get("/prefill", response_model=list[ResultPrefill])
+async def prefill(
+    user: CurrentUser,
+    db: DbSession,
+    lab_id: Annotated[uuid.UUID | None, Query()] = None,
+) -> list[ResultPrefill]:
+    """The most recent reading of every marker this account has ever recorded.
+
+    Manual entry is otherwise five fields per line, four of which have not
+    changed since the last visit to the same laboratory. Narrowed to that
+    laboratory when one is given; without it the latest reading anywhere is
+    offered instead, marked `same_lab: false` — the unit and the assay travel
+    between laboratories, and the reference range does not.
+    """
+    statement = (
+        select(Result, LabReport)
+        .join(LabReport, Result.report_id == LabReport.id)
+        .where(LabReport.user_id == user.id)
+        .distinct(Result.biomarker_id)
+        .order_by(
+            Result.biomarker_id,
+            LabReport.collected_on.desc(),
+            LabReport.created_at.desc(),
+        )
+    )
+    if lab_id is not None:
+        statement = statement.where(LabReport.lab_id == lab_id)
+
+    return [
+        ResultPrefill(
+            biomarker_id=result.biomarker_id,
+            unit=result.unit,
+            ref_min=result.ref_min,
+            ref_max=result.ref_max,
+            method=result.method,
+            lab_name=report.lab.name,
+            collected_on=report.collected_on,
+            same_lab=lab_id is not None,
+        )
+        for result, report in (await db.execute(statement)).all()
     ]
 
 

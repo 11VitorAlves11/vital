@@ -1,6 +1,7 @@
-"""Laboratories and doctors as entities, and notes at two levels.
+"""Laboratories and doctors as entities, notes at two levels, and the prefill.
 
-Backlog 1.7 and 1.8.
+Backlog 1.7, 1.8 and 4.2 — all three of which turn on a report knowing which
+laboratory issued it.
 """
 
 from typing import Any
@@ -169,3 +170,78 @@ async def test_another_accounts_report_cannot_be_annotated(
         f"/api/reports/{report['id']}/results/{result_id}", json={"note": "x"}
     )
     assert response.status_code == 404
+
+
+async def test_prefill_offers_the_last_reading_of_each_marker(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    """Backlog 4.2: a known value should cost a biomarker, a value and a date."""
+    ac, _ = await make_user()
+    marker_id = catalogue["biomarkers"]["hemoglobina"]["id"]
+    for collected_on, ref_max in (("2026-01-01", 17.0), ("2026-06-01", 17.5)):
+        await _report(
+            ac,
+            catalogue,
+            collected_on=collected_on,
+            results=[
+                {
+                    "biomarker_id": marker_id,
+                    "value": 14.1,
+                    "unit": "g/dL",
+                    "ref_min": 13,
+                    "ref_max": ref_max,
+                    "method": "Citometria de fluxo",
+                }
+            ],
+        )
+
+    [suggestion] = (await ac.get("/api/reports/prefill")).json()
+    assert suggestion["biomarker_id"] == marker_id
+    # The most recent one, not the first.
+    assert suggestion["ref_max"] == "17.5000"
+    assert suggestion["unit"] == "g/dL"
+    assert suggestion["method"] == "Citometria de fluxo"
+    assert suggestion["collected_on"] == "2026-06-01"
+    assert suggestion["lab_name"] == "Synlab Braga"
+    assert suggestion["same_lab"] is False
+
+
+async def test_prefill_can_be_narrowed_to_one_laboratory(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    """A reference range belongs to the laboratory that issued it."""
+    ac, _ = await make_user()
+    marker_id = catalogue["biomarkers"]["hemoglobina"]["id"]
+    synlab = await _report(
+        ac,
+        catalogue,
+        lab_name="Synlab",
+        results=[{"biomarker_id": marker_id, "value": 14.1, "ref_min": 13, "ref_max": 17}],
+    )
+    await _report(
+        ac,
+        catalogue,
+        collected_on="2026-06-01",
+        lab_name="Unilabs",
+        results=[{"biomarker_id": marker_id, "value": 14.4, "ref_min": 13.5, "ref_max": 17.5}],
+    )
+
+    # Unfiltered, the newest wins; filtered, the laboratory's own range does.
+    unfiltered = (await ac.get("/api/reports/prefill")).json()
+    assert unfiltered[0]["ref_min"] == "13.5000"
+    # Marked as coming from somewhere else, so the range is not applied blind.
+    assert unfiltered[0]["same_lab"] is False
+
+    narrowed = (await ac.get(f"/api/reports/prefill?lab_id={synlab['lab_id']}")).json()
+    assert narrowed[0]["ref_min"] == "13.0000"
+    assert narrowed[0]["lab_name"] == "Synlab"
+    assert narrowed[0]["same_lab"] is True
+
+
+async def test_prefill_never_reaches_another_account(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    alice, _ = await make_user()
+    bob, _ = await make_user()
+    await _report(alice, catalogue)
+    assert (await bob.get("/api/reports/prefill")).json() == []

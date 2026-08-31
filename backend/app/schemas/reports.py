@@ -127,6 +127,28 @@ class ResultOut(BaseModel):
     flag: ResultFlag | None
 
 
+class ResultPrefill(BaseModel):
+    """What the last reading of this marker looked like, to save typing it again.
+
+    Everything here is a suggestion the form fills in and the reader can
+    overwrite. Nothing is applied server-side: a range that goes unedited has to
+    be one someone looked at, not one the software assumed.
+    """
+
+    biomarker_id: int
+    unit: str
+    ref_min: Decimal | None
+    ref_max: Decimal | None
+    method: str | None
+    #: Where and when the suggestion comes from, so it can be shown and doubted.
+    lab_name: str
+    collected_on: date
+    # Whether it came from the laboratory the new report is for. A range from
+    # another laboratory is that laboratory's, and carrying it across is exactly
+    # what storing the range per result exists to prevent.
+    same_lab: bool
+
+
 class ReportSummary(BaseModel):
     id: uuid.UUID
     collected_on: date
