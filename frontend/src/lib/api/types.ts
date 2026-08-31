@@ -35,6 +35,17 @@ export type Caveat = {
   values: Record<string, string>;
 };
 
+/** A laboratory or a doctor this account has actually used. Per-account, not
+ *  global: a shared instance must not leak where other people go. */
+export type Lab = {
+  id: string;
+  name: string;
+  report_count: number;
+  created_at: string;
+};
+
+export type Doctor = Lab & { specialty: string | null };
+
 /** The pre-analytical context of a draw, as the API takes and returns it. */
 export type CollectionContext = {
   collected_on: string;
@@ -119,15 +130,23 @@ export type Result = {
   band_label: string | null;
   /** The assay behind the number, as the report named it. */
   method: string | null;
+  /** Context someone wrote against this one value, and when. */
+  note: string | null;
+  note_at: string | null;
   caveats: Caveat[];
   flag: ResultFlag | null;
 };
 
 export type ReportSummary = CollectionContext & {
   id: string;
+  lab_id: string;
   lab_name: string;
+  doctor_id: string | null;
+  doctor_name: string | null;
   source: "manual" | "extracted";
   notes: string | null;
+  /** When the note was last written, so an old reading is not read as current. */
+  notes_at: string | null;
   created_at: string;
   result_count: number;
   /** Whether the original PDF is still on the server for this report. */

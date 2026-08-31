@@ -6,9 +6,16 @@ import { cn } from "../../lib/cn";
 import { formatRange, formatValue } from "../../lib/format";
 import { FlagChip } from "../ui/FlagChip";
 import { CaveatList } from "./CaveatList";
+import { NoteEditor } from "./NoteEditor";
 
 /** One line of a lab report: value in tabular mono, unit, range, flag with label. */
-export function ResultRow({ result }: { result: Result }) {
+type ResultRowProps = {
+  result: Result;
+  /** Given only where a note can be written — the report's own page. */
+  onAnnotate?: (note: string | null) => Promise<void>;
+};
+
+export function ResultRow({ result, onAnnotate }: ResultRowProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
   // On a named scale the step is the reference; the two numbers around it read
@@ -42,6 +49,17 @@ export function ResultRow({ result }: { result: Result }) {
         </div>
       </div>
       <CaveatList caveats={result.caveats} className="mt-1.5" />
+      {onAnnotate ? (
+        <NoteEditor
+          note={result.note}
+          noteAt={result.note_at}
+          label={t("reports.resultNote")}
+          placeholder={t("notes.resultPlaceholder")}
+          onSave={onAnnotate}
+        />
+      ) : result.note ? (
+        <p className="mt-1.5 max-w-prose whitespace-pre-line text-sm text-ink">{result.note}</p>
+      ) : null}
     </div>
   );
 }

@@ -13,7 +13,7 @@ import { FormSurface } from "../components/ui/FormSurface";
 import { Input } from "../components/ui/Input";
 import { Select } from "../components/ui/Select";
 import { useToast } from "../components/ui/Toast";
-import { catalogue, reports } from "../lib/api";
+import { catalogue, providers, reports } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import { todayInputValue } from "../lib/format";
 import { useAsync } from "../lib/useAsync";
@@ -25,10 +25,11 @@ type Row = {
   refMin: string;
   refMax: string;
   method: string;
+  note: string;
 };
 
 function emptyRow(key: number): Row {
-  return { key, biomarkerId: "", value: "", refMin: "", refMax: "", method: "" };
+  return { key, biomarkerId: "", value: "", refMin: "", refMax: "", method: "", note: "" };
 }
 
 type ReportCreateProps = {
@@ -42,8 +43,13 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
   const { t } = useTranslation();
   const notify = useToast();
   const { data: biomarkers } = useAsync(() => catalogue.biomarkers());
+  // Suggestions, not a closed list: a first visit to a new laboratory has to be
+  // as easy to record as the tenth to a familiar one.
+  const { data: labs } = useAsync(() => providers.labs());
+  const { data: doctors } = useAsync(() => providers.doctors());
   const [collection, setCollection] = useState(() => emptyCollection(todayInputValue()));
   const [labName, setLabName] = useState("");
+  const [doctorName, setDoctorName] = useState("");
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<Row[]>([emptyRow(0)]);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +78,7 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
       await reports.create({
         ...toCollectionContext(collection),
         lab_name: labName,
+        doctor_name: doctorName || null,
         notes: notes || null,
         results: filled.map((row) => ({
           biomarker_id: Number(row.biomarkerId),
@@ -79,11 +86,13 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
           ref_min: row.refMin ? Number(row.refMin.replace(",", ".")) : null,
           ref_max: row.refMax ? Number(row.refMax.replace(",", ".")) : null,
           method: row.method.trim() || null,
+          note: row.note.trim() || null,
         })),
       });
       notify(t("reports.created"));
       setRows([emptyRow(0)]);
       setLabName("");
+      setDoctorName("");
       setNotes("");
       setCollection(emptyCollection(todayInputValue()));
       onCreated();
@@ -99,12 +108,31 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
     <FormSurface open={open} onOpenChange={onOpenChange} title={t("reports.new")}>
       <form className="flex flex-col gap-8" onSubmit={submit} noValidate>
         <div className="flex flex-col gap-4">
-          <Input
-            label={t("reports.labName")}
-            required
-            value={labName}
-            onChange={(event) => setLabName(event.target.value)}
-          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input
+              label={t("reports.labName")}
+              required
+              list="known-labs"
+              value={labName}
+              onChange={(event) => setLabName(event.target.value)}
+            />
+            <datalist id="known-labs">
+              {(labs ?? []).map((lab) => (
+                <option key={lab.id} value={lab.name} />
+              ))}
+            </datalist>
+            <Input
+              label={`${t("reports.doctorName")} (${t("common.optional")})`}
+              list="known-doctors"
+              value={doctorName}
+              onChange={(event) => setDoctorName(event.target.value)}
+            />
+            <datalist id="known-doctors">
+              {(doctors ?? []).map((doctor) => (
+                <option key={doctor.id} value={doctor.name} />
+              ))}
+            </datalist>
+          </div>
           <CollectionFields
             value={collection}
             onChange={(patch) => setCollection((current) => ({ ...current, ...patch }))}
@@ -156,6 +184,11 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
                   value={row.method}
                   hint={t("reports.methodHint")}
                   onChange={(event) => update(row.key, { method: event.target.value })}
+                />
+                <Input
+                  label={`${t("reports.resultNote")} (${t("common.optional")})`}
+                  value={row.note}
+                  onChange={(event) => update(row.key, { note: event.target.value })}
                 />
                 {rows.length > 1 ? (
                   <div>

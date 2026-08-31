@@ -8,8 +8,9 @@ import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { Input } from "../components/ui/Input";
+import { Select } from "../components/ui/Select";
 import { Skeleton } from "../components/ui/Skeleton";
-import { features, reports } from "../lib/api";
+import { features, providers, reports } from "../lib/api";
 import { formatDate } from "../lib/format";
 import { useAsync } from "../lib/useAsync";
 import { ReportCreate } from "./ReportCreate";
@@ -20,14 +21,21 @@ export function Reports() {
   const locale = i18n.resolvedLanguage ?? "pt-PT";
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [labId, setLabId] = useState("");
   const [creating, setCreating] = useState(false);
   const [importing, setImporting] = useState(false);
   // Self-hosted: whether this instance has a model configured is a fact to ask
   // for, not one to assume. No model, no import button.
   const { data: available } = useAsync(() => features.read());
+  const { data: labs } = useAsync(() => providers.labs());
   const { data, loading, error, reload } = useAsync(
-    () => reports.list({ from: from || undefined, to: to || undefined }),
-    [from, to],
+    () =>
+      reports.list({
+        from: from || undefined,
+        to: to || undefined,
+        lab_id: labId || undefined,
+      }),
+    [from, to, labId],
   );
 
   return (
@@ -52,7 +60,7 @@ export function Reports() {
         </div>
       </header>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 md:max-w-md">
+      <div className="mt-6 grid grid-cols-2 gap-3 md:max-w-2xl md:grid-cols-3">
         <Input
           label={t("reports.filterFrom")}
           type="date"
@@ -65,6 +73,20 @@ export function Reports() {
           value={to}
           onChange={(event) => setTo(event.target.value)}
         />
+        {/* Offered only once there is a choice to make: a single laboratory is
+            not a filter, it is a fact about every row on the page. */}
+        {labs && labs.length > 1 ? (
+          <Select
+            label={t("reports.filterLab")}
+            placeholder={t("reports.allLabs")}
+            options={labs.map((lab) => ({
+              value: lab.id,
+              label: `${lab.name} (${lab.report_count})`,
+            }))}
+            value={labId}
+            onChange={(event) => setLabId(event.target.value)}
+          />
+        ) : null}
       </div>
 
       <div className="mt-8">
@@ -93,7 +115,12 @@ export function Reports() {
                     <span className="data font-medium text-ink">
                       {formatDate(report.collected_on, locale)}
                     </span>
-                    <span className="flex-1 text-ink">{report.lab_name}</span>
+                    <span className="flex-1 text-ink">
+                      {report.lab_name}
+                      {report.doctor_name ? (
+                        <span className="text-ink-muted"> · {report.doctor_name}</span>
+                      ) : null}
+                    </span>
                     <span className="text-sm text-ink-muted">
                       {t("reports.resultCount", { count: report.result_count })}
                     </span>

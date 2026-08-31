@@ -109,7 +109,11 @@
     "fastingHours": "Horas de jejum",
     "fastingHoursShort": "{{count}} h de jejum",
     "method": "Método analítico",
-    "methodHint": "Ex.: hexoquinase, enzimático, CMIA. Permite detetar mudanças de método entre colheitas."
+    "methodHint": "Ex.: hexoquinase, enzimático, CMIA. Permite detetar mudanças de método entre colheitas.",
+    "doctorName": "Médico",
+    "filterLab": "Laboratório",
+    "allLabs": "Todos os laboratórios",
+    "resultNote": "Nota sobre este resultado"
   },
   "extraction": {
     "title": "Importar PDF",
@@ -266,5 +270,12 @@
     "outside_time_window": "Colheita às {{time}}, fora da janela recomendada ({{start}}–{{end}}) para este marcador.",
     "low_reliability_method": "Método «{{method}}»: menos fiável do que as alternativas para este marcador. Ver as notas do biomarcador.",
     "method_changed": "Método diferente da colheita anterior ({{from}} → {{to}}): a diferença pode ser do método e não do organismo."
+  },
+  "notes": {
+    "add": "Adicionar nota",
+    "edit": "Editar nota",
+    "writtenAt": "Escrita em {{when}}",
+    "reportPlaceholder": "Leitura do conjunto: o que mudou, o que ficou por repetir.",
+    "resultPlaceholder": "Contexto pontual, por exemplo: colheita às 11:30, fora da janela recomendada."
   }
 }

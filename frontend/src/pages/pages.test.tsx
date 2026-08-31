@@ -245,10 +245,21 @@ describe("Reports", () => {
     mockApi([
       { pattern: /\/api\/features/, body: { extraction: false } },
       {
+        pattern: /\/api\/labs/,
+        body: [
+          { id: "l1", name: "Synlab Braga", report_count: 1, created_at: "2026-03-01T10:00:00Z" },
+          { id: "l2", name: "Unilabs", report_count: 2, created_at: "2026-03-01T10:00:00Z" },
+        ],
+      },
+      {
         pattern: /\/api\/reports/,
         body: [
           {
             id: "r1",
+            lab_id: "l1",
+            doctor_id: null,
+            doctor_name: "Dra. Sofia Nunes",
+            notes_at: null,
             collected_on: "2026-03-01",
             lab_name: "Synlab Braga",
             collected_at: "2026-01-01T08:15:00",
@@ -266,12 +277,17 @@ describe("Reports", () => {
     renderWithProviders(<Reports />);
     expect(await screen.findByText("Synlab Braga")).toBeInTheDocument();
     expect(screen.getByText("3 resultados")).toBeInTheDocument();
+    expect(screen.getByText(/Dra\. Sofia Nunes/)).toBeInTheDocument();
+    // Offered because this account has used more than one laboratory.
+    expect(await screen.findByLabelText("Laboratório")).toBeInTheDocument();
   });
 
   it("opens the manual entry form", async () => {
     mockApi([
       { pattern: /\/api\/features/, body: { extraction: false } },
       { pattern: /\/api\/reports/, body: [] },
+      { pattern: /\/api\/labs/, body: [] },
+      { pattern: /\/api\/doctors/, body: [] },
       { pattern: /\/api\/biomarkers/, body: [HAEMOGLOBIN] },
     ]);
     renderWithProviders(<Reports />);

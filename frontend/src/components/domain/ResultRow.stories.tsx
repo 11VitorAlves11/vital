@@ -19,6 +19,8 @@ const RESULT: Result = {
   reference_bands: null,
   band_label: null,
   method: null,
+  note: null,
+  note_at: null,
   caveats: [],
   flag: "low",
 };

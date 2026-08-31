@@ -8,19 +8,26 @@ import type {
   BodySeries,
   CollectionContext,
   Dashboard,
+  Doctor,
   ExtractionJob,
   Features,
   Intervention,
   InterventionKind,
+  Lab,
   Photo,
   Pose,
   Report,
   ReportSummary,
+  Result,
   Sex,
   User,
 } from "./types";
 
 export type DateWindow = { from?: string; to?: string };
+
+/** Filters the report list accepts. `lab_id` and `doctor_id` come from the
+ *  account's own lists, so an id from elsewhere simply matches nothing. */
+export type ReportFilter = DateWindow & { lab_id?: string; doctor_id?: string };
 
 export const auth = {
   config: () => request<{ mode: "oidc" | "local" }>("/api/auth/config"),
@@ -47,7 +54,18 @@ type ResultPayload = {
   ref_min?: number | null;
   ref_max?: number | null;
   method?: string | null;
+  note?: string | null;
 };
+
+/** The report itself on the way in. The laboratory and the doctor travel as
+ *  names — the server resolves each to the account's own entity, creating it on
+ *  first sight, so a form never has to know an id to record a new place. */
+type ReportPayload = {
+  lab_name: string;
+  doctor_name?: string | null;
+  notes?: string | null;
+  results: ResultPayload[];
+} & CollectionContext;
 
 /**
  * The PDF pipeline. `create` only ever produces a preview: nothing an extraction
@@ -58,13 +76,16 @@ export const extractions = {
   read: (id: string) => request<ExtractionJob>(`/api/extractions/${id}`),
   confirm: (
     id: string,
-    payload: {
-      lab_name: string;
-      notes?: string | null;
-      results: ResultPayload[];
-    } & CollectionContext,
+    payload: ReportPayload,
   ) => request<Report>(`/api/extractions/${id}/confirm`, { method: "POST", body: payload }),
   discard: (id: string) => request<void>(`/api/extractions/${id}`, { method: "DELETE" }),
+};
+
+/** Where the history came from — for filtering it, and for pre-filling a new
+ *  entry from the last report the same laboratory issued. */
+export const providers = {
+  labs: () => request<Lab[]>("/api/labs"),
+  doctors: () => request<Doctor[]>("/api/doctors"),
 };
 
 export const catalogue = {
@@ -81,16 +102,25 @@ export const biomarkers = {
 };
 
 export const reports = {
-  list: (window: DateWindow = {}) =>
-    request<ReportSummary[]>(`/api/reports${query({ from: window.from, to: window.to })}`),
+  list: (filter: ReportFilter = {}) =>
+    request<ReportSummary[]>(
+      `/api/reports${query({
+        from: filter.from,
+        to: filter.to,
+        lab_id: filter.lab_id,
+        doctor_id: filter.doctor_id,
+      })}`,
+    ),
   read: (id: string) => request<Report>(`/api/reports/${id}`),
-  create: (
-    payload: {
-      lab_name: string;
-      notes?: string | null;
-      results: ResultPayload[];
-    } & CollectionContext,
-  ) => request<Report>("/api/reports", { method: "POST", body: payload }),
+  update: (id: string, payload: { notes?: string | null; doctor_name?: string | null }) =>
+    request<Report>(`/api/reports/${id}`, { method: "PATCH", body: payload }),
+  annotate: (reportId: string, resultId: string, note: string | null) =>
+    request<Result>(`/api/reports/${reportId}/results/${resultId}`, {
+      method: "PATCH",
+      body: { note },
+    }),
+  create: (payload: ReportPayload) =>
+    request<Report>("/api/reports", { method: "POST", body: payload }),
   remove: (id: string) => request<void>(`/api/reports/${id}`, { method: "DELETE" }),
 };
 

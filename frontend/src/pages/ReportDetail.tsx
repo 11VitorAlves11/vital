@@ -2,6 +2,7 @@ import { FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { NoteEditor } from "../components/domain/NoteEditor";
 import { ResultRow } from "../components/domain/ResultRow";
 import { Button, buttonClasses } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
@@ -42,6 +43,7 @@ export function ReportDetail() {
           <p className="text-ink-muted">
             {[
               data.lab_name,
+              data.doctor_name,
               data.collected_at ? formatTime(data.collected_at, locale) : null,
               data.fasting_state === "unknown" ? null : t(`fastingStates.${data.fasting_state}`),
               data.fasting_hours === null
@@ -72,11 +74,31 @@ export function ReportDetail() {
         </div>
       </header>
 
-      {data.notes ? <p className="text-ink-muted">{data.notes}</p> : null}
+      {/* The interpretive note on the collection as a whole, above the values it
+          is about — as against the note on a single result, which sits with it. */}
+      <Card title={t("reports.notes")}>
+        <NoteEditor
+          note={data.notes}
+          noteAt={data.notes_at}
+          label={t("reports.notes")}
+          placeholder={t("notes.reportPlaceholder")}
+          onSave={async (notes) => {
+            await reports.update(id, { notes });
+            reload();
+          }}
+        />
+      </Card>
 
       <Card title={t("reports.results")}>
         {data.results.map((result) => (
-          <ResultRow key={result.id} result={result} />
+          <ResultRow
+            key={result.id}
+            result={result}
+            onAnnotate={async (note) => {
+              await reports.annotate(id, result.id, note);
+              reload();
+            }}
+          />
         ))}
       </Card>
     </section>
