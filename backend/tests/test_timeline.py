@@ -176,3 +176,34 @@ async def test_a_day_that_fills_a_page_is_not_dropped(
     body = (await ac.get("/api/timeline?limit=2")).json()
     assert len(body["events"]) == 2
     assert body["next_before"] == "2026-03-01"
+
+
+async def test_a_series_carries_the_other_events_in_its_period(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    """Backlog 2.3: what else was happening, drawn on the chart."""
+    ac, _ = await make_user(sex="M")
+    marker_id = catalogue["biomarkers"]["hemoglobina"]["id"]
+    await _report(ac, catalogue, "2026-01-01")
+    await _report(ac, catalogue, "2026-06-01")
+    await _scan(ac, catalogue, "2026-03-15T08:00:00Z")
+    await _intervention(ac)
+
+    series = (await ac.get(f"/api/biomarkers/{marker_id}/series")).json()
+    # The weigh-in is a mark; the supplement is a band; the draws are the points.
+    assert [event["kind"] for event in series["moments"]] == ["body_composition"]
+    assert [item["name"] for item in series["interventions"]] == ["Vitamina D"]
+
+
+async def test_a_moment_outside_the_plotted_period_is_not_drawn(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    """An annotation past the data invites reading a correlation off the chart."""
+    ac, _ = await make_user(sex="M")
+    marker_id = catalogue["biomarkers"]["hemoglobina"]["id"]
+    await _report(ac, catalogue, "2026-01-01")
+    await _report(ac, catalogue, "2026-02-01")
+    await _scan(ac, catalogue, "2026-09-01T08:00:00Z")
+
+    series = (await ac.get(f"/api/biomarkers/{marker_id}/series")).json()
+    assert series["moments"] == []

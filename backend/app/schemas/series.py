@@ -8,6 +8,7 @@ from app.models.enums import ReferenceKind, ResultFlag
 from app.schemas.catalog import BiomarkerOut, BodyMetricOut
 from app.schemas.interventions import InterventionOut
 from app.schemas.reports import CaveatOut
+from app.schemas.timeline import TimelineEvent
 
 
 class BiomarkerPoint(BaseModel):
@@ -43,6 +44,9 @@ class BiomarkerSeries(BaseModel):
     has_unconverted_points: bool = False
     # Only those overlapping the period covered by the points, for the chart overlay.
     interventions: list[InterventionOut]
+    # Point events inside the same period, drawn as vertical marks. Lab reports
+    # are absent on purpose: on this chart they are the points themselves.
+    moments: list[TimelineEvent]
 
 
 class BodyPoint(BaseModel):

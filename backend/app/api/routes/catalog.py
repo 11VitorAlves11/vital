@@ -16,7 +16,7 @@ from app.schemas.catalog import BandOut, BiomarkerOut, BodyMetricOut, ReferenceB
 from app.schemas.interventions import InterventionOut
 from app.schemas.reports import CaveatOut
 from app.schemas.series import BiomarkerPoint, BiomarkerSeries
-from app.services import caveats
+from app.services import caveats, timeline
 from app.services.bands import bands_for
 from app.services.flags import Reference, band_label, canonical_reference
 from app.services.overlay import overlapping_interventions
@@ -108,12 +108,16 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
         points[0].date if points else None,
         points[-1].date if points else None,
     )
+
+    start = points[0].date if points else None
+    end = points[-1].date if points else None
     return BiomarkerSeries(
         biomarker=to_biomarker_out(biomarker, user),
         points=points,
         unit=biomarker.canonical_unit,
         has_unconverted_points=any(point.canonical_value is None for point in points),
         interventions=[InterventionOut.model_validate(item) for item in interventions],
+        moments=await timeline.moments(db, user.id, start, end),
     )
 
 

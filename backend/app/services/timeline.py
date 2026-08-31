@@ -13,7 +13,7 @@ medical history — hundreds of rows, not millions — it is the one worth havin
 import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime, time
 from typing import Any
 
 from sqlalchemy import Select, select
@@ -212,6 +212,42 @@ async def collect(
     if events[limit].occurred_on == page[-1].occurred_on:
         page = [event for event in page if event.occurred_on != page[-1].occurred_on] or page
     return Page(page, page[-1].occurred_on)
+
+
+async def moments(
+    db: AsyncSession, user_id: uuid.UUID, start: date | None, end: date | None
+) -> list[TimelineEvent]:
+    """Point events inside a plotted period, for annotating a chart.
+
+    Lab reports are left out: on a biomarker chart they are the points, and a
+    vertical rule through every one of them annotates nothing. Interventions are
+    left out too — they have duration and are drawn as bands, not lines.
+    """
+    if start is None or end is None:
+        return []
+
+    scans = (
+        await db.execute(
+            select(BodyScan).where(
+                BodyScan.user_id == user_id,
+                BodyScan.measured_at >= datetime.combine(start, time.min, tzinfo=UTC),
+                BodyScan.measured_at <= datetime.combine(end, time.max, tzinfo=UTC),
+            )
+        )
+    ).scalars()
+    photos = (
+        await db.execute(
+            select(ProgressPhoto).where(
+                ProgressPhoto.user_id == user_id,
+                ProgressPhoto.taken_on >= start,
+                ProgressPhoto.taken_on <= end,
+            )
+        )
+    ).scalars()
+
+    events = [_scan_event(scan) for scan in scans] + [_photo_event(photo) for photo in photos]
+    events.sort(key=lambda event: event.occurred_on)
+    return events
 
 
 async def available_kinds(db: AsyncSession, user_id: uuid.UUID) -> list[TimelineKind]:
