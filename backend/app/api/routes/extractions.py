@@ -27,10 +27,11 @@ from app.api.deps import AppSettings, CurrentUser, DbSession
 from app.api.routes.reports import to_report_out
 from app.core.config import get_settings
 from app.db.session import get_sessionmaker
-from app.models import Biomarker, ExtractionJob, LabReport, Result
+from app.models import Biomarker, ExtractionJob, LabReport
 from app.models.enums import ExtractionStatus, ReportSource
 from app.schemas.extractions import ExtractionConfirm, ExtractionOut, ExtractionPayload
 from app.schemas.reports import ReportOut
+from app.services import results as result_service
 from app.services import storage
 from app.services.extraction import (
     ExtractionError,
@@ -39,7 +40,6 @@ from app.services.extraction import (
     page_contents,
     parse_answer,
 )
-from app.services.flags import compute_flag, effective_range
 
 logger = logging.getLogger(__name__)
 
@@ -196,17 +196,11 @@ async def confirm_extraction(
     )
     for entry in payload.results:
         biomarker = catalogue[entry.biomarker_id]
-        reference = effective_range(biomarker, user.sex, entry.ref_min, entry.ref_max)
+        # Flags and unit conversion stay server-side, extracted or not: the model
+        # is never asked to classify or convert, only to transcribe.
         report.results.append(
-            Result(
-                biomarker_id=biomarker.id,
-                value=entry.value,
-                unit=entry.unit or biomarker.unit_default,
-                ref_min=entry.ref_min,
-                ref_max=entry.ref_max,
-                # Flags stay server-side, extracted or not: the model is never
-                # asked to classify, only to transcribe.
-                flag=compute_flag(entry.value, reference),
+            result_service.build(
+                biomarker, user.sex, entry.value, entry.unit, entry.ref_min, entry.ref_max
             )
         )
 

@@ -15,14 +15,19 @@ from sqlalchemy import select
 from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, LabReport, Result
 from app.models.enums import ReportSource
+from app.schemas.catalog import ReferenceBandOut
 from app.schemas.reports import ReportCreate, ReportOut, ReportSummary, ResultOut
+from app.services import results as result_service
 from app.services import storage
-from app.services.flags import compute_flag, effective_range
+from app.services.flags import Reference, band_label
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 
 def to_result_out(result: Result) -> ResultOut:
+    reference = Reference(
+        result.reference_kind, result.ref_min, result.ref_max, result.reference_bands
+    )
     return ResultOut(
         id=result.id,
         biomarker_id=result.biomarker_id,
@@ -31,8 +36,23 @@ def to_result_out(result: Result) -> ResultOut:
         category=result.biomarker.category,
         value=result.value,
         unit=result.unit,
+        canonical_value=result.canonical_value,
+        canonical_unit=result.canonical_unit,
         ref_min=result.ref_min,
         ref_max=result.ref_max,
+        reference_kind=result.reference_kind,
+        reference_bands=(
+            [ReferenceBandOut.model_validate(band) for band in result.reference_bands]
+            if result.reference_bands
+            else None
+        ),
+        # Named only for the ordinal scales, and read off the canonical value:
+        # the bands are catalogued in the canonical unit, not the reported one.
+        band_label=(
+            band_label(result.canonical_value, reference)
+            if result.canonical_value is not None
+            else None
+        ),
         flag=result.flag,
     )
 
@@ -119,15 +139,9 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
     )
     for entry in payload.results:
         biomarker = catalogue[entry.biomarker_id]
-        reference = effective_range(biomarker, user.sex, entry.ref_min, entry.ref_max)
         report.results.append(
-            Result(
-                biomarker_id=biomarker.id,
-                value=entry.value,
-                unit=entry.unit or biomarker.unit_default,
-                ref_min=entry.ref_min,
-                ref_max=entry.ref_max,
-                flag=compute_flag(entry.value, reference),
+            result_service.build(
+                biomarker, user.sex, entry.value, entry.unit, entry.ref_min, entry.ref_max
             )
         )
 

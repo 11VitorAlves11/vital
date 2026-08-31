@@ -26,6 +26,8 @@ CATEGORIES = {
     "outro",
 }
 FLAGS = {"normal", "warn", "alert"}
+RESULT_FLAGS = {"low", "normal", "high"}
+REFERENCE_KINDS = {"two_sided", "upper_bound", "lower_bound", "ordinal_bands", "none"}
 
 errors: list[str] = []
 
@@ -38,7 +40,16 @@ def check_biomarkers(entries: list[dict[str, Any]]) -> None:
     seen: set[str] = set()
     for entry in entries:
         slug = entry.get("slug", "<sem slug>")
-        for field in ("slug", "name", "category", "unit_default", "aliases"):
+        for field in (
+            "slug",
+            "name",
+            "category",
+            "unit_default",
+            "canonical_unit",
+            "unit_conversions",
+            "reference_kind",
+            "aliases",
+        ):
             if field not in entry:
                 fail(f"biomarcador {slug}: falta o campo '{field}'")
         if slug in seen:
@@ -52,6 +63,74 @@ def check_biomarkers(entries: list[dict[str, Any]]) -> None:
             lo, hi = entry.get(f"ref_min_{sex}"), entry.get(f"ref_max_{sex}")
             if lo is not None and hi is not None and lo >= hi:
                 fail(f"biomarcador {slug}: ref_min_{sex} ({lo}) >= ref_max_{sex} ({hi})")
+        check_units(slug, entry)
+        check_reference_kind(slug, entry)
+
+
+def check_units(slug: str, entry: dict[str, Any]) -> None:
+    """A conversion factor multiplies someone's result, so the table is checked hard."""
+    if not entry.get("canonical_unit"):
+        fail(f"biomarcador {slug}: 'canonical_unit' não pode ser vazio")
+    conversions = entry.get("unit_conversions")
+    if not isinstance(conversions, dict):
+        fail(f"biomarcador {slug}: 'unit_conversions' tem de ser um objeto")
+        return
+    for unit, factor in conversions.items():
+        if not unit:
+            fail(f"biomarcador {slug}: unidade sem nome em 'unit_conversions'")
+        if not isinstance(factor, int | float) or isinstance(factor, bool) or factor <= 0:
+            fail(f"biomarcador {slug}: fator de conversão inválido para {unit!r}: {factor!r}")
+        if unit == entry.get("canonical_unit"):
+            fail(f"biomarcador {slug}: {unit!r} é a unidade canónica e não precisa de fator")
+
+
+def check_reference_kind(slug: str, entry: dict[str, Any]) -> None:
+    """The declared shape has to be the shape the bounds actually form."""
+    kind = entry.get("reference_kind")
+    if kind not in REFERENCE_KINDS:
+        fail(f"biomarcador {slug}: reference_kind inválido {kind!r}")
+        return
+
+    bands = entry.get("ordinal_bands")
+    if kind == "ordinal_bands":
+        if not bands:
+            fail(f"biomarcador {slug}: reference_kind 'ordinal_bands' exige 'ordinal_bands'")
+        else:
+            check_ordinal_bands(slug, bands)
+        return
+    if bands:
+        fail(f"biomarcador {slug}: 'ordinal_bands' definido mas reference_kind é {kind!r}")
+
+    has_min = entry.get("ref_min_m") is not None or entry.get("ref_min_f") is not None
+    has_max = entry.get("ref_max_m") is not None or entry.get("ref_max_f") is not None
+    expected = {
+        (True, True): "two_sided",
+        (True, False): "lower_bound",
+        (False, True): "upper_bound",
+        (False, False): "none",
+    }[(has_min, has_max)]
+    if kind != expected:
+        fail(f"biomarcador {slug}: reference_kind {kind!r} mas os limites formam {expected!r}")
+
+
+def check_ordinal_bands(slug: str, bands: list[dict[str, Any]]) -> None:
+    """Same contract as the body-composition bands, with the lab flag vocabulary."""
+    if bands[0]["min"] is not None or bands[-1]["max"] is not None:
+        fail(f"biomarcador {slug}: as bandas têm de cobrir todo o domínio (extremos null)")
+    for band in bands:
+        if band.get("flag") not in RESULT_FLAGS:
+            fail(f"biomarcador {slug}: flag de banda inválida {band.get('flag')!r}")
+        if not band.get("label"):
+            fail(f"biomarcador {slug}: banda sem label")
+        lo, hi = band["min"], band["max"]
+        if lo is not None and hi is not None and lo >= hi:
+            fail(f"biomarcador {slug}: banda '{band['label']}' com min >= max")
+    for previous, current in zip(bands, bands[1:], strict=False):
+        if previous["max"] != current["min"]:
+            fail(
+                f"biomarcador {slug}: lacuna ou sobreposição entre "
+                f"'{previous['label']}' e '{current['label']}'"
+            )
 
 
 def check_bands(slug: str, sex: str, bands: list[dict[str, Any]]) -> None:

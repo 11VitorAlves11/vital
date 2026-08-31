@@ -1,13 +1,15 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import VALUE, Base
 from app.models.biomarker import Biomarker
-from app.models.enums import ReportSource, ResultFlag, pg_enum
+from app.models.enums import ReferenceKind, ReportSource, ResultFlag, pg_enum
 
 
 class LabReport(Base):
@@ -51,10 +53,27 @@ class Result(Base):
     biomarker_id: Mapped[int] = mapped_column(
         ForeignKey("biomarkers.id"), nullable=False, index=True
     )
+    #: The value as the laboratory reported it, in `unit`. Never rewritten.
     value: Mapped[Decimal] = mapped_column(VALUE, nullable=False)
     unit: Mapped[str] = mapped_column(String, nullable=False)
+    # The same reading in the catalogue's canonical unit, so a series stays one
+    # continuous line when a lab switches from ng/mL to nmol/L. NULL when the
+    # reported unit is not one we know how to convert.
+    canonical_value: Mapped[Decimal | None] = mapped_column(VALUE)
+    canonical_unit: Mapped[str | None] = mapped_column(String)
+    #: value × conversion_factor = canonical_value. Stored so the conversion is
+    #: auditable years later, when the catalogue's table may have been corrected.
+    conversion_factor: Mapped[Decimal | None] = mapped_column(VALUE)
     ref_min: Mapped[Decimal | None] = mapped_column(VALUE)
     ref_max: Mapped[Decimal | None] = mapped_column(VALUE)
+    #: Which of the four interval shapes `ref_min`/`ref_max`/`reference_bands` form.
+    reference_kind: Mapped[ReferenceKind] = mapped_column(
+        pg_enum(ReferenceKind, "reference_kind"), nullable=False, default=ReferenceKind.NONE
+    )
+    # Snapshot of the ordinal bands used for this draw, for the same reason the
+    # range is stored per result: a later correction to the catalogue must not
+    # silently reinterpret what was already read.
+    reference_bands: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
     # Computed server-side on write; NULL when neither the lab nor the catalogue
     # provides a range to compare against.
     flag: Mapped[ResultFlag | None] = mapped_column(pg_enum(ResultFlag, "result_flag"))

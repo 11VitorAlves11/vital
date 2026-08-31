@@ -18,8 +18,18 @@ from app.schemas.dashboard import (
     DashboardOut,
     SparkPoint,
 )
+from app.services.flags import Reference, band_label
 
 router = APIRouter(tags=["dashboard"])
+
+
+def _band_label(result: Result) -> str | None:
+    if result.canonical_value is None:
+        return None
+    reference = Reference(
+        result.reference_kind, result.ref_min, result.ref_max, result.reference_bands
+    )
+    return band_label(result.canonical_value, reference)
 
 
 @router.get("/dashboard", response_model=DashboardOut)
@@ -49,10 +59,18 @@ async def dashboard(user: CurrentUser, db: DbSession) -> DashboardOut:
                 value=latest.value,
                 unit=latest.unit,
                 flag=latest.flag,
+                band_label=_band_label(latest),
                 collected_on=latest_report.collected_on,
                 lab_name=latest_report.lab_name,
+                # Canonical, so a sparkline crossing a change of unit still shows
+                # the shape of the history rather than a step that never happened.
                 sparkline=[
-                    SparkPoint(date=report.collected_on, value=result.value)
+                    SparkPoint(
+                        date=report.collected_on,
+                        value=result.canonical_value
+                        if result.canonical_value is not None
+                        else result.value,
+                    )
                     for result, report in entries[-SPARKLINE_POINTS:]
                 ],
             )

@@ -12,26 +12,34 @@ from sqlalchemy import select
 from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, BodyMetric, LabReport, Result, User
 from app.models.enums import BiomarkerCategory
-from app.schemas.catalog import BandOut, BiomarkerOut, BodyMetricOut
+from app.schemas.catalog import BandOut, BiomarkerOut, BodyMetricOut, ReferenceBandOut
 from app.schemas.interventions import InterventionOut
 from app.schemas.series import BiomarkerPoint, BiomarkerSeries
 from app.services.bands import bands_for
-from app.services.flags import canonical_range
+from app.services.flags import Reference, band_label, canonical_reference
 from app.services.overlay import overlapping_interventions
+from app.services.units import convert_bound
 
 router = APIRouter(tags=["catalogue"])
 
 
 def to_biomarker_out(biomarker: Biomarker, user: User) -> BiomarkerOut:
-    ref_min, ref_max = canonical_range(biomarker, user.sex)
+    reference = canonical_reference(biomarker, user.sex)
     return BiomarkerOut(
         id=biomarker.id,
         slug=biomarker.slug,
         name=biomarker.name,
         category=biomarker.category,
         unit_default=biomarker.unit_default,
-        ref_min=ref_min,
-        ref_max=ref_max,
+        canonical_unit=biomarker.canonical_unit,
+        reference_kind=reference.kind,
+        ref_min=reference.minimum,
+        ref_max=reference.maximum,
+        reference_bands=(
+            [ReferenceBandOut.model_validate(band) for band in reference.bands]
+            if reference.bands
+            else None
+        ),
         aliases=biomarker.aliases,
         notes=biomarker.notes,
     )
@@ -85,19 +93,7 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
         .order_by(LabReport.collected_on)
     )
     rows = (await db.execute(statement)).all()
-    points = [
-        BiomarkerPoint(
-            date=report.collected_on,
-            value=result.value,
-            unit=result.unit,
-            lab_name=report.lab_name,
-            ref_min=result.ref_min,
-            ref_max=result.ref_max,
-            flag=result.flag,
-            report_id=str(report.id),
-        )
-        for result, report in rows
-    ]
+    points = [_to_point(result, report) for result, report in rows]
     interventions = await overlapping_interventions(
         db,
         user.id,
@@ -107,5 +103,32 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
     return BiomarkerSeries(
         biomarker=to_biomarker_out(biomarker, user),
         points=points,
+        unit=biomarker.canonical_unit,
+        has_unconverted_points=any(point.canonical_value is None for point in points),
         interventions=[InterventionOut.model_validate(item) for item in interventions],
+    )
+
+
+def _to_point(result: Result, report: LabReport) -> BiomarkerPoint:
+    reference = Reference(
+        result.reference_kind, result.ref_min, result.ref_max, result.reference_bands
+    )
+    return BiomarkerPoint(
+        date=report.collected_on,
+        value=result.value,
+        unit=result.unit,
+        canonical_value=result.canonical_value,
+        lab_name=report.lab_name,
+        ref_min=result.ref_min,
+        ref_max=result.ref_max,
+        canonical_ref_min=convert_bound(result.ref_min, result.conversion_factor),
+        canonical_ref_max=convert_bound(result.ref_max, result.conversion_factor),
+        reference_kind=result.reference_kind,
+        band_label=(
+            band_label(result.canonical_value, reference)
+            if result.canonical_value is not None
+            else None
+        ),
+        flag=result.flag,
+        report_id=str(report.id),
     )

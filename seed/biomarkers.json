@@ -4,10 +4,16 @@
     "name": "Hemoglobina",
     "category": "hematologia",
     "unit_default": "g/dL",
+    "canonical_unit": "g/dL",
+    "unit_conversions": {
+      "g/L": 0.1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 13.0,
     "ref_max_m": 17.0,
     "ref_min_f": 12.0,
     "ref_max_f": 15.0,
+    "ordinal_bands": null,
     "aliases": [
       "Hb",
       "HGB",
@@ -20,10 +26,16 @@
     "name": "Hematócrito",
     "category": "hematologia",
     "unit_default": "%",
+    "canonical_unit": "%",
+    "unit_conversions": {
+      "L/L": 100
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 40.0,
     "ref_max_m": 52.0,
     "ref_min_f": 36.0,
     "ref_max_f": 46.0,
+    "ordinal_bands": null,
     "aliases": [
       "Ht",
       "HCT",
@@ -36,10 +48,18 @@
     "name": "Eritrócitos",
     "category": "hematologia",
     "unit_default": "10^12/L",
+    "canonical_unit": "10^12/L",
+    "unit_conversions": {
+      "10^6/µL": 1,
+      "M/µL": 1,
+      "milhões/µL": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 4.5,
     "ref_max_m": 5.9,
     "ref_min_f": 4.0,
     "ref_max_f": 5.2,
+    "ordinal_bands": null,
     "aliases": [
       "Glóbulos vermelhos",
       "RBC",
@@ -53,10 +73,19 @@
     "name": "Leucócitos",
     "category": "hematologia",
     "unit_default": "10^9/L",
+    "canonical_unit": "10^9/L",
+    "unit_conversions": {
+      "10^3/µL": 1,
+      "/µL": 0.001,
+      "/mm³": 0.001,
+      "/mm3": 0.001
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 4.0,
     "ref_max_m": 11.0,
     "ref_min_f": 4.0,
     "ref_max_f": 11.0,
+    "ordinal_bands": null,
     "aliases": [
       "Glóbulos brancos",
       "WBC",
@@ -69,10 +98,19 @@
     "name": "Plaquetas",
     "category": "hematologia",
     "unit_default": "10^9/L",
+    "canonical_unit": "10^9/L",
+    "unit_conversions": {
+      "10^3/µL": 1,
+      "/µL": 0.001,
+      "/mm³": 0.001,
+      "/mm3": 0.001
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 150.0,
     "ref_max_m": 400.0,
     "ref_min_f": 150.0,
     "ref_max_f": 400.0,
+    "ordinal_bands": null,
     "aliases": [
       "PLT",
       "Trombócitos",
@@ -85,10 +123,16 @@
     "name": "VGM (volume globular médio)",
     "category": "hematologia",
     "unit_default": "fL",
+    "canonical_unit": "fL",
+    "unit_conversions": {
+      "µm^3": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 80.0,
     "ref_max_m": 100.0,
     "ref_min_f": 80.0,
     "ref_max_f": 100.0,
+    "ordinal_bands": null,
     "aliases": [
       "VGM",
       "MCV",
@@ -102,10 +146,14 @@
     "name": "HGM (hemoglobina globular média)",
     "category": "hematologia",
     "unit_default": "pg",
+    "canonical_unit": "pg",
+    "unit_conversions": {},
+    "reference_kind": "two_sided",
     "ref_min_m": 27.0,
     "ref_max_m": 33.0,
     "ref_min_f": 27.0,
     "ref_max_f": 33.0,
+    "ordinal_bands": null,
     "aliases": [
       "HGM",
       "MCH",
@@ -119,10 +167,47 @@
     "name": "Vitamina D (25-OH)",
     "category": "vitaminas",
     "unit_default": "ng/mL",
+    "canonical_unit": "ng/mL",
+    "unit_conversions": {
+      "nmol/L": 0.4006
+    },
+    "reference_kind": "ordinal_bands",
     "ref_min_m": 30.0,
     "ref_max_m": 100.0,
     "ref_min_f": 30.0,
     "ref_max_f": 100.0,
+    "ordinal_bands": [
+      {
+        "label": "deficiência grave",
+        "min": null,
+        "max": 10,
+        "flag": "low"
+      },
+      {
+        "label": "deficiência",
+        "min": 10,
+        "max": 20,
+        "flag": "low"
+      },
+      {
+        "label": "insuficiência",
+        "min": 20,
+        "max": 30,
+        "flag": "low"
+      },
+      {
+        "label": "suficiência",
+        "min": 30,
+        "max": 100,
+        "flag": "normal"
+      },
+      {
+        "label": "excesso",
+        "min": 100,
+        "max": null,
+        "flag": "high"
+      }
+    ],
     "aliases": [
       "25-hidroxivitamina D",
       "25-OH-D",
@@ -138,10 +223,17 @@
     "name": "Vitamina B12",
     "category": "vitaminas",
     "unit_default": "pg/mL",
+    "canonical_unit": "pg/mL",
+    "unit_conversions": {
+      "pmol/L": 1.355,
+      "ng/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 200.0,
     "ref_max_m": 900.0,
     "ref_min_f": 200.0,
     "ref_max_f": 900.0,
+    "ordinal_bands": null,
     "aliases": [
       "B12",
       "Cobalamina",
@@ -155,10 +247,17 @@
     "name": "Ácido fólico",
     "category": "vitaminas",
     "unit_default": "ng/mL",
+    "canonical_unit": "ng/mL",
+    "unit_conversions": {
+      "nmol/L": 0.4413,
+      "µg/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 3.0,
     "ref_max_m": 17.0,
     "ref_min_f": 3.0,
     "ref_max_f": 17.0,
+    "ordinal_bands": null,
     "aliases": [
       "Folato",
       "Folato sérico",
@@ -171,10 +270,16 @@
     "name": "Ferritina",
     "category": "ferro",
     "unit_default": "ng/mL",
+    "canonical_unit": "ng/mL",
+    "unit_conversions": {
+      "µg/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 30.0,
     "ref_max_m": 400.0,
     "ref_min_f": 15.0,
     "ref_max_f": 150.0,
+    "ordinal_bands": null,
     "aliases": [
       "Ferritina sérica"
     ],
@@ -185,10 +290,16 @@
     "name": "Ferro sérico",
     "category": "ferro",
     "unit_default": "µg/dL",
+    "canonical_unit": "µg/dL",
+    "unit_conversions": {
+      "µmol/L": 5.587
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 65.0,
     "ref_max_m": 175.0,
     "ref_min_f": 50.0,
     "ref_max_f": 170.0,
+    "ordinal_bands": null,
     "aliases": [
       "Ferro",
       "Sideremia",
@@ -201,10 +312,16 @@
     "name": "Transferrina",
     "category": "ferro",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "g/L": 100
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 200.0,
     "ref_max_m": 360.0,
     "ref_min_f": 200.0,
     "ref_max_f": 360.0,
+    "ordinal_bands": null,
     "aliases": [
       "Transferrina sérica",
       "Siderofilina"
@@ -216,10 +333,14 @@
     "name": "Saturação da transferrina",
     "category": "ferro",
     "unit_default": "%",
+    "canonical_unit": "%",
+    "unit_conversions": {},
+    "reference_kind": "two_sided",
     "ref_min_m": 20.0,
     "ref_max_m": 50.0,
     "ref_min_f": 15.0,
     "ref_max_f": 45.0,
+    "ordinal_bands": null,
     "aliases": [
       "Índice de saturação da transferrina",
       "IST",
@@ -233,10 +354,16 @@
     "name": "Colesterol total",
     "category": "lipidos",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "mmol/L": 38.67
+    },
+    "reference_kind": "upper_bound",
     "ref_min_m": null,
     "ref_max_m": 190.0,
     "ref_min_f": null,
     "ref_max_f": 190.0,
+    "ordinal_bands": null,
     "aliases": [
       "Colesterol",
       "Colesterol total sérico",
@@ -249,10 +376,16 @@
     "name": "Colesterol LDL",
     "category": "lipidos",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "mmol/L": 38.67
+    },
+    "reference_kind": "upper_bound",
     "ref_min_m": null,
     "ref_max_m": 115.0,
     "ref_min_f": null,
     "ref_max_f": 115.0,
+    "ordinal_bands": null,
     "aliases": [
       "LDL",
       "LDL-C",
@@ -267,10 +400,16 @@
     "name": "Colesterol HDL",
     "category": "lipidos",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "mmol/L": 38.67
+    },
+    "reference_kind": "lower_bound",
     "ref_min_m": 40.0,
     "ref_max_m": null,
     "ref_min_f": 50.0,
     "ref_max_f": null,
+    "ordinal_bands": null,
     "aliases": [
       "HDL",
       "HDL-C",
@@ -285,10 +424,16 @@
     "name": "Triglicéridos",
     "category": "lipidos",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "mmol/L": 88.57
+    },
+    "reference_kind": "upper_bound",
     "ref_min_m": null,
     "ref_max_m": 150.0,
     "ref_min_f": null,
     "ref_max_f": 150.0,
+    "ordinal_bands": null,
     "aliases": [
       "TG",
       "Triglicerídeos",
@@ -301,10 +446,16 @@
     "name": "Creatinina",
     "category": "renal",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "µmol/L": 0.01131
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 0.7,
     "ref_max_m": 1.2,
     "ref_min_f": 0.5,
     "ref_max_f": 1.0,
+    "ordinal_bands": null,
     "aliases": [
       "Creatinina sérica",
       "Creat"
@@ -316,26 +467,40 @@
     "name": "Ureia",
     "category": "renal",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "mmol/L": 6.006,
+      "g/L": 100
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 17.0,
     "ref_max_m": 43.0,
     "ref_min_f": 17.0,
     "ref_max_f": 43.0,
+    "ordinal_bands": null,
     "aliases": [
       "Ureia sérica",
       "BUN",
       "Azoto ureico"
     ],
-    "notes": "Sobe com dietas hiperproteicas e desidratação, sem significar disfunção renal."
+    "notes": "Sobe com dietas hiperproteicas e desidratação, sem significar disfunção renal. Não confundir com azoto ureico (BUN), que é outro analito: ureia mg/dL = BUN mg/dL × 2,14. Um valor de BUN não é convertido."
   },
   {
     "slug": "tfg",
     "name": "TFG (taxa de filtração glomerular estimada)",
     "category": "renal",
     "unit_default": "mL/min/1,73 m²",
+    "canonical_unit": "mL/min/1,73 m²",
+    "unit_conversions": {
+      "mL/min/1,73m²": 1,
+      "mL/min": 1
+    },
+    "reference_kind": "lower_bound",
     "ref_min_m": 90.0,
     "ref_max_m": null,
     "ref_min_f": 90.0,
     "ref_max_f": null,
+    "ordinal_bands": null,
     "aliases": [
       "TFG",
       "TFGe",
@@ -351,10 +516,16 @@
     "name": "Ácido úrico",
     "category": "renal",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "µmol/L": 0.01681
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 3.4,
     "ref_max_m": 7.0,
     "ref_min_f": 2.4,
     "ref_max_f": 6.0,
+    "ordinal_bands": null,
     "aliases": [
       "Uricemia",
       "Urato",
@@ -367,10 +538,17 @@
     "name": "ALT (TGP)",
     "category": "hepatico",
     "unit_default": "U/L",
+    "canonical_unit": "U/L",
+    "unit_conversions": {
+      "UI/L": 1,
+      "IU/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 10.0,
     "ref_max_m": 41.0,
     "ref_min_f": 7.0,
     "ref_max_f": 33.0,
+    "ordinal_bands": null,
     "aliases": [
       "ALT",
       "TGP",
@@ -385,10 +563,17 @@
     "name": "AST (TGO)",
     "category": "hepatico",
     "unit_default": "U/L",
+    "canonical_unit": "U/L",
+    "unit_conversions": {
+      "UI/L": 1,
+      "IU/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 10.0,
     "ref_max_m": 40.0,
     "ref_min_f": 9.0,
     "ref_max_f": 32.0,
+    "ordinal_bands": null,
     "aliases": [
       "AST",
       "TGO",
@@ -403,10 +588,17 @@
     "name": "GGT",
     "category": "hepatico",
     "unit_default": "U/L",
+    "canonical_unit": "U/L",
+    "unit_conversions": {
+      "UI/L": 1,
+      "IU/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 10.0,
     "ref_max_m": 71.0,
     "ref_min_f": 6.0,
     "ref_max_f": 42.0,
+    "ordinal_bands": null,
     "aliases": [
       "GGT",
       "Gama-GT",
@@ -421,10 +613,17 @@
     "name": "Fosfatase alcalina",
     "category": "hepatico",
     "unit_default": "U/L",
+    "canonical_unit": "U/L",
+    "unit_conversions": {
+      "UI/L": 1,
+      "IU/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 40.0,
     "ref_max_m": 129.0,
     "ref_min_f": 35.0,
     "ref_max_f": 104.0,
+    "ordinal_bands": null,
     "aliases": [
       "FA",
       "ALP",
@@ -437,10 +636,16 @@
     "name": "Bilirrubina total",
     "category": "hepatico",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "µmol/L": 0.05847
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 0.2,
     "ref_max_m": 1.2,
     "ref_min_f": 0.2,
     "ref_max_f": 1.2,
+    "ordinal_bands": null,
     "aliases": [
       "Bilirrubina",
       "Bilirrubina total sérica",
@@ -453,10 +658,17 @@
     "name": "Glicose (jejum)",
     "category": "bioquimica",
     "unit_default": "mg/dL",
+    "canonical_unit": "mg/dL",
+    "unit_conversions": {
+      "mmol/L": 18.016,
+      "g/L": 100
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 70.0,
     "ref_max_m": 99.0,
     "ref_min_f": 70.0,
     "ref_max_f": 99.0,
+    "ordinal_bands": null,
     "aliases": [
       "Glicemia",
       "Glucose",
@@ -470,27 +682,37 @@
     "name": "Hemoglobina glicada (HbA1c)",
     "category": "bioquimica",
     "unit_default": "%",
+    "canonical_unit": "%",
+    "unit_conversions": {},
+    "reference_kind": "two_sided",
     "ref_min_m": 4.0,
     "ref_max_m": 5.6,
     "ref_min_f": 4.0,
     "ref_max_f": 5.6,
+    "ordinal_bands": null,
     "aliases": [
       "HbA1c",
       "A1c",
       "Hemoglobina glicada",
       "Hemoglobina glicosilada"
     ],
-    "notes": "5,7–6,4 %: pré-diabetes; ≥6,5 %: critério de diabetes. Falseada por anemia e hemoglobinopatias."
+    "notes": "5,7–6,4 %: pré-diabetes; ≥6,5 %: critério de diabetes. Falseada por anemia e hemoglobinopatias. A conversão IFCC (mmol/mol) para NGSP (%) é afim, não um fator: % = mmol/mol × 0,09148 + 2,152. Por isso não é convertida aqui — um valor em mmol/mol fica registado como reportado, sem série canónica."
   },
   {
     "slug": "pcr",
     "name": "PCR (proteína C reativa)",
     "category": "bioquimica",
     "unit_default": "mg/L",
+    "canonical_unit": "mg/L",
+    "unit_conversions": {
+      "mg/dL": 10
+    },
+    "reference_kind": "upper_bound",
     "ref_min_m": null,
     "ref_max_m": 5.0,
     "ref_min_f": null,
     "ref_max_f": 5.0,
+    "ordinal_bands": null,
     "aliases": [
       "PCR",
       "CRP",
@@ -506,10 +728,19 @@
     "name": "TSH",
     "category": "hormonas",
     "unit_default": "µUI/mL",
+    "canonical_unit": "µUI/mL",
+    "unit_conversions": {
+      "mUI/L": 1,
+      "µIU/mL": 1,
+      "mIU/L": 1,
+      "mU/L": 1
+    },
+    "reference_kind": "two_sided",
     "ref_min_m": 0.27,
     "ref_max_m": 4.2,
     "ref_min_f": 0.27,
     "ref_max_f": 4.2,
+    "ordinal_bands": null,
     "aliases": [
       "TSH",
       "Tirotropina",

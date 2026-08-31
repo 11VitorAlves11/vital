@@ -13,14 +13,18 @@ SPARKLINE_POINTS = 8
 
 class SparkPoint(BaseModel):
     date: date
+    #: Canonical where the reading could be converted, as reported where it could not.
     value: Decimal
 
 
 class DashboardItem(BaseModel):
     biomarker: BiomarkerOut
+    #: The latest reading as the lab reported it — the number on the card.
     value: Decimal
     unit: str
     flag: ResultFlag | None
+    #: Which step of an ordinal scale it landed on, for the markers that have one.
+    band_label: str | None = None
     collected_on: date
     lab_name: str
     sparkline: list[SparkPoint]

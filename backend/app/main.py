@@ -22,6 +22,7 @@ from app.api.routes import (
 from app.core.config import get_settings
 from app.db.seed import load_catalogue
 from app.db.session import dispose_engine, get_sessionmaker
+from app.services.recompute import recompute_every_users_flags
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -31,7 +32,16 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     async with get_sessionmaker()() as db:
         biomarkers, body_metrics = await load_catalogue(db)
-    logger.info("Catalogue loaded: %d biomarkers, %d body metrics", biomarkers, body_metrics)
+        # The catalogue that just loaded may have corrected a band, a range or a
+        # conversion factor. Anything already stored is re-derived against it, so
+        # a correction reaches the history and not only the next draw.
+        accounts = await recompute_every_users_flags(db)
+    logger.info(
+        "Catalogue loaded: %d biomarkers, %d body metrics; re-flagged %d account(s)",
+        biomarkers,
+        body_metrics,
+        accounts,
+    )
     yield
     await dispose_engine()
 

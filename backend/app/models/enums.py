@@ -38,6 +38,22 @@ class ResultFlag(StrEnum):
     HIGH = "high"
 
 
+class ReferenceKind(StrEnum):
+    """The shape of the interval a value is read against.
+
+    A lab range is not always two numbers: plenty of markers are reported as a
+    single bound, and a few (vitamin D) are only meaningful as named bands. Which
+    of the four it is decides both the flag and how the band is drawn.
+    """
+
+    TWO_SIDED = "two_sided"
+    UPPER_BOUND = "upper_bound"
+    LOWER_BOUND = "lower_bound"
+    ORDINAL_BANDS = "ordinal_bands"
+    #: No interval at all — the value is recorded and charted, never classified.
+    NONE = "none"
+
+
 class ExtractionStatus(StrEnum):
     """Where a PDF is in the pipeline. `preview` is the human gate: nothing
     reaches `results` until someone confirms what the model read."""

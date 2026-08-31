@@ -16,16 +16,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import dispose_engine, get_sessionmaker
 from app.models import Biomarker, BodyMetric
+from app.models.enums import ReferenceKind
+from app.services.recompute import recompute_every_users_flags
 
 BIOMARKER_FIELDS = (
     "slug",
     "name",
     "category",
     "unit_default",
+    "canonical_unit",
+    "unit_conversions",
+    "reference_kind",
     "ref_min_m",
     "ref_max_m",
     "ref_min_f",
     "ref_max_f",
+    "ordinal_bands",
     "aliases",
     "notes",
 )
@@ -53,6 +59,14 @@ def _row(entry: dict[str, Any], fields: tuple[str, ...]) -> dict[str, Any]:
         if row[field] is not None:
             # Through str, so 0.1 stays 0.1 instead of the nearest binary float.
             row[field] = Decimal(str(row[field]))
+    # The common case is a marker reported in one unit with a two-sided range, so
+    # the entries that are only that say nothing about it.
+    if "canonical_unit" in row and row["canonical_unit"] is None:
+        row["canonical_unit"] = entry["unit_default"]
+    if "unit_conversions" in row and row["unit_conversions"] is None:
+        row["unit_conversions"] = {}
+    if "reference_kind" in row and row["reference_kind"] is None:
+        row["reference_kind"] = ReferenceKind.TWO_SIDED.value
     return row
 
 
@@ -82,8 +96,12 @@ async def load_catalogue(db: AsyncSession) -> tuple[int, int]:
 async def main() -> None:
     async with get_sessionmaker()() as db:
         biomarkers, body_metrics = await load_catalogue(db)
+        accounts = await recompute_every_users_flags(db)
     await dispose_engine()
-    print(f"Catálogo carregado: {biomarkers} biomarcadores, {body_metrics} métricas corporais.")
+    print(
+        f"Catálogo carregado: {biomarkers} biomarcadores, {body_metrics} métricas corporais. "
+        f"{accounts} conta(s) reclassificada(s)."
+    )
 
 
 if __name__ == "__main__":

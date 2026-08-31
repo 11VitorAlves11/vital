@@ -5,7 +5,8 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.models.enums import BiomarkerCategory, ReportSource, ResultFlag
+from app.models.enums import BiomarkerCategory, ReferenceKind, ReportSource, ResultFlag
+from app.schemas.catalog import ReferenceBandOut
 
 
 class ResultIn(BaseModel):
@@ -46,10 +47,19 @@ class ResultOut(BaseModel):
     biomarker_slug: str
     biomarker_name: str
     category: BiomarkerCategory
+    #: As the laboratory reported it — what the report itself would show.
     value: Decimal
     unit: str
+    # The same reading in the catalogue's unit; null when it was not convertible.
+    canonical_value: Decimal | None = None
+    canonical_unit: str | None = None
     ref_min: Decimal | None
     ref_max: Decimal | None
+    reference_kind: ReferenceKind
+    #: The ordinal scale this value was read against, in `canonical_unit`.
+    reference_bands: list[ReferenceBandOut] | None = None
+    #: Which step of that scale it landed on ("insuficiência"), for ordinal markers.
+    band_label: str | None = None
     flag: ResultFlag | None
 
 
