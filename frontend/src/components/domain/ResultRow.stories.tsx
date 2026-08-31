@@ -18,6 +18,8 @@ const RESULT: Result = {
   reference_kind: "two_sided",
   reference_bands: null,
   band_label: null,
+  method: null,
+  caveats: [],
   flag: "low",
 };
 

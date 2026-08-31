@@ -3,6 +3,11 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  CollectionFields,
+  emptyCollection,
+  toCollectionContext,
+} from "../components/domain/CollectionFields";
 import { Button } from "../components/ui/Button";
 import { FormSurface } from "../components/ui/FormSurface";
 import { Input } from "../components/ui/Input";
@@ -13,10 +18,17 @@ import { ApiError } from "../lib/api/client";
 import { todayInputValue } from "../lib/format";
 import { useAsync } from "../lib/useAsync";
 
-type Row = { key: number; biomarkerId: string; value: string; refMin: string; refMax: string };
+type Row = {
+  key: number;
+  biomarkerId: string;
+  value: string;
+  refMin: string;
+  refMax: string;
+  method: string;
+};
 
 function emptyRow(key: number): Row {
-  return { key, biomarkerId: "", value: "", refMin: "", refMax: "" };
+  return { key, biomarkerId: "", value: "", refMin: "", refMax: "", method: "" };
 }
 
 type ReportCreateProps = {
@@ -30,9 +42,8 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
   const { t } = useTranslation();
   const notify = useToast();
   const { data: biomarkers } = useAsync(() => catalogue.biomarkers());
-  const [collectedOn, setCollectedOn] = useState(todayInputValue());
+  const [collection, setCollection] = useState(() => emptyCollection(todayInputValue()));
   const [labName, setLabName] = useState("");
-  const [fasting, setFasting] = useState(false);
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<Row[]>([emptyRow(0)]);
   const [error, setError] = useState<string | null>(null);
@@ -59,21 +70,22 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
     setBusy(true);
     try {
       await reports.create({
-        collected_on: collectedOn,
+        ...toCollectionContext(collection),
         lab_name: labName,
-        fasting,
         notes: notes || null,
         results: filled.map((row) => ({
           biomarker_id: Number(row.biomarkerId),
           value: Number(row.value.replace(",", ".")),
           ref_min: row.refMin ? Number(row.refMin.replace(",", ".")) : null,
           ref_max: row.refMax ? Number(row.refMax.replace(",", ".")) : null,
+          method: row.method.trim() || null,
         })),
       });
       notify(t("reports.created"));
       setRows([emptyRow(0)]);
       setLabName("");
       setNotes("");
+      setCollection(emptyCollection(todayInputValue()));
       onCreated();
       onOpenChange(false);
     } catch (cause) {
@@ -86,29 +98,17 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
   return (
     <FormSurface open={open} onOpenChange={onOpenChange} title={t("reports.new")}>
       <form className="flex flex-col gap-8" onSubmit={submit} noValidate>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            label={t("reports.collectedOn")}
-            type="date"
-            required
-            value={collectedOn}
-            onChange={(event) => setCollectedOn(event.target.value)}
-          />
+        <div className="flex flex-col gap-4">
           <Input
             label={t("reports.labName")}
             required
             value={labName}
             onChange={(event) => setLabName(event.target.value)}
           />
-          <label className="flex min-h-[var(--touch-target)] items-center gap-2 text-ink">
-            <input
-              type="checkbox"
-              checked={fasting}
-              onChange={(event) => setFasting(event.target.checked)}
-              className="size-5"
-            />
-            {t("reports.fasting")}
-          </label>
+          <CollectionFields
+            value={collection}
+            onChange={(patch) => setCollection((current) => ({ ...current, ...patch }))}
+          />
         </div>
 
         <fieldset>
@@ -151,6 +151,12 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
                     onChange={(event) => update(row.key, { refMax: event.target.value })}
                   />
                 </div>
+                <Input
+                  label={`${t("reports.method")} (${t("common.optional")})`}
+                  value={row.method}
+                  hint={t("reports.methodHint")}
+                  onChange={(event) => update(row.key, { method: event.target.value })}
+                />
                 {rows.length > 1 ? (
                   <div>
                     <Button

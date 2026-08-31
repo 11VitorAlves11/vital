@@ -28,7 +28,8 @@ const PREVIEW = {
   preview: {
     collected_on: "2026-02-14",
     lab_name: "Unilabs",
-    fasting: true,
+    collected_at: "2026-02-14T08:15:00",
+    fasting_state: "fasting",
     results: [
       {
         biomarker_id: 1,

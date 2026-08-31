@@ -3,6 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  CollectionFields,
+  emptyCollection,
+  toCollectionContext,
+} from "../components/domain/CollectionFields";
 import { Button } from "../components/ui/Button";
 import { FormSurface } from "../components/ui/FormSurface";
 import { Input } from "../components/ui/Input";
@@ -25,6 +30,7 @@ type Row = {
   value: string;
   refMin: string;
   refMax: string;
+  method: string;
 };
 
 type ReportImportProps = {
@@ -41,6 +47,7 @@ function toRows(job: ExtractionJob): Row[] {
     value: result.value ?? "",
     refMin: result.ref_min ?? "",
     refMax: result.ref_max ?? "",
+    method: result.method ?? "",
   }));
 }
 
@@ -60,9 +67,8 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [collectedOn, setCollectedOn] = useState(todayInputValue());
+  const [collection, setCollection] = useState(() => emptyCollection(todayInputValue()));
   const [labName, setLabName] = useState("");
-  const [fasting, setFasting] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -86,9 +92,18 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
   useEffect(() => {
     if (job?.status !== "preview" || job.preview === null) return;
     setRows(toRows(job));
-    if (job.preview.collected_on) setCollectedOn(job.preview.collected_on);
-    if (job.preview.lab_name) setLabName(job.preview.lab_name);
-    setFasting(job.preview.fasting ?? false);
+    const preview = job.preview;
+    if (preview.lab_name) setLabName(preview.lab_name);
+    setCollection({
+      collectedOn: preview.collected_on ?? todayInputValue(),
+      // The hour only survives if the model read one off the same day it dated.
+      collectedTime:
+        preview.collected_at && preview.collected_at.startsWith(preview.collected_on ?? "")
+          ? preview.collected_at.slice(11, 16)
+          : "",
+      fastingState: preview.fasting_state,
+      fastingHours: "",
+    });
   }, [job?.id, job?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const options = (biomarkers ?? []).map((biomarker: Biomarker) => ({
@@ -101,8 +116,7 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
     setRows([]);
     setError(null);
     setLabName("");
-    setFasting(false);
-    setCollectedOn(todayInputValue());
+    setCollection(emptyCollection(todayInputValue()));
     if (fileInput.current) fileInput.current.value = "";
   }
 
@@ -142,14 +156,14 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
     setBusy(true);
     try {
       await extractions.confirm(job.id, {
-        collected_on: collectedOn,
+        ...toCollectionContext(collection),
         lab_name: labName,
-        fasting,
         results: filled.map((row) => ({
           biomarker_id: Number(row.biomarkerId),
           value: Number(row.value.replace(",", ".")),
           ref_min: row.refMin ? Number(row.refMin.replace(",", ".")) : null,
           ref_max: row.refMax ? Number(row.refMax.replace(",", ".")) : null,
+          method: row.method.trim() || null,
         })),
       });
       notify(t("reports.created"));
@@ -226,29 +240,17 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
         <form className="flex flex-col gap-8" onSubmit={submit} noValidate>
           <p className="max-w-prose text-sm text-ink-muted">{t("extraction.checkHint")}</p>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input
-              label={t("reports.collectedOn")}
-              type="date"
-              required
-              value={collectedOn}
-              onChange={(event) => setCollectedOn(event.target.value)}
-            />
+          <div className="flex flex-col gap-4">
             <Input
               label={t("reports.labName")}
               required
               value={labName}
               onChange={(event) => setLabName(event.target.value)}
             />
-            <label className="flex min-h-[var(--touch-target)] items-center gap-2 text-ink">
-              <input
-                type="checkbox"
-                checked={fasting}
-                onChange={(event) => setFasting(event.target.checked)}
-                className="size-5"
-              />
-              {t("reports.fasting")}
-            </label>
+            <CollectionFields
+              value={collection}
+              onChange={(patch) => setCollection((current) => ({ ...current, ...patch }))}
+            />
           </div>
 
           <fieldset>
@@ -297,6 +299,11 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
                       onChange={(event) => update(row.key, { refMax: event.target.value })}
                     />
                   </div>
+                  <Input
+                    label={`${t("reports.method")} (${t("common.optional")})`}
+                    value={row.method}
+                    onChange={(event) => update(row.key, { method: event.target.value })}
+                  />
                   <div>
                     <Button
                       variant="ghost"

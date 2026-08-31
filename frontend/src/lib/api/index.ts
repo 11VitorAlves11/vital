@@ -6,6 +6,7 @@ import type {
   BodyMetricSummary,
   BodyScan,
   BodySeries,
+  CollectionContext,
   Dashboard,
   ExtractionJob,
   Features,
@@ -37,6 +38,17 @@ export const features = {
   read: () => request<Features>("/api/features"),
 };
 
+/** One result on the way in. The server derives everything else about it —
+ *  the canonical value, the shape of the reference, the flag. */
+type ResultPayload = {
+  biomarker_id: number;
+  value: number;
+  unit?: string | null;
+  ref_min?: number | null;
+  ref_max?: number | null;
+  method?: string | null;
+};
+
 /**
  * The PDF pipeline. `create` only ever produces a preview: nothing an extraction
  * read reaches the history until `confirm` is called with what a human approved.
@@ -47,18 +59,10 @@ export const extractions = {
   confirm: (
     id: string,
     payload: {
-      collected_on: string;
       lab_name: string;
-      fasting?: boolean | null;
       notes?: string | null;
-      results: {
-        biomarker_id: number;
-        value: number;
-        unit?: string | null;
-        ref_min?: number | null;
-        ref_max?: number | null;
-      }[];
-    },
+      results: ResultPayload[];
+    } & CollectionContext,
   ) => request<Report>(`/api/extractions/${id}/confirm`, { method: "POST", body: payload }),
   discard: (id: string) => request<void>(`/api/extractions/${id}`, { method: "DELETE" }),
 };
@@ -80,19 +84,13 @@ export const reports = {
   list: (window: DateWindow = {}) =>
     request<ReportSummary[]>(`/api/reports${query({ from: window.from, to: window.to })}`),
   read: (id: string) => request<Report>(`/api/reports/${id}`),
-  create: (payload: {
-    collected_on: string;
-    lab_name: string;
-    fasting?: boolean | null;
-    notes?: string | null;
-    results: {
-      biomarker_id: number;
-      value: number;
-      unit?: string | null;
-      ref_min?: number | null;
-      ref_max?: number | null;
-    }[];
-  }) => request<Report>("/api/reports", { method: "POST", body: payload }),
+  create: (
+    payload: {
+      lab_name: string;
+      notes?: string | null;
+      results: ResultPayload[];
+    } & CollectionContext,
+  ) => request<Report>("/api/reports", { method: "POST", body: payload }),
   remove: (id: string) => request<void>(`/api/reports/${id}`, { method: "DELETE" }),
 };
 

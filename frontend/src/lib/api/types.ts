@@ -21,6 +21,29 @@ export type BiomarkerCategory =
 
 export type InterventionKind = "suplemento" | "medicacao" | "dieta" | "treino" | "outro";
 
+/** Whether the draw was fasted. `unknown` is "nobody recorded it", which is a
+ *  different fact from "they had eaten" and the only one worth prompting about. */
+export type FastingState = "fasting" | "not_fasting" | "unknown";
+
+/** The order the form offers them in, and the only values the API accepts. */
+export const FASTING_STATES: FastingState[] = ["unknown", "fasting", "not_fasting"];
+
+/** A reason to read a value with care. The server sends the code and the values
+ *  that go in the sentence; the sentence itself is a translation. */
+export type Caveat = {
+  code: string;
+  values: Record<string, string>;
+};
+
+/** The pre-analytical context of a draw, as the API takes and returns it. */
+export type CollectionContext = {
+  collected_on: string;
+  /** Local wall-clock moment, no offset. Its date has to be `collected_on`. */
+  collected_at: string | null;
+  fasting_state: FastingState;
+  fasting_hours: number | null;
+};
+
 export type User = {
   id: string;
   email: string | null;
@@ -94,14 +117,15 @@ export type Result = {
   reference_bands: ReferenceBand[] | null;
   /** Which step of an ordinal scale it landed on ("insuficiência"). */
   band_label: string | null;
+  /** The assay behind the number, as the report named it. */
+  method: string | null;
+  caveats: Caveat[];
   flag: ResultFlag | null;
 };
 
-export type ReportSummary = {
+export type ReportSummary = CollectionContext & {
   id: string;
-  collected_on: string;
   lab_name: string;
-  fasting: boolean | null;
   source: "manual" | "extracted";
   notes: string | null;
   created_at: string;
@@ -126,12 +150,14 @@ export type PreviewResult = {
   unit: string | null;
   ref_min: string | null;
   ref_max: string | null;
+  method: string | null;
 };
 
 export type ExtractionPreview = {
   collected_on: string | null;
+  collected_at: string | null;
   lab_name: string | null;
-  fasting: boolean | null;
+  fasting_state: FastingState;
   results: PreviewResult[];
 };
 
@@ -216,6 +242,9 @@ export type BiomarkerPoint = {
   canonical_ref_max: string | null;
   reference_kind: ReferenceKind;
   band_label: string | null;
+  method: string | null;
+  /** Why this point may not be strictly comparable to the one before it. */
+  caveats: Caveat[];
   flag: ResultFlag | null;
   report_id: string;
 };

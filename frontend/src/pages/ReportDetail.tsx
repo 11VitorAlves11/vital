@@ -9,7 +9,7 @@ import { ErrorState } from "../components/ui/ErrorState";
 import { Skeleton } from "../components/ui/Skeleton";
 import { useToast } from "../components/ui/Toast";
 import { reports } from "../lib/api";
-import { formatDate } from "../lib/format";
+import { formatDate, formatTime } from "../lib/format";
 import { useAsync } from "../lib/useAsync";
 
 export function ReportDetail() {
@@ -36,9 +36,20 @@ export function ReportDetail() {
           <h1 className="font-display text-2xl leading-tight font-medium text-ink">
             {t("reports.detailTitle", { date: formatDate(data.collected_on, locale) })}
           </h1>
+          {/* The collection context, in one line: where, at what hour, in what
+              state. An unrecorded hour or fast is simply absent — the caveats
+              beside the results it matters for say so where it means something. */}
           <p className="text-ink-muted">
-            {data.lab_name}
-            {data.fasting === null ? "" : ` · ${t("reports.fasting")}: ${data.fasting ? t("common.yes") : t("common.no")}`}
+            {[
+              data.lab_name,
+              data.collected_at ? formatTime(data.collected_at, locale) : null,
+              data.fasting_state === "unknown" ? null : t(`fastingStates.${data.fasting_state}`),
+              data.fasting_hours === null
+                ? null
+                : t("reports.fastingHoursShort", { count: data.fasting_hours }),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

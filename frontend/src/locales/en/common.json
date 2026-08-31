@@ -102,7 +102,14 @@
     "created": "Collection recorded.",
     "pickBiomarker": "Choose a biomarker",
     "import": "Import a PDF",
-    "openFile": "View the original report"
+    "openFile": "View the original report",
+    "collectedTime": "Collection time",
+    "collectedTimeHint": "Local time printed on the report. Matters for markers that vary through the day.",
+    "fastingState": "Fasting",
+    "fastingHours": "Hours fasted",
+    "fastingHoursShort": "fasted {{count}} h",
+    "method": "Analytical method",
+    "methodHint": "e.g. hexokinase, enzymatic, CMIA. Lets a change of method between draws be spotted."
   },
   "extraction": {
     "title": "Import a PDF",
@@ -244,5 +251,20 @@
     "optional": "optional",
     "yes": "Yes",
     "no": "No"
+  },
+  "fastingStates": {
+    "fasting": "Fasted",
+    "not_fasting": "Not fasted",
+    "unknown": "Not recorded"
+  },
+  "caveats": {
+    "unknown": "This value carries a caveat this version of the app cannot interpret.",
+    "fasting_unknown": "Nobody recorded whether this draw was fasted, and this marker is sensitive to it.",
+    "not_fasting": "Drawn without fasting: this marker is sensitive to the last meal.",
+    "fasting_too_short": "Fasted {{hours}} h, under the {{required}} h this marker asks for.",
+    "collection_time_unknown": "Collection time not recorded. This marker varies through the day and should be drawn between {{start}} and {{end}}.",
+    "outside_time_window": "Drawn at {{time}}, outside the {{start}}–{{end}} window recommended for this marker.",
+    "low_reliability_method": "Method \\u201c{{method}}\\u201d: less reliable than the alternatives for this marker. See the biomarker notes.",
+    "method_changed": "Different method from the previous draw ({{from}} \\u2192 {{to}}): the difference may be the assay rather than the body."
   }
 }

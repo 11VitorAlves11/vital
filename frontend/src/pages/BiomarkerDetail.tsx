@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
+import { CaveatList } from "../components/domain/CaveatList";
 import { TrendChart } from "../components/domain/TrendChart";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -145,7 +146,10 @@ export function BiomarkerDetail() {
                             t("biomarker.noRange")
                           )}
                         </td>
-                        <td className="py-2 text-ink-muted">{point.lab_name}</td>
+                        <td className="py-2 text-ink-muted">
+                          {point.lab_name}
+                          <CaveatList caveats={point.caveats} className="mt-1" />
+                        </td>
                         <td className="py-2">
                           <FlagChip flag={point.flag} label={flagLabel(point)} />
                         </td>
@@ -168,6 +172,7 @@ export function BiomarkerDetail() {
                       {formatDate(point.date, locale)} · {point.lab_name}
                       {point.band_label ? ` · ${point.band_label}` : ""}
                     </p>
+                    <CaveatList caveats={point.caveats} className="mt-1" />
                   </li>
                 ))}
               </ul>

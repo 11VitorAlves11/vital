@@ -22,6 +22,17 @@ export function formatDateTime(iso: string, locale: string): string {
   );
 }
 
+/** The hour of a collection, which is a local wall-clock time carrying no zone.
+ *  Read off the string rather than through Date, which would shift it by the
+ *  reader's own offset and move an 08:15 draw to another hour or another day. */
+export function formatTime(local: string, locale: string): string {
+  const [hours, minutes] = local.slice(11, 16).split(":").map(Number);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return "—";
+  return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(
+    new Date(2000, 0, 1, hours, minutes),
+  );
+}
+
 /** Range as it reads on a lab report: "13–17", "≥ 13", "≤ 17". */
 export function formatRange(
   min: string | number | null,

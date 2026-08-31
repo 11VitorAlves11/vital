@@ -24,8 +24,11 @@ const HAEMOGLOBIN = {
   name: "Hemoglobina",
   category: "hematologia",
   unit_default: "g/dL",
+  canonical_unit: "g/dL",
+  reference_kind: "two_sided",
   ref_min: "12.0000",
   ref_max: "15.0000",
+  reference_bands: null,
   aliases: ["Hb"],
   notes: null,
 };
@@ -152,12 +155,21 @@ describe("BiomarkerDetail", () => {
               value: "14.0000",
               unit: "g/dL",
               lab_name: "Synlab",
+              canonical_value: "14.0000",
+              canonical_ref_min: "12.0000",
+              canonical_ref_max: "15.0000",
               ref_min: "12.0000",
               ref_max: "15.0000",
+              reference_kind: "two_sided",
+              band_label: null,
+              method: "Hexoquinase",
+              caveats: [{ code: "fasting_unknown", values: {} }],
               flag: "normal",
               report_id: "r1",
             },
           ],
+          unit: "g/dL",
+          has_unconverted_points: false,
           interventions: [
             {
               id: "i1",
@@ -182,6 +194,8 @@ describe("BiomarkerDetail", () => {
     expect(screen.getByText(/Synlab/)).toBeInTheDocument();
     expect(screen.getByText("Normal")).toBeInTheDocument();
     expect(screen.getByText(/Ferro/)).toBeInTheDocument();
+    // A caveat is shown beside the point it qualifies, not as a page-level alert.
+    expect(screen.getByText(/não ficou registado se a colheita foi em jejum/i)).toBeInTheDocument();
   });
 
   it("shows the history as a dense table on a desktop", async () => {
@@ -197,12 +211,21 @@ describe("BiomarkerDetail", () => {
               value: "14.0000",
               unit: "g/dL",
               lab_name: "Synlab",
+              canonical_value: "14.0000",
+              canonical_ref_min: "12.0000",
+              canonical_ref_max: "15.0000",
               ref_min: "12.0000",
               ref_max: "15.0000",
+              reference_kind: "two_sided",
+              band_label: null,
+              method: null,
+              caveats: [],
               flag: "normal",
               report_id: "r1",
             },
           ],
+          unit: "g/dL",
+          has_unconverted_points: false,
           interventions: [],
         },
       },
@@ -228,7 +251,9 @@ describe("Reports", () => {
             id: "r1",
             collected_on: "2026-03-01",
             lab_name: "Synlab Braga",
-            fasting: true,
+            collected_at: "2026-01-01T08:15:00",
+            fasting_state: "fasting",
+            fasting_hours: 12,
             source: "manual",
             notes: null,
             created_at: "2026-03-01T10:00:00Z",
