@@ -12,6 +12,17 @@ export function formatValue(value: string | number | null | undefined, locale: s
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 4 }).format(parsed);
 }
 
+/** A difference, with the sign it needs to read as one: "+1,4", "−10". Zero
+ *  carries no sign — nothing moved, and "+0" says it moved by nothing. */
+export function formatSigned(value: string | number | null | undefined, locale: string): string {
+  const parsed = toNumber(value);
+  if (Number.isNaN(parsed)) return "—";
+  return new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 4,
+    signDisplay: "exceptZero",
+  }).format(parsed);
+}
+
 export function formatDate(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
 }

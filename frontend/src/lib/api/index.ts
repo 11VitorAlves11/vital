@@ -17,6 +17,7 @@ import type {
   Photo,
   Pose,
   Report,
+  ReportComparison,
   ReportSummary,
   Result,
   ResultPrefill,
@@ -125,6 +126,10 @@ export const reports = {
       })}`,
     ),
   read: (id: string) => request<Report>(`/api/reports/${id}`),
+  /** Two collections marker by marker. The order the ids are given in does not
+   *  matter: the server puts the earlier draw first, so a delta reads forward. */
+  compare: (a: string, b: string) =>
+    request<ReportComparison>(`/api/reports/compare${query({ a, b })}`),
   /** The last reading of every marker, to fill a new entry in. Narrowed to one
    *  laboratory when known, because a reference range belongs to the lab that
    *  issued it and carrying one across is how a history acquires a wrong one. */

@@ -120,6 +120,24 @@
     "resultNote": "Note on this result",
     "prefilledFrom": "Pre-filled from {{source}}."
   },
+  "compare": {
+    "title": "Compare collections",
+    "open": "Compare",
+    "first": "First collection",
+    "second": "Second collection",
+    "samePick": "Pick two different collections to compare them.",
+    "needTwoTitle": "There are not two collections to compare yet",
+    "needTwoDescription": "A comparison needs two reports. Record another collection to see what changed between them.",
+    "caption": "Biomarker-by-biomarker comparison between the collection of {{previous}} and the one of {{current}}.",
+    "delta": "Difference",
+    "percent": "Change",
+    "added": "New",
+    "dropped": "Not repeated",
+    "entered": "{{count}} came back into range",
+    "entered_other": "{{count}} came back into range",
+    "left": "{{count}} left the range",
+    "left_other": "{{count}} left the range"
+  },
   "extraction": {
     "title": "Import a PDF",
     "description": "The model reads the report; you confirm what gets stored.",
@@ -285,7 +303,9 @@
     "collection_time_unknown": "Collection time not recorded. This marker varies through the day and should be drawn between {{start}} and {{end}}.",
     "outside_time_window": "Drawn at {{time}}, outside the {{start}}–{{end}} window recommended for this marker.",
     "low_reliability_method": "Method “{{method}}”: less reliable than the alternatives for this marker. See the biomarker notes.",
-    "method_changed": "Different method from the previous draw ({{from}} → {{to}}): the difference may be the assay rather than the body."
+    "method_changed": "Different method from the previous draw ({{from}} → {{to}}): the difference may be the assay rather than the body.",
+    "reference_changed": "The reference interval is not the same in both collections: the change in classification may be the laboratory rather than the body.",
+    "units_incomparable": "No known conversion between {{from}} and {{to}}: the difference cannot be computed."
   },
   "notes": {
     "add": "Add a note",

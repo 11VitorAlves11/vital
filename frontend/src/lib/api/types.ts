@@ -174,6 +174,32 @@ export type ReportSummary = CollectionContext & {
 
 export type Report = Omit<ReportSummary, "result_count"> & { results: Result[] };
 
+/** One biomarker across two collections. Either side is null when only one of
+ *  them measured it — a marker that was dropped or added is part of the diff. */
+export type ComparisonRow = {
+  biomarker_id: number;
+  biomarker_slug: string;
+  biomarker_name: string;
+  category: BiomarkerCategory;
+  previous: Result | null;
+  current: Result | null;
+  /** Later minus earlier, in `unit`. Null when the two had no common scale. */
+  delta: string | null;
+  /** Against the earlier value, in per cent. Null when that value was zero. */
+  percent_change: string | null;
+  /** The unit the difference is in, which is not always either report's own. */
+  unit: string | null;
+  /** Why the two numbers may not be strictly subtractable. */
+  caveats: Caveat[];
+};
+
+/** Two collections side by side, oldest first whatever order they were asked in. */
+export type ReportComparison = {
+  previous: ReportSummary;
+  current: ReportSummary;
+  rows: ComparisonRow[];
+};
+
 export type ExtractionStatus = "pending" | "processing" | "preview" | "confirmed" | "failed";
 
 /** One line as the model read it, paired with the catalogue entry it matched.

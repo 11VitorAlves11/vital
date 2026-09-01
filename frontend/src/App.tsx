@@ -12,6 +12,7 @@ import { Interventions } from "./pages/Interventions";
 import { Login } from "./pages/Login";
 import { Photos } from "./pages/Photos";
 import { Profile } from "./pages/Profile";
+import { ReportCompare } from "./pages/ReportCompare";
 import { ReportDetail } from "./pages/ReportDetail";
 import { Reports } from "./pages/Reports";
 import { Timeline } from "./pages/Timeline";
@@ -80,6 +81,16 @@ export function App() {
         element={
           <RequireSession>
             <Reports />
+          </RequireSession>
+        }
+      />
+      {/* Before the dynamic route in the file, though the router ranks a static
+          segment higher regardless — "compare" is not a report id. */}
+      <Route
+        path="/reports/compare"
+        element={
+          <RequireSession>
+            <ReportCompare />
           </RequireSession>
         }
       />

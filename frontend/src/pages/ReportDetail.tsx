@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { FileText, GitCompareArrows } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -7,6 +7,7 @@ import { ResultRow } from "../components/domain/ResultRow";
 import { Button, buttonClasses } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { ErrorState } from "../components/ui/ErrorState";
+import { LinkButton } from "../components/ui/LinkButton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { useToast } from "../components/ui/Toast";
 import { reports } from "../lib/api";
@@ -20,6 +21,9 @@ export function ReportDetail() {
   const navigate = useNavigate();
   const notify = useToast();
   const { data, loading, error, reload } = useAsync(() => reports.read(id), [id]);
+  // Only to know whether there is anything to compare this draw against; the
+  // comparison page picks the collection next to it in time.
+  const { data: history } = useAsync(() => reports.list());
 
   if (loading) return <Skeleton lines={6} label={t("common.loading")} />;
   if (error || !data) return <ErrorState onRetry={reload} />;
@@ -55,6 +59,12 @@ export function ReportDetail() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {history && history.length > 1 ? (
+            <LinkButton to={`/reports/compare?b=${data.id}`} variant="secondary">
+              <GitCompareArrows size={20} aria-hidden="true" />
+              {t("compare.open")}
+            </LinkButton>
+          ) : null}
           {/* A plain link, not fetch: the browser renders the PDF itself, and
               the session cookie rides along the way it does everywhere else. */}
           {data.has_file ? (

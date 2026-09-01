@@ -120,6 +120,24 @@
     "resultNote": "Nota sobre este resultado",
     "prefilledFrom": "Pré-preenchido a partir de {{source}}."
   },
+  "compare": {
+    "title": "Comparar colheitas",
+    "open": "Comparar",
+    "first": "Primeira colheita",
+    "second": "Segunda colheita",
+    "samePick": "Escolhe duas colheitas diferentes para as comparar.",
+    "needTwoTitle": "Ainda não há duas colheitas para comparar",
+    "needTwoDescription": "A comparação precisa de dois boletins. Regista outra colheita para ver o que mudou entre as duas.",
+    "caption": "Comparação por biomarcador entre a colheita de {{previous}} e a de {{current}}.",
+    "delta": "Diferença",
+    "percent": "Variação",
+    "added": "Novo",
+    "dropped": "Não repetido",
+    "entered": "{{count}} entrou no intervalo",
+    "entered_other": "{{count}} entraram no intervalo",
+    "left": "{{count}} saiu do intervalo",
+    "left_other": "{{count}} saíram do intervalo"
+  },
   "extraction": {
     "title": "Importar PDF",
     "description": "O modelo lê o boletim; tu confirmas o que fica guardado.",
@@ -285,7 +303,9 @@
     "collection_time_unknown": "Hora da colheita não registada. Este marcador varia ao longo do dia e deve ser colhido entre as {{start}} e as {{end}}.",
     "outside_time_window": "Colheita às {{time}}, fora da janela recomendada ({{start}}–{{end}}) para este marcador.",
     "low_reliability_method": "Método «{{method}}»: menos fiável do que as alternativas para este marcador. Ver as notas do biomarcador.",
-    "method_changed": "Método diferente da colheita anterior ({{from}} → {{to}}): a diferença pode ser do método e não do organismo."
+    "method_changed": "Método diferente da colheita anterior ({{from}} → {{to}}): a diferença pode ser do método e não do organismo.",
+    "reference_changed": "O intervalo de referência não é o mesmo nas duas colheitas: a mudança de classificação pode ser do laboratório e não do organismo.",
+    "units_incomparable": "Unidades sem conversão conhecida entre si ({{from}} → {{to}}): a diferença não é calculável."
   },
   "notes": {
     "add": "Adicionar nota",

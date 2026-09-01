@@ -1,4 +1,4 @@
-import { FileUp, Plus } from "lucide-react";
+import { FileUp, GitCompareArrows, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { Input } from "../components/ui/Input";
+import { LinkButton } from "../components/ui/LinkButton";
 import { Select } from "../components/ui/Select";
 import { Skeleton } from "../components/ui/Skeleton";
 import { features, providers, reports } from "../lib/api";
@@ -45,6 +46,13 @@ export function Reports() {
           {t("reports.title")}
         </h1>
         <div className="flex flex-wrap gap-2">
+          {/* Two collections are the minimum a diff can be about. */}
+          {data && data.length > 1 ? (
+            <LinkButton to="/reports/compare" variant="secondary">
+              <GitCompareArrows size={20} aria-hidden="true" />
+              {t("compare.open")}
+            </LinkButton>
+          ) : null}
           {available?.extraction ? (
             <Button
               variant="secondary"
