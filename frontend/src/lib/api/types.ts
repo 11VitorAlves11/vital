@@ -71,7 +71,9 @@ export type Band = {
   label: string;
   min: number | null;
   max: number | null;
-  flag: BandFlag;
+  /** Null on a scale that names without judging — the ACE body-fat categories
+   *  are fitness classes, so the label travels and the verdict does not. */
+  flag: BandFlag | null;
 };
 
 /** One step of an ordinal scale, in the biomarker's canonical unit. */
@@ -109,7 +111,11 @@ export type BodyMetric = {
   unit: string;
   /** Null for a trend-only metric, and while the user's sex is unknown. */
   bands: Band[] | null;
+  /** The standard behind the bands, for a metric that classifies. */
   source: string | null;
+  /** Why this metric carries no verdict, in one line. Set on every metric that
+   *  cannot flag — the card shows it where a classified metric shows `source`. */
+  trend_reason: string | null;
   notes: string | null;
 };
 

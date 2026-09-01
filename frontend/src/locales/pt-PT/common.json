@@ -185,7 +185,6 @@
     "notes": "Notas",
     "values": "Valores",
     "noClinicalReference": "Sem referência clínica",
-    "trendOnlyHint": "Registada em tendência. Não existe standard clínico validado para esta estimativa.",
     "emptyTitle": "Sem pesagens registadas",
     "emptyDescription": "Regista a primeira pesagem para veres a evolução e as bandas clínicas.",
     "setSexTitle": "Indica o sexo no perfil",

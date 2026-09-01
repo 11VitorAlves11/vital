@@ -185,7 +185,6 @@
     "notes": "Notes",
     "values": "Values",
     "noClinicalReference": "No clinical reference",
-    "trendOnlyHint": "Recorded as a trend. There is no validated clinical standard for this estimate.",
     "emptyTitle": "No weigh-ins recorded",
     "emptyDescription": "Record your first weigh-in to see the trend and the clinical bands.",
     "setSexTitle": "Set your sex in the profile",

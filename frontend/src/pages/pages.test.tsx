@@ -41,6 +41,7 @@ const BMI = {
   unit: "kg/m²",
   bands: [{ label: "Pré-obesidade", min: 25, max: 30, flag: "warn" }],
   source: "OMS",
+  trend_reason: null,
   notes: null,
 };
 
@@ -426,7 +427,7 @@ describe("Interventions", () => {
 });
 
 describe("Body", () => {
-  it("shows the clinical band label and marks trend-only metrics as unreferenced", async () => {
+  it("shows the standard where one classifies, and the reason where none does", async () => {
     mockApi([
       ...SESSION_ROUTES,
       {
@@ -448,7 +449,15 @@ describe("Body", () => {
             sparkline: [{ date: "2026-03-01T08:00:00Z", value: "27.0000" }],
           },
           {
-            metric: { ...BMI, id: 2, slug: "weight", name: "Peso", bands: null, source: null },
+            metric: {
+              ...BMI,
+              id: 2,
+              slug: "weight",
+              name: "Peso",
+              bands: null,
+              source: null,
+              trend_reason: "A leitura clínica faz-se pelo IMC",
+            },
             latest: {
               id: "v2",
               metric_id: 2,
@@ -467,7 +476,11 @@ describe("Body", () => {
     ]);
     renderWithSession(<Body />);
     expect(await screen.findByText("Pré-obesidade")).toBeInTheDocument();
-    expect(screen.getByText("Sem referência clínica")).toBeInTheDocument();
+    expect(screen.getByText("OMS")).toBeInTheDocument();
+    // The reason this one carries no verdict, rather than the same four words
+    // the page used to repeat on every unclassified metric.
+    expect(screen.getByText("A leitura clínica faz-se pelo IMC")).toBeInTheDocument();
+    expect(screen.queryByText("Sem referência clínica")).not.toBeInTheDocument();
   });
 
   it("asks for the missing sex instead of showing values it cannot classify", async () => {

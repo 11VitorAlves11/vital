@@ -9,6 +9,7 @@ import { FlagChip } from "../components/ui/FlagChip";
 import { Skeleton } from "../components/ui/Skeleton";
 import { body } from "../lib/api";
 import { formatDateTime, formatValue, toNumber } from "../lib/format";
+import { referenceLabel } from "../lib/reference";
 import { useAsync } from "../lib/useAsync";
 
 export function BodyMetricDetail() {
@@ -31,11 +32,12 @@ export function BodyMetricDetail() {
         <h1 className="font-display text-2xl leading-tight font-medium text-ink">{metric.name}</h1>
         <p className="text-sm text-ink-muted">
           {metric.unit}
-          {metric.source ? ` · ${metric.source}` : ` · ${t("body.noClinicalReference")}`}
+          {` · ${referenceLabel(metric) ?? t("body.noClinicalReference")}`}
         </p>
-        {metric.bands === null ? (
-          <p className="text-sm text-ink-muted">{t("body.trendOnlyHint")}</p>
-        ) : null}
+        {/* The catalogue's own note on this metric, where there is room for it.
+            It is the long form of the line above — what bioimpedance actually
+            measures here, and which standard would be the real one. */}
+        {metric.notes ? <p className="max-w-prose text-sm text-ink-muted">{metric.notes}</p> : null}
       </header>
 
       {points.length === 0 ? (

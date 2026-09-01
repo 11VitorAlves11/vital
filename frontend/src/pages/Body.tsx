@@ -15,6 +15,7 @@ import { Skeleton } from "../components/ui/Skeleton";
 import { Sparkline } from "../components/ui/Sparkline";
 import { body } from "../lib/api";
 import { formatDateTime, formatValue, toNumber } from "../lib/format";
+import { classifies, referenceLabel } from "../lib/reference";
 import { useSession } from "../lib/session";
 import { useAsync } from "../lib/useAsync";
 
@@ -121,9 +122,13 @@ export function Body() {
                   })}
                 />
 
-                <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-3 border-t border-border pt-3 text-sm">
-                  <span className={entry.metric.source ? "text-ink" : "text-ink-muted"}>
-                    {entry.metric.source ?? t("body.noClinicalReference")}
+                {/* The standard when one classifies, and otherwise the reason
+                    none does — stacked rather than side by side, because the
+                    reasons are sentences and a date pushed onto a second line
+                    by some cards and not others makes a ragged grid. */}
+                <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-3 text-sm">
+                  <span className={classifies(entry.metric) ? "text-ink" : "text-ink-muted"}>
+                    {referenceLabel(entry.metric) ?? t("body.noClinicalReference")}
                   </span>
                   <span className="text-ink-muted">
                     {formatDateTime(entry.measured_at, locale)}
