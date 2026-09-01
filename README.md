@@ -6,11 +6,14 @@ Vital turns a pile of PDF lab reports and bathroom-scale readings into a single 
 you actually read: trends with the reference band drawn behind them, clinical flags, and
 an overlay of the interventions (supplements, diet, training) you were running at the time.
 
-Body-composition classifications come from **clinical standards** (WHO, ACE/ACSM, IDF) —
-never from the proprietary ratings your scale prints.
+Body-composition classifications come from **clinical standards** (WHO, IDF, GLIM/ESPEN) —
+never from the proprietary ratings your scale prints. A scale that is not clinical, like the
+ACE/ACSM body-fat categories, names the reading and stops there: sixteen of the twenty body
+metrics carry no verdict at all, and each says why in its own words.
 
 > **Status:** early development. v1 (MVP) covers authentication, manual lab reports,
 > body-composition logging with clinical flags, interventions and the trend dashboard.
+> Reading a lab PDF with a model is built and off until you configure one.
 
 ## Stack
 
@@ -27,7 +30,7 @@ docker compose -f docker-compose.dev.yml up --build
 Web: <http://localhost:5173> · API: <http://localhost:8000/api> · Docs: <http://localhost:8000/docs>
 
 The API migrates and seeds itself on start-up, so the first run comes up with the full
-clinical catalogue (31 biomarkers, 18 body-composition metrics) already loaded.
+clinical catalogue (31 biomarkers, 20 body-composition metrics) already loaded.
 
 ## Authentication
 
@@ -44,6 +47,39 @@ the API refuses to start without one.
 
 Set your sex in the profile: reference ranges and clinical bands are sex-specific, and
 Vital declines to classify anything rather than guess which set applies.
+
+## Reading a PDF with a model
+
+Point Vital at any model LiteLLM supports and **Import a PDF** appears next to the manual
+entry form. Leave `LLM_MODEL` empty and the button does not: no model configured means no
+extraction, not a broken one.
+
+```bash
+# In .env. A model you host yourself: no key, and nothing leaves the machine.
+LLM_MODEL=ollama/llama3.2-vision
+LLM_BASE_URL=http://10.0.0.10:11434
+
+# Or a hosted provider — anything LiteLLM accepts, written "provider/model",
+# with that provider's key. Vital hardcodes no vendor and prefers none.
+# LLM_MODEL=<provider>/<model>
+# LLM_API_KEY=...
+```
+
+What happens to the file:
+
+1. PyMuPDF pulls the text out. Under `EXTRACTION_TEXT_THRESHOLD` characters per page the
+   report is a scan, and each page goes to the model as a 144 dpi image instead — so a
+   scanned report needs a model that can see.
+2. The model is asked for JSON and nothing else. The answer is validated against a schema,
+   and each name it returns is matched against the catalogue by name and PT-PT alias.
+3. The result is a **preview**, not a report. Nothing reaches your history until you have
+   looked at every row and confirmed it — two-column layouts are read across the columns
+   often enough that this gate is not optional, and a wrong value entered as fact is worse
+   than no value. The original PDF is kept, so the reading can always be checked.
+
+`EXTRACTION_MAX_PAGES` and `UPLOAD_MAX_BYTES` bound what a single upload can cost, in
+tokens and in memory. A cloud model means your blood work is sent to that provider; a
+self-hosted one is the reason the setting exists.
 
 ### Without Docker
 
