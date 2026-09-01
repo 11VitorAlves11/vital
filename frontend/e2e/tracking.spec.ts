@@ -48,7 +48,9 @@ test.describe("recording and reading values", () => {
     await expect(page.getByText("Pré-obesidade")).toBeVisible();
 
     await recordScan(page, { metric: "Peso", value: "74.2" });
-    await expect(page.getByText("Sem referência clínica").first()).toBeVisible();
+    // Peso carries no bands, and says why rather than the generic string every
+    // unclassified metric used to repeat.
+    await expect(page.getByText("A leitura clínica faz-se pelo IMC").first()).toBeVisible();
   });
 
   test("interventions can be ended", async ({ page }) => {
