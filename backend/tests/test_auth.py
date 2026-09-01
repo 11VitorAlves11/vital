@@ -1,13 +1,23 @@
 """Local authentication, the session cookie, and what happens without one."""
 
+import time
 import uuid
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
 
 import pytest
 from httpx import AsyncClient
+from itsdangerous import TimestampSigner
 
 from app.core.config import get_settings
-from app.core.security import hash_password, issue_session, read_session, verify_password
+from app.core.security import (
+    MAX_CLOCK_SKEW_SECONDS,
+    hash_password,
+    issue_session,
+    read_session,
+    verify_password,
+)
 from tests.conftest import TEST_PASSWORD, UserFactory
 
 PROTECTED = [
@@ -123,6 +133,43 @@ async def test_session_token_round_trip() -> None:
     user_id = uuid.uuid4()
     assert read_session(issue_session(user_id)) == user_id
     assert read_session("not-a-token") is None
+
+
+@contextmanager
+def _clock_offset(seconds: int) -> Iterator[None]:
+    """Issue tokens as if this machine's clock were `seconds` off from real time."""
+    original = TimestampSigner.get_timestamp
+    TimestampSigner.get_timestamp = lambda self: int(time.time()) + seconds  # type: ignore[method-assign]
+    try:
+        yield
+    finally:
+        TimestampSigner.get_timestamp = original  # type: ignore[method-assign]
+
+
+def _token_stamped(offset_seconds: int, user_id: uuid.UUID) -> str:
+    """A session token signed by us, but timestamped somewhere else in time."""
+    with _clock_offset(offset_seconds):
+        return issue_session(user_id)
+
+
+async def test_a_token_from_the_near_future_is_still_read() -> None:
+    """A clock that stepped back must not sign everybody out.
+
+    Machines do step their clocks — after a suspend, or when NTP first syncs —
+    and a token stamped seconds ahead carries a signature only this instance
+    could have produced.
+    """
+    user_id = uuid.uuid4()
+    assert read_session(_token_stamped(5, user_id)) == user_id
+    assert read_session(_token_stamped(MAX_CLOCK_SKEW_SECONDS - 1, user_id)) == user_id
+
+
+async def test_a_token_from_far_ahead_or_long_past_is_refused() -> None:
+    """The tolerance is for skew, not for extending a session by either end."""
+    user_id = uuid.uuid4()
+    assert read_session(_token_stamped(MAX_CLOCK_SKEW_SECONDS + 60, user_id)) is None
+    expired = -(get_settings().session_max_age + 60)
+    assert read_session(_token_stamped(expired, user_id)) is None
 
 
 async def test_passwords_are_hashed_not_stored() -> None:

@@ -6,6 +6,7 @@ to run at home, at the cost of not being able to revoke a single session early.
 """
 
 import uuid
+from datetime import UTC, datetime
 
 import bcrypt
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
@@ -17,7 +18,11 @@ from app.core.config import get_settings
 MAX_PASSWORD_BYTES = 72
 MIN_PASSWORD_LENGTH = 10
 
-_SESSION_SALT = "vital.session"
+#: How far into the future a session token may be stamped and still be read.
+#: Wide enough for a clock that stepped back, far too narrow to extend a session.
+MAX_CLOCK_SKEW_SECONDS = 60
+
+SESSION_SALT = "vital.session"
 
 
 class PasswordTooLongError(ValueError):
@@ -42,7 +47,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 def _serializer() -> URLSafeTimedSerializer:
-    return URLSafeTimedSerializer(get_settings().secret_key, salt=_SESSION_SALT)
+    return URLSafeTimedSerializer(get_settings().secret_key, salt=SESSION_SALT)
 
 
 def issue_session(user_id: uuid.UUID) -> str:
@@ -51,11 +56,36 @@ def issue_session(user_id: uuid.UUID) -> str:
 
 def read_session(token: str) -> uuid.UUID | None:
     """Return the user id carried by a valid, unexpired token, else None."""
+    serializer = _serializer()
+    max_age = get_settings().session_max_age
     try:
-        raw = _serializer().loads(token, max_age=get_settings().session_max_age)
-    except (BadSignature, SignatureExpired):
+        raw = serializer.loads(token, max_age=max_age)
+    except SignatureExpired as expired:
+        if not _within_clock_skew(expired.date_signed):
+            return None
+        # A token stamped seconds into the future is a clock that stepped back,
+        # not a forgery: the signature already proved we issued it. Refusing it
+        # would sign everyone out until real time caught up, and machines do
+        # step their clocks — after a suspend, or when NTP first syncs.
+        try:
+            raw = serializer.loads(token)
+        except BadSignature:
+            return None
+    except BadSignature:
         return None
     try:
         return uuid.UUID(str(raw))
     except ValueError:
         return None
+
+
+def _within_clock_skew(signed_at: datetime | None) -> bool:
+    """Whether a token was stamped in the near future rather than long ago.
+
+    Only the future side is forgiven. A token whose age is positive and beyond
+    `session_max_age` has genuinely expired, and stays refused.
+    """
+    if signed_at is None:
+        return False
+    ahead = (signed_at - datetime.now(UTC)).total_seconds()
+    return 0 < ahead <= MAX_CLOCK_SKEW_SECONDS
