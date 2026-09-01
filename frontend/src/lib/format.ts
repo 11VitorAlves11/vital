@@ -23,6 +23,14 @@ export function formatSigned(value: string | number | null | undefined, locale: 
   }).format(parsed);
 }
 
+/** A target month for a scheduled repeat: "junho de 2026". The day is not part
+ *  of what was asked for, so none is shown. */
+export function formatMonthYear(year: number, month: number, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(
+    new Date(year, month - 1, 1),
+  );
+}
+
 export function formatDate(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
 }

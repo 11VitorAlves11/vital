@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -113,5 +113,24 @@ describe("ReportDetail", () => {
     render({ ...REPORT, notes: "Tudo dentro do intervalo.", notes_at: "2026-03-02T09:30:00Z" });
     expect(await screen.findByText("Tudo dentro do intervalo.")).toBeInTheDocument();
     expect(screen.getByText(/Escrita em/)).toBeInTheDocument();
+  });
+
+  it("schedules a repeat from one result", async () => {
+    const fetchMock = mockApi([
+      { pattern: /\/api\/repeats/, body: { id: "rep-1" } },
+      { pattern: /\/api\/reports\/r1/, body: REPORT },
+    ]);
+    renderWithProviders(<ReportDetail />, { route: "/reports/r1", path: "/reports/:id" });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Agendar repetição" }));
+    const dialog = await screen.findByRole("dialog", { name: /Repetir Hemoglobina/ });
+    await userEvent.click(within(dialog).getByRole("button", { name: "Guardar" }));
+
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
+      expect(call?.[0]).toBe("/api/repeats");
+      const body = JSON.parse(String(call?.[1]?.body));
+      expect(body).toMatchObject({ result_id: "res-1", note: null });
+    });
   });
 });

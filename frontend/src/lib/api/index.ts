@@ -16,11 +16,13 @@ import type {
   Lab,
   Photo,
   Pose,
+  RepeatStatus,
   Report,
   ReportComparison,
   ReportSummary,
   Result,
   ResultPrefill,
+  ScheduledRepeat,
   Sex,
   Timeline,
   TimelineKind,
@@ -145,6 +147,19 @@ export const reports = {
   create: (payload: ReportPayload) =>
     request<Report>("/api/reports", { method: "POST", body: payload }),
   remove: (id: string) => request<void>(`/api/reports/${id}`, { method: "DELETE" }),
+};
+
+/** Reminders to repeat one biomarker, created from a result. Status is derived
+ *  server-side on every read — nothing here is a fact the client tracks itself. */
+export const repeats = {
+  list: (status?: RepeatStatus) => request<ScheduledRepeat[]>(`/api/repeats${query({ status })}`),
+  create: (payload: {
+    result_id: string;
+    target_year: number;
+    target_month: number;
+    note?: string | null;
+  }) => request<ScheduledRepeat>("/api/repeats", { method: "POST", body: payload }),
+  remove: (id: string) => request<void>(`/api/repeats/${id}`, { method: "DELETE" }),
 };
 
 export const interventions = {

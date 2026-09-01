@@ -138,6 +138,20 @@
     "left": "{{count}} saiu do intervalo",
     "left_other": "{{count}} saíram do intervalo"
   },
+  "repeats": {
+    "schedule": "Agendar repetição",
+    "scheduleTitle": "Repetir {{biomarker}}",
+    "targetMonth": "Mês previsto",
+    "note": "Nota",
+    "notePlaceholder": "Ex.: ver se a suplementação resultou",
+    "created": "Repetição agendada.",
+    "deleted": "Lembrete removido.",
+    "dueTitle": "Por repetir",
+    "dueCount": "{{count}} marcador por repetir",
+    "dueCount_other": "{{count}} marcadores por repetir",
+    "targetLabel": "Previsto para {{month}}",
+    "cancel": "Cancelar lembrete"
+  },
   "extraction": {
     "title": "Importar PDF",
     "description": "O modelo lê o boletim; tu confirmas o que fica guardado.",
@@ -304,7 +318,8 @@
     "low_reliability_method": "Método «{{method}}»: menos fiável do que as alternativas para este marcador. Ver as notas do biomarcador.",
     "method_changed": "Método diferente da colheita anterior ({{from}} → {{to}}): a diferença pode ser do método e não do organismo.",
     "reference_changed": "O intervalo de referência não é o mesmo nas duas colheitas: a mudança de classificação pode ser do laboratório e não do organismo.",
-    "units_incomparable": "Unidades sem conversão conhecida entre si ({{from}} → {{to}}): a diferença não é calculável."
+    "units_incomparable": "Unidades sem conversão conhecida entre si ({{from}} → {{to}}): a diferença não é calculável.",
+    "seasonal_marker": "Marcador sensível à estação do ano: esta leitura e a anterior distam {{months_apart}} meses no calendário — parte da diferença pode ser sazonal."
   },
   "notes": {
     "add": "Adicionar nota",

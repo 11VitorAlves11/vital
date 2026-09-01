@@ -138,6 +138,20 @@
     "left": "{{count}} left the range",
     "left_other": "{{count}} left the range"
   },
+  "repeats": {
+    "schedule": "Schedule a repeat",
+    "scheduleTitle": "Repeat {{biomarker}}",
+    "targetMonth": "Target month",
+    "note": "Note",
+    "notePlaceholder": "E.g. check whether the supplement worked",
+    "created": "Repeat scheduled.",
+    "deleted": "Reminder removed.",
+    "dueTitle": "Due for repeat",
+    "dueCount": "{{count}} marker due for repeat",
+    "dueCount_other": "{{count}} markers due for repeat",
+    "targetLabel": "Due around {{month}}",
+    "cancel": "Cancel reminder"
+  },
   "extraction": {
     "title": "Import a PDF",
     "description": "The model reads the report; you confirm what gets stored.",
@@ -304,7 +318,8 @@
     "low_reliability_method": "Method “{{method}}”: less reliable than the alternatives for this marker. See the biomarker notes.",
     "method_changed": "Different method from the previous draw ({{from}} → {{to}}): the difference may be the assay rather than the body.",
     "reference_changed": "The reference interval is not the same in both collections: the change in classification may be the laboratory rather than the body.",
-    "units_incomparable": "No known conversion between {{from}} and {{to}}: the difference cannot be computed."
+    "units_incomparable": "No known conversion between {{from}} and {{to}}: the difference cannot be computed.",
+    "seasonal_marker": "Marker sensitive to the time of year: this reading and the previous one are {{months_apart}} months apart in the calendar — part of the difference may be seasonal."
   },
   "notes": {
     "add": "Add a note",

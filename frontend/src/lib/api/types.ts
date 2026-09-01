@@ -405,4 +405,27 @@ export type Dashboard = {
   categories: { category: BiomarkerCategory; items: DashboardItem[] }[];
   last_report_on: string | null;
   report_count: number;
+  /** Schedules whose target month has arrived with nothing newer recorded
+   *  since. Upcoming and fulfilled ones live only on GET /api/repeats. */
+  due_repeats: ScheduledRepeat[];
+};
+
+/** Whether a schedule still needs acting on — derived server-side on every
+ *  read, never stored: a newer result for the marker fulfils it on its own. */
+export type RepeatStatus = "upcoming" | "due" | "fulfilled";
+
+/** A reminder to repeat one biomarker around a future month, created from a
+ *  result. `source_result_id` goes null if that report is later deleted — the
+ *  schedule itself survives, checked against the date it snapshotted. */
+export type ScheduledRepeat = {
+  id: string;
+  biomarker_id: number;
+  biomarker_slug: string;
+  biomarker_name: string;
+  target_year: number;
+  target_month: number;
+  note: string | null;
+  created_at: string;
+  source_result_id: string | null;
+  status: RepeatStatus;
 };

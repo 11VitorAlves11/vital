@@ -1,13 +1,17 @@
+import { CalendarClock } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import type { Result } from "../../lib/api/types";
 import { cn } from "../../lib/cn";
 import { formatRange, formatValue } from "../../lib/format";
+import { Button } from "../ui/Button";
 import { FlagChip } from "../ui/FlagChip";
 import { Markdown } from "../ui/Markdown";
 import { CaveatList } from "./CaveatList";
 import { NoteEditor } from "./NoteEditor";
+import { ScheduleRepeatForm } from "./ScheduleRepeatForm";
 
 /** One line of a lab report: value in tabular mono, unit, range, flag with label. */
 type ResultRowProps = {
@@ -19,6 +23,7 @@ type ResultRowProps = {
 export function ResultRow({ result, onAnnotate }: ResultRowProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
+  const [scheduling, setScheduling] = useState(false);
   // On a named scale the step is the reference; the two numbers around it read
   // as a pass/fail the marker deliberately is not.
   const range = result.band_label ?? formatRange(result.ref_min, result.ref_max, locale);
@@ -61,6 +66,20 @@ export function ResultRow({ result, onAnnotate }: ResultRowProps) {
       ) : result.note ? (
         <Markdown className="mt-1.5 text-sm">{result.note}</Markdown>
       ) : null}
+      <Button
+        variant="ghost"
+        className="mt-1.5"
+        icon={<CalendarClock size={16} aria-hidden="true" />}
+        onClick={() => setScheduling(true)}
+      >
+        {t("repeats.schedule")}
+      </Button>
+      <ScheduleRepeatForm
+        open={scheduling}
+        onOpenChange={setScheduling}
+        resultId={result.id}
+        biomarkerName={result.biomarker_name}
+      />
     </div>
   );
 }

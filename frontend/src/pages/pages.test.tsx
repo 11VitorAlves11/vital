@@ -115,6 +115,7 @@ describe("Dashboard", () => {
           ],
           last_report_on: "2026-03-01",
           report_count: 2,
+          due_repeats: [],
         },
       },
     ]);
@@ -160,6 +161,7 @@ describe("Dashboard", () => {
           ],
           last_report_on: "2026-03-01",
           report_count: 1,
+          due_repeats: [],
         },
       },
     ]);
@@ -196,6 +198,7 @@ describe("Dashboard", () => {
           ],
           last_report_on: "2026-03-01",
           report_count: 1,
+          due_repeats: [],
         },
       },
     ]);
@@ -208,12 +211,54 @@ describe("Dashboard", () => {
     mockApi([
       {
         pattern: /\/api\/dashboard/,
-        body: { categories: [], last_report_on: null, report_count: 0 },
+        body: { categories: [], last_report_on: null, report_count: 0, due_repeats: [] },
       },
     ]);
     renderWithProviders(<Dashboard />);
     expect(await screen.findByText("Ainda não há análises")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Registar colheita" })).toBeInTheDocument();
+  });
+
+  it("surfaces what is due for repeat, and cancelling removes it", async () => {
+    const fetchMock = mockApi([
+      {
+        pattern: /\/api\/dashboard/,
+        body: {
+          categories: [],
+          last_report_on: "2026-03-01",
+          report_count: 1,
+          due_repeats: [
+            {
+              id: "rep-1",
+              biomarker_id: 1,
+              biomarker_slug: "vitamin-d-25-oh",
+              biomarker_name: "Vitamina D (25-OH)",
+              target_year: 2026,
+              target_month: 3,
+              note: "ver suplementação",
+              created_at: "2026-01-01T00:00:00Z",
+              source_result_id: "res-1",
+              status: "due",
+            },
+          ],
+        },
+      },
+      { pattern: /\/api\/repeats\/rep-1/, body: null },
+    ]);
+    renderWithProviders(<Dashboard />);
+
+    expect(await screen.findByRole("heading", { name: "1 marcador por repetir" })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: "Vitamina D (25-OH)" });
+    expect(link).toHaveAttribute("href", "/biomarkers/1");
+    expect(screen.getByText(/Previsto para março de 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/ver suplementação/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Cancelar lembrete" }));
+
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([, init]) => init?.method === "DELETE");
+      expect(call?.[0]).toBe("/api/repeats/rep-1");
+    });
   });
 
   it("keeps the failure beside the content, with a retry", async () => {
