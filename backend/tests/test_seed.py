@@ -75,6 +75,23 @@ async def test_bands_round_trip_unmodified(database: None) -> None:
         assert row.bands_m == entry["bands_m"], row.slug
         assert row.bands_f == entry["bands_f"], row.slug
         assert row.source == entry["source"], row.slug
+        assert row.trend_reason == entry["trend_reason"], row.slug
+
+
+async def test_every_metric_that_cannot_flag_says_why(database: None) -> None:
+    """The card shows this sentence where a classified metric shows its standard.
+
+    Without it the page falls back to the same four words on every unclassified
+    metric, which is what it said before and told the reader nothing.
+    """
+    async with get_sessionmaker()() as db:
+        rows = (await db.execute(select(BodyMetric))).scalars().all()
+
+    for row in rows:
+        classifies = row.bands_m is not None and any(
+            band.get("flag") is not None for band in row.bands_m
+        )
+        assert bool(row.trend_reason) is not classifies, row.slug
 
 
 async def test_trend_only_metrics_are_sql_null_not_json_null(database: None) -> None:

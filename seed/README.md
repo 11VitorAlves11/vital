@@ -22,18 +22,28 @@ Catálogos partilhados entre utilizadores, carregados na base de dados no arranq
   porque varia entre laboratórios. `null` = limite não aplicável.
 - **Bandas** (`bands_m` / `bands_f`) são intervalos **`[min, max)`** — `min` inclusivo,
   `max` exclusivo, `null` = sem limite desse lado. As bandas de cada sexo cobrem todo o
-  domínio sem sobreposições nem lacunas. `flag` ∈ `normal` | `warn` | `alert`.
+  domínio sem sobreposições nem lacunas. `flag` ∈ `normal` | `warn` | `alert`, ou `null`.
+- **`flag` a `null` = a escala nomeia sem classificar.** Dá nome ao valor («Atleta»,
+  «Aceitável») e não emite veredicto — é o caso das categorias do ACE/ACSM, que são de
+  aptidão física e não clínicas. Dentro de uma métrica, as bandas ou classificam todas
+  ou nenhuma: meio a meio deixaria o leitor sem saber distinguir uma coisa da outra.
 - **`bands` a `null` = métrica trend-only**: registada e visualizada em tendência, sem
   flag. Só existe flag onde há standard clínico validado — aplicar "standards" inventados
   a estimativas de bioimpedância seria pseudo-precisão.
 - **`source`** identifica a proveniência do standard (OMS, ACE/ACSM, IDF), para auditoria.
+- **`trend_reason`** é a razão, numa linha, de a métrica não emitir veredicto — obrigatória
+  em todas as que não classificam (sem bandas, ou com bandas que só nomeiam) e proibida nas
+  que classificam, que declaram `source`. É o que o cartão mostra onde uma métrica
+  classificada mostra o standard, em vez de repetir «Sem referência clínica» em toda a
+  página. O texto longo continua em `notes`, que a página de detalhe mostra por inteiro.
 
 ## Proveniência dos standards
 
 | Standard | Aplicação |
 |---|---|
 | OMS | Classificação do IMC; perímetro abdominal (em conjunto com a IDF) |
-| ACE/ACSM | Categorias de percentagem de gordura corporal, por sexo |
+| ACE/ACSM | Categorias de percentagem de gordura corporal, por sexo — **nomeiam sem classificar** (aptidão física, não clínica) |
+| GLIM/ESPEN | Limiares de IMLG para massa magra reduzida |
 | IDF | Limiares de perímetro abdominal para risco cardiometabólico |
 
 Os intervalos de referência dos biomarcadores seguem valores laboratoriais de adulto

@@ -79,11 +79,9 @@ def _seed_metric(slug: str) -> dict[str, object]:
         ("bmi", "bands_m", "27", "warn", "Pré-obesidade"),
         ("bmi", "bands_f", "22", "normal", "Normal"),
         ("bmi", "bands_m", "36", "alert", "Obesidade grau II"),
-        ("body-fat-pct", "bands_m", "10", "normal", "Atleta"),
-        ("body-fat-pct", "bands_m", "1.5", "alert", "Abaixo do essencial"),
-        ("body-fat-pct", "bands_f", "33", "alert", "Obesidade"),
         ("waist-circumference", "bands_m", "96", "warn", "Risco aumentado"),
         ("waist-circumference", "bands_f", "79", "normal", "Sem risco acrescido"),
+        ("ffmi", "bands_m", "16.4", "alert", "Massa magra reduzida"),
     ],
 )
 def test_seeded_bands_classify_against_their_published_standard(
@@ -91,3 +89,24 @@ def test_seeded_bands_classify_against_their_published_standard(
 ) -> None:
     bands = _seed_metric(slug)[sex]
     assert classify(Decimal(value), bands) == (expected_flag, expected_label)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("sex", "value", "expected_label"),
+    [
+        ("bands_m", "10", "Atleta"),
+        ("bands_m", "1.5", "Abaixo do essencial"),
+        ("bands_f", "33", "Obesidade"),
+    ],
+)
+def test_the_body_fat_scale_names_without_judging(
+    sex: str, value: str, expected_label: str
+) -> None:
+    """The ACE categories are fitness classes, not clinical ones (decision D1).
+
+    They still name the reading — the reader gets "Atleta" — but they no longer
+    produce a flag, because a bioimpedance estimate against a fitness scale is
+    not a verdict on anyone's health.
+    """
+    bands = _seed_metric("body-fat-pct")[sex]
+    assert classify(Decimal(value), bands) == (None, expected_label)  # type: ignore[arg-type]

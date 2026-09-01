@@ -42,7 +42,16 @@ BIOMARKER_FIELDS = (
     "aliases",
     "notes",
 )
-BODY_METRIC_FIELDS = ("slug", "name", "unit", "bands_m", "bands_f", "source", "notes")
+BODY_METRIC_FIELDS = (
+    "slug",
+    "name",
+    "unit",
+    "bands_m",
+    "bands_f",
+    "source",
+    "trend_reason",
+    "notes",
+)
 DECIMAL_FIELDS = frozenset({"ref_min_m", "ref_max_m", "ref_min_f", "ref_max_f"})
 TIME_FIELDS = frozenset({"time_window_start", "time_window_end"})
 #: Columns the JSON may leave out, with what "left out" means for each.

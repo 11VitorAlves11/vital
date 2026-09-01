@@ -16,6 +16,8 @@ class BodyMetric(Base):
 
     `bands_m`/`bands_f` are `[{label, min, max, flag}]` covering the whole domain as
     `[min, max)` intervals. Both NULL means trend-only: recorded, charted, never flagged.
+    A band whose `flag` is null names the reading without judging it — the scale is
+    real, the verdict is not ours to give (see `trend_reason`).
     """
 
     __tablename__ = "body_metrics"
@@ -29,6 +31,10 @@ class BodyMetric(Base):
     bands_m: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
     bands_f: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
     source: Mapped[str | None] = mapped_column(String)
+    # Why this metric carries no verdict, in one line — set on every metric that
+    # cannot produce a flag, whether it has no bands at all or bands that only
+    # name (the ACE categories, which are fitness classes and not clinical ones).
+    trend_reason: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
 
 

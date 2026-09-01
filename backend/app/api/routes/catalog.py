@@ -56,6 +56,7 @@ def to_body_metric_out(metric: BodyMetric, user: User) -> BodyMetricOut:
         unit=metric.unit,
         bands=[BandOut.model_validate(band) for band in bands] if bands is not None else None,
         source=metric.source,
+        trend_reason=metric.trend_reason,
         notes=metric.notes,
     )
 

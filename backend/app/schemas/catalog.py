@@ -12,7 +12,10 @@ class BandOut(BaseModel):
     label: str
     min: float | None = None
     max: float | None = None
-    flag: Literal["normal", "warn", "alert"]
+    # Null on a scale that names without judging: the ACE body-fat categories are
+    # fitness classes, and calling one of them "normal" would lend them an
+    # authority they do not have. The label still travels; the verdict does not.
+    flag: Literal["normal", "warn", "alert"] | None = None
 
 
 class ReferenceBandOut(BaseModel):
@@ -56,4 +59,7 @@ class BodyMetricOut(BaseModel):
     # Null bands = trend-only metric: charted, never flagged.
     bands: list[BandOut] | None = None
     source: str | None = None
+    #: Why there is no verdict here, in one line. Set on every metric that cannot
+    #: flag, so a card can say the reason instead of the same four words.
+    trend_reason: str | None = None
     notes: str | None = None

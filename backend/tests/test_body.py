@@ -108,6 +108,42 @@ async def test_setting_the_sex_later_flags_the_existing_history(
     assert (await ac.get("/api/body/scans")).json()[0]["values"][0]["flag"] == "warn"
 
 
+async def test_a_scale_that_names_without_judging_labels_but_does_not_flag(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    """Body fat carries the ACE categories as names only — decision D1."""
+    response = await user_client.post(
+        "/api/body/scans",
+        json={
+            "measured_at": "2026-03-01T08:00:00Z",
+            "values": [{"metric_id": catalogue["metrics"]["body-fat-pct"]["id"], "value": 22}],
+        },
+    )
+    value = response.json()["values"][0]
+    assert (value["label"], value["flag"]) == ("Aceitável", None)
+
+    metric = next(
+        item
+        for item in (await user_client.get("/api/body/metrics")).json()
+        if item["slug"] == "body-fat-pct"
+    )
+    # The provenance still travels, and so does the reason it does not classify.
+    assert metric["source"] == "ACE/ACSM"
+    assert metric["trend_reason"]
+    assert all(band["flag"] is None for band in metric["bands"])
+
+
+async def test_an_unclassified_metric_says_why_rather_than_saying_nothing(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    metrics = {item["slug"]: item for item in (await user_client.get("/api/body/metrics")).json()}
+    assert metrics["weight"]["trend_reason"] == "A leitura clínica faz-se pelo IMC"
+    assert metrics["weight"]["source"] is None
+    # And a metric that does classify has a standard instead of an excuse.
+    assert metrics["bmi"]["trend_reason"] is None
+    assert metrics["bmi"]["source"] == "OMS"
+
+
 async def test_the_same_metric_cannot_appear_twice_in_a_scan(
     user_client: AsyncClient, catalogue: dict[str, Any]
 ) -> None:

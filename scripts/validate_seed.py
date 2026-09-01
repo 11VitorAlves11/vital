@@ -171,8 +171,13 @@ def check_bands(slug: str, sex: str, bands: list[dict[str, Any]]) -> None:
         return
     if bands[0]["min"] is not None or bands[-1]["max"] is not None:
         fail(f"métrica {slug} ({sex}): as bandas têm de cobrir todo o domínio (extremos null)")
+    # All or none: a band set either classifies or only names. Half of each would
+    # leave a reader unable to tell an unflagged band from an unjudged scale.
+    flags = [band.get("flag") for band in bands]
+    if any(flag is None for flag in flags) and any(flag is not None for flag in flags):
+        fail(f"métrica {slug} ({sex}): bandas ou classificam todas ou nenhuma")
     for band in bands:
-        if band.get("flag") not in FLAGS:
+        if band.get("flag") is not None and band["flag"] not in FLAGS:
             fail(f"métrica {slug} ({sex}): flag inválida {band.get('flag')!r}")
         if not band.get("label"):
             fail(f"métrica {slug} ({sex}): banda sem label")
@@ -191,7 +196,16 @@ def check_body_metrics(entries: list[dict[str, Any]]) -> None:
     seen: set[str] = set()
     for entry in entries:
         slug = entry.get("slug", "<sem slug>")
-        for field in ("slug", "name", "unit", "bands_m", "bands_f", "source", "notes"):
+        for field in (
+            "slug",
+            "name",
+            "unit",
+            "bands_m",
+            "bands_f",
+            "source",
+            "trend_reason",
+            "notes",
+        ):
             if field not in entry:
                 fail(f"métrica {slug}: falta o campo '{field}'")
         if slug in seen:
@@ -209,6 +223,14 @@ def check_body_metrics(entries: list[dict[str, Any]]) -> None:
             check_bands(slug, "M", entry["bands_m"])
             check_bands(slug, "F", entry["bands_f"])
 
+        # A metric that cannot produce a flag has to say why, in one line: the
+        # card shows that sentence where a classified metric shows its standard.
+        classifies = has_m and any(band.get("flag") is not None for band in entry["bands_m"])
+        if not classifies and not entry.get("trend_reason"):
+            fail(f"métrica {slug}: sem classificação, exige 'trend_reason' (a razão, numa linha)")
+        if classifies and entry.get("trend_reason"):
+            fail(f"métrica {slug}: classifica, por isso não declara 'trend_reason'")
+
 
 def main() -> int:
     biomarkers = json.loads((SEED / "biomarkers.json").read_text(encoding="utf-8"))
@@ -223,11 +245,17 @@ def main() -> int:
             print(f"  - {error}", file=sys.stderr)
         return 1
 
-    banded = sum(1 for m in body_metrics if m["bands_m"] is not None)
+    def classifies(metric: dict[str, Any]) -> bool:
+        bands = metric["bands_m"]
+        return bands is not None and any(band.get("flag") is not None for band in bands)
+
+    banded = sum(1 for m in body_metrics if classifies(m))
+    named = sum(1 for m in body_metrics if m["bands_m"] is not None and not classifies(m))
     print(
         f"Catálogo válido: {len(biomarkers)} biomarcadores, "
         f"{len(body_metrics)} métricas corporais ({banded} com bandas clínicas, "
-        f"{len(body_metrics) - banded} trend-only)."
+        f"{named} com bandas que nomeiam sem classificar, "
+        f"{len(body_metrics) - banded - named} trend-only)."
     )
     return 0
 
