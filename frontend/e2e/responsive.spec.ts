@@ -19,7 +19,9 @@ test.describe("navigation adapts to the viewport", () => {
 
   test("every destination carries its label", async ({ page }) => {
     await signUp(page);
-    for (const label of ["Início", "Análises", "Corpo", "Intervenções", "Perfil"]) {
+    // The five top-level destinations (NAV_ITEMS). Interventions gave up its
+    // slot to the timeline and is reached from there, via the sub-navigation.
+    for (const label of ["Início", "Cronologia", "Análises", "Corpo", "Perfil"]) {
       await expect(page.getByRole("link", { name: label })).toBeVisible();
     }
   });

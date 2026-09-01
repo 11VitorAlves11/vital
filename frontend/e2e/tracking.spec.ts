@@ -9,10 +9,17 @@ test.describe("recording and reading values", () => {
     await recordCollection(page, { biomarker: "Hemoglobina", value: "10.5" });
 
     await page.goto("/");
-    const card = page.locator("div").filter({ hasText: "Hemoglobina" }).last();
+    // The link, its flag-row parent, and that row's parent: BiomarkerCard's own
+    // outer div — the one that also holds the value. Flagged, so the card
+    // renders twice (out-of-range section, then its panel); either instance
+    // carries the same true value, so the first is enough.
+    const card = page
+      .getByRole("link", { name: "Hemoglobina", exact: true })
+      .first()
+      .locator("xpath=../..");
     await expect(page.getByRole("heading", { name: "Hematologia" })).toBeVisible();
     await expect(card.getByText("Baixo")).toBeVisible();
-    await expect(page.getByText("10,5")).toBeVisible();
+    await expect(card.getByText("10,5")).toBeVisible();
   });
 
   test("the biomarker page draws the band and the intervention overlay", async ({ page }) => {
