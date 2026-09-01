@@ -202,8 +202,10 @@ async def test_an_ordinal_scale_is_not_reported_as_a_moved_interval(
         [{"biomarker_id": marker, "value": 22, "ref_min": 30, "ref_max": 100}],
     )
     newer = await _report(
+        # Kept close in the calendar so the marker's own seasonal caveat (it is
+        # vitamin D) stays out of this assertion, which is about DT5 only.
         user_client,
-        "2026-06-10",
+        "2026-02-05",
         [{"biomarker_id": marker, "value": 41, "ref_min": 20, "ref_max": 80}],
     )
 
@@ -239,3 +241,17 @@ async def test_another_accounts_report_cannot_be_compared(
 
     response = await mine.get(f"/api/reports/compare?a={ours}&b={hidden}")
     assert response.status_code == 404
+
+
+async def test_a_seasonal_marker_far_apart_in_the_calendar_says_so(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    marker = catalogue["biomarkers"]["vitamin-d-25-oh"]["id"]
+    older = await _report(user_client, "2026-01-10", [{"biomarker_id": marker, "value": 22}])
+    newer = await _report(user_client, "2026-06-10", [{"biomarker_id": marker, "value": 41}])
+
+    row = _row(
+        (await user_client.get(f"/api/reports/compare?a={older}&b={newer}")).json(),
+        "vitamin-d-25-oh",
+    )
+    assert "seasonal_marker" in _codes(row)

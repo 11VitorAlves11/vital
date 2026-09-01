@@ -17,6 +17,10 @@ Catálogos partilhados entre utilizadores, carregados na base de dados no arranq
 - **`aliases`** lista as designações usadas pelos laboratórios portugueses para o mesmo
   biomarcador. Alimenta o matching da extração LLM (case-insensitive, sem acentos).
   Todo o português é **PT-PT**.
+- **`seasonal`** marca um biomarcador cujo nível varia genuinamente ao longo do ano
+  (vitamina D, por exposição solar). Nunca é usado para adivinhar uma direção — a app
+  não sabe o hemisfério de quem a usa — só para avisar que duas colheitas afastadas no
+  calendário podem diferir em parte por isso. Exige `notes` a explicar a variação.
 - **Intervalos canónicos** (`ref_min_*` / `ref_max_*`) são apenas *fallback*: a fonte
   primária é o intervalo que o próprio laboratório reporta em `results.ref_min/ref_max`,
   porque varia entre laboratórios. `null` = limite não aplicável.

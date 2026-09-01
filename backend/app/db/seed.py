@@ -38,6 +38,7 @@ BIOMARKER_FIELDS = (
     "time_sensitive",
     "time_window_start",
     "time_window_end",
+    "seasonal",
     "low_reliability_methods",
     "aliases",
     "notes",
@@ -60,6 +61,7 @@ DEFAULTS: dict[str, Any] = {
     "reference_kind": ReferenceKind.TWO_SIDED.value,
     "fasting_sensitive": False,
     "time_sensitive": False,
+    "seasonal": False,
     "low_reliability_methods": [],
 }
 

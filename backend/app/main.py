@@ -17,6 +17,7 @@ from app.api.routes import (
     interventions,
     photos,
     providers,
+    repeats,
     reports,
     timeline,
     users,
@@ -87,6 +88,7 @@ app.include_router(body.router, prefix="/api")
 app.include_router(photos.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(timeline.router, prefix="/api")
+app.include_router(repeats.router, prefix="/api")
 
 
 @app.get("/api")

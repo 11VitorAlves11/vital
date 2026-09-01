@@ -59,6 +59,13 @@ class Biomarker(Base):
     #: Local wall-clock window the draw should fall in, for the diurnal markers.
     time_window_start: Mapped[time | None] = mapped_column(Time)
     time_window_end: Mapped[time | None] = mapped_column(Time)
+    # Markers whose level genuinely shifts through the calendar year (vitamin D,
+    # sun-exposure dependent). Never used to guess a direction — the app has no
+    # hemisphere to reason from — only to say that two draws far apart in the
+    # calendar may differ partly because of when they were taken.
+    seasonal: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
     # Assays whose result is worth reading with a caveat — never a reason to
     # hide the value, only to say why two labs may disagree about it.
     low_reliability_methods: Mapped[list[str]] = mapped_column(

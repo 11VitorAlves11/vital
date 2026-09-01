@@ -4,6 +4,7 @@ Both are global, but what a caller sees is not: reference ranges and clinical ba
 are resolved for their sex before leaving the server, so no client ever has to pick.
 """
 
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -96,12 +97,16 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
         .order_by(LabReport.collected_on)
     )
     rows = (await db.execute(statement)).all()
-    # The previous draw's assay travels forward, so a change of method shows as a
-    # discontinuity on the point where it happened rather than nowhere at all.
+    # The previous draw's assay and date travel forward, so a change of method
+    # or a gap in the calendar shows as a discontinuity on the point where it
+    # happened rather than nowhere at all.
     methods = [None, *(result.method for result, _ in rows)]
+    collected_ons = [None, *(report.collected_on for _, report in rows)]
     points = [
-        _to_point(result, report, previous)
-        for (result, report), previous in zip(rows, methods, strict=False)
+        _to_point(result, report, previous_method, previous_collected_on)
+        for (result, report), previous_method, previous_collected_on in zip(
+            rows, methods, collected_ons, strict=False
+        )
     ]
     interventions = await overlapping_interventions(
         db,
@@ -122,7 +127,12 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
     )
 
 
-def _to_point(result: Result, report: LabReport, previous_method: str | None) -> BiomarkerPoint:
+def _to_point(
+    result: Result,
+    report: LabReport,
+    previous_method: str | None,
+    previous_collected_on: date | None,
+) -> BiomarkerPoint:
     reference = Reference(
         result.reference_kind, result.ref_min, result.ref_max, result.reference_bands
     )
@@ -145,7 +155,7 @@ def _to_point(result: Result, report: LabReport, previous_method: str | None) ->
         method=result.method,
         caveats=[
             CaveatOut(code=caveat.code, values=caveat.values)
-            for caveat in caveats.for_point(result, report, previous_method)
+            for caveat in caveats.for_point(result, report, previous_method, previous_collected_on)
         ],
         flag=result.flag,
         report_id=str(report.id),

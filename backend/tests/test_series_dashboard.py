@@ -111,4 +111,9 @@ async def test_dashboard_groups_by_category_with_the_latest_value(
 
 async def test_dashboard_is_empty_before_the_first_report(user_client: AsyncClient) -> None:
     payload = (await user_client.get("/api/dashboard")).json()
-    assert payload == {"categories": [], "last_report_on": None, "report_count": 0}
+    assert payload == {
+        "categories": [],
+        "last_report_on": None,
+        "report_count": 0,
+        "due_repeats": [],
+    }

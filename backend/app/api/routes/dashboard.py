@@ -9,6 +9,7 @@ from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DbSession
 from app.api.routes.catalog import to_biomarker_out
+from app.api.routes.repeats import to_repeat_out
 from app.models import LabReport, Result
 from app.models.enums import BiomarkerCategory
 from app.schemas.dashboard import (
@@ -19,6 +20,7 @@ from app.schemas.dashboard import (
     SparkPoint,
 )
 from app.services.flags import Reference, band_label
+from app.services.repeats import list_with_status
 
 router = APIRouter(tags=["dashboard"])
 
@@ -84,8 +86,14 @@ async def dashboard(user: CurrentUser, db: DbSession) -> DashboardOut:
         for category in BiomarkerCategory
         if category in by_category
     ]
+    due = [
+        to_repeat_out(entry.repeat, entry.status)
+        for entry in await list_with_status(db, user.id, date.today())
+        if entry.status == "due"
+    ]
     return DashboardOut(
         categories=categories,
         last_report_on=max(collected) if collected else None,
         report_count=len(reports),
+        due_repeats=due,
     )

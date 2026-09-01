@@ -15,12 +15,13 @@ computed when the value was written, against the interval that report carried.
 """
 
 from dataclasses import dataclass
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from app.models.biomarker import Biomarker
 from app.models.enums import BiomarkerCategory, ReferenceKind
 from app.models.lab_report import LabReport, Result
-from app.services.caveats import Caveat, CaveatCode
+from app.services.caveats import Caveat, CaveatCode, seasonal_caveat
 from app.services.units import convert_bound, normalise_unit
 
 _HUNDRED = Decimal(100)
@@ -116,7 +117,7 @@ def _method_changed(previous: Result, current: Result) -> bool:
 
 
 def _difference(
-    previous: Result, current: Result
+    previous: Result, current: Result, previous_on: date, current_on: date
 ) -> tuple[Decimal | None, Decimal | None, str | None, list[Caveat]]:
     caveats: list[Caveat] = []
     if _method_changed(previous, current):
@@ -126,6 +127,9 @@ def _difference(
                 {"from": previous.method or "", "to": current.method or ""},
             )
         )
+    seasonal = seasonal_caveat(current.biomarker, previous_on, current_on)
+    if seasonal is not None:
+        caveats.append(seasonal)
 
     scale = _on_one_scale(previous, current)
     if scale is None:
@@ -165,7 +169,7 @@ def compare(previous: LabReport, current: LabReport) -> list[Comparison]:
     for biomarker_id in before.keys() | after.keys():
         earlier, later = before.get(biomarker_id), after.get(biomarker_id)
         delta, percent, unit, caveats = (
-            _difference(earlier, later)
+            _difference(earlier, later, previous.collected_on, current.collected_on)
             if earlier is not None and later is not None
             else (None, None, None, [])
         )

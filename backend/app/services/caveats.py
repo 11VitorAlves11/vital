@@ -11,7 +11,7 @@ language someone reads their own blood work in.
 """
 
 from dataclasses import dataclass, field
-from datetime import time
+from datetime import date, time
 from enum import StrEnum
 
 from app.models.biomarker import Biomarker
@@ -31,6 +31,11 @@ class CaveatCode(StrEnum):
     # its own has nothing to be incomparable with.
     REFERENCE_CHANGED = "reference_changed"
     UNITS_INCOMPARABLE = "units_incomparable"
+    SEASONAL_MARKER = "seasonal_marker"
+
+
+#: Below this, two draws are "the same part of the year" and not worth flagging.
+SEASONAL_GAP_MONTHS = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,6 +103,29 @@ def _method_caveats(biomarker: Biomarker, result: Result) -> list[Caveat]:
     return [Caveat(CaveatCode.LOW_RELIABILITY_METHOD, {"method": result.method})]
 
 
+def _months_apart(a: date, b: date) -> int:
+    """Distance around the calendar year between two dates' months — 0 for the
+    same month, 6 for opposite sides of the year. The year itself does not
+    matter: a January draw and a December draw a year later are 1 month apart.
+    """
+    diff = abs(a.month - b.month)
+    return min(diff, 12 - diff)
+
+
+def seasonal_caveat(biomarker: Biomarker, previous: date, current: date) -> Caveat | None:
+    """Two draws far apart in the calendar, for a marker that moves with it.
+
+    Never says which direction: the app has no hemisphere to reason from, only
+    that the gap itself may explain part of what changed.
+    """
+    if not biomarker.seasonal:
+        return None
+    gap = _months_apart(previous, current)
+    if gap < SEASONAL_GAP_MONTHS:
+        return None
+    return Caveat(CaveatCode.SEASONAL_MARKER, {"months_apart": str(gap)})
+
+
 def for_result(result: Result, report: LabReport) -> list[Caveat]:
     """Everything worth knowing about this one reading, in isolation."""
     biomarker = result.biomarker
@@ -108,11 +136,17 @@ def for_result(result: Result, report: LabReport) -> list[Caveat]:
     ]
 
 
-def for_point(result: Result, report: LabReport, previous_method: str | None) -> list[Caveat]:
+def for_point(
+    result: Result,
+    report: LabReport,
+    previous_method: str | None,
+    previous_collected_on: date | None = None,
+) -> list[Caveat]:
     """The same, plus what only the series can see.
 
     A change of method between two draws is a discontinuity in the line: the
-    difference between the points may be the assay rather than the body.
+    difference between the points may be the assay rather than the body. A gap
+    in the calendar is the same idea for a marker that moves with the seasons.
     """
     caveats = for_result(result, report)
     if (
@@ -123,4 +157,8 @@ def for_point(result: Result, report: LabReport, previous_method: str | None) ->
         caveats.append(
             Caveat(CaveatCode.METHOD_CHANGED, {"from": previous_method, "to": result.method})
         )
+    if previous_collected_on is not None:
+        seasonal = seasonal_caveat(result.biomarker, previous_collected_on, report.collected_on)
+        if seasonal is not None:
+            caveats.append(seasonal)
     return caveats

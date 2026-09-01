@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.models.enums import BiomarkerCategory, ResultFlag
 from app.schemas.catalog import BiomarkerOut
+from app.schemas.repeats import ScheduledRepeatOut
 
 # How many readings a dashboard sparkline carries. Enough to read a direction,
 # few enough that the card stays a summary and not a chart.
@@ -39,3 +40,6 @@ class DashboardOut(BaseModel):
     categories: list[DashboardCategory]
     last_report_on: date | None
     report_count: int
+    #: Schedules whose target month has arrived and nothing newer has been
+    #: recorded since. Upcoming and fulfilled ones stay on GET /api/repeats.
+    due_repeats: list[ScheduledRepeatOut]

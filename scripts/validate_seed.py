@@ -115,6 +115,9 @@ def check_preanalytics(slug: str, entry: dict[str, Any]) -> None:
         # Naming an assay unreliable without saying why is an accusation, not data.
         fail(f"biomarcador {slug}: métodos de baixa fiabilidade exigem 'notes' a explicar porquê")
 
+    if entry.get("seasonal") and not entry.get("notes"):
+        fail(f"biomarcador {slug}: 'seasonal' exige 'notes' a explicar a variação")
+
 
 def check_reference_kind(slug: str, entry: dict[str, Any]) -> None:
     """The declared shape has to be the shape the bounds actually form."""

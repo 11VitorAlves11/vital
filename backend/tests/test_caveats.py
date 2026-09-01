@@ -77,6 +77,22 @@ HAEMOGLOBIN = Biomarker(
     aliases=["Hb"],
 )
 
+VITAMIN_D = Biomarker(
+    id=5,
+    slug="vitamin-d-25-oh",
+    name="Vitamina D (25-OH)",
+    category=BiomarkerCategory.VITAMINAS,
+    unit_default="ng/mL",
+    canonical_unit="ng/mL",
+    unit_conversions={},
+    reference_kind=ReferenceKind.ORDINAL_BANDS,
+    fasting_sensitive=False,
+    time_sensitive=False,
+    seasonal=True,
+    low_reliability_methods=[],
+    aliases=["Vitamina D"],
+)
+
 
 def _report(**overrides: object) -> LabReport:
     fields: dict[str, object] = {
@@ -171,3 +187,31 @@ def test_a_change_of_method_marks_the_point_it_happened_on() -> None:
 
 def test_the_first_point_of_a_series_has_nothing_to_differ_from() -> None:
     assert caveats.for_point(_result(CREATININE, "enzimático"), _report(), None) == []
+
+
+def test_a_non_seasonal_marker_never_carries_the_seasonal_caveat() -> None:
+    report = _report(collected_on=date(2026, 8, 1))
+    caveat = caveats.for_point(_result(CREATININE), report, None, date(2026, 1, 1))
+    assert CaveatCode.SEASONAL_MARKER not in [item.code for item in caveat]
+
+
+def test_draws_close_in_the_calendar_say_nothing() -> None:
+    """One month apart is close enough to be the same part of the year."""
+    report = _report(collected_on=date(2026, 2, 1))
+    caveat = caveats.for_point(_result(VITAMIN_D), report, None, date(2026, 1, 1))
+    assert caveat == []
+
+
+def test_draws_far_apart_in_the_calendar_carry_the_gap_not_a_direction() -> None:
+    report = _report(collected_on=date(2026, 6, 1))
+    [caveat] = caveats.for_point(_result(VITAMIN_D), report, None, date(2026, 1, 1))
+    assert caveat.code is CaveatCode.SEASONAL_MARKER
+    assert caveat.values == {"months_apart": "5"}
+
+
+def test_the_calendar_gap_wraps_around_the_year_end() -> None:
+    """November to February is 3 months apart, not 9 — the year boundary is not
+    a wall, and counting the long way round would say the opposite of the truth."""
+    report = _report(collected_on=date(2026, 2, 1))
+    [caveat] = caveats.for_point(_result(VITAMIN_D), report, None, date(2025, 11, 1))
+    assert caveat.values == {"months_apart": "3"}

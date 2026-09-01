@@ -19,6 +19,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Hb",
@@ -47,6 +48,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Ht",
@@ -77,6 +79,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Glóbulos vermelhos",
@@ -109,6 +112,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Glóbulos brancos",
@@ -140,6 +144,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "PLT",
@@ -168,6 +173,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "VGM",
@@ -195,6 +201,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "HGM",
@@ -255,6 +262,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": true,
     "low_reliability_methods": [],
     "aliases": [
       "25-hidroxivitamina D",
@@ -264,7 +272,7 @@
       "Vitamina D",
       "Vitamina D3"
     ],
-    "notes": "<20 ng/mL deficiência, 20–29 insuficiência, ≥30 suficiência. Ideal >30 ng/mL para desportistas."
+    "notes": "<20 ng/mL deficiência, 20–29 insuficiência, ≥30 suficiência. Ideal >30 ng/mL para desportistas. Varia com a exposição solar ao longo do ano — duas colheitas afastadas no calendário podem diferir em parte por causa disso, não só do organismo."
   },
   {
     "slug": "vitamin-b12",
@@ -287,6 +295,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "B12",
@@ -317,6 +326,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Folato",
@@ -345,6 +355,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Ferritina sérica"
@@ -371,6 +382,7 @@
     "time_sensitive": true,
     "time_window_start": "07:00",
     "time_window_end": "10:00",
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Ferro",
@@ -399,6 +411,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Transferrina sérica",
@@ -424,6 +437,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Índice de saturação da transferrina",
@@ -453,6 +467,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Colesterol",
@@ -481,6 +496,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "LDL",
@@ -511,6 +527,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "HDL",
@@ -541,6 +558,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "TG",
@@ -569,6 +587,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [
       "Jaffe",
       "Picrato alcalino cinético",
@@ -601,6 +620,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Ureia sérica",
@@ -630,6 +650,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "TFG",
@@ -661,6 +682,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Uricemia",
@@ -690,6 +712,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "ALT",
@@ -721,6 +744,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "AST",
@@ -752,6 +776,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "GGT",
@@ -783,6 +808,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "FA",
@@ -811,6 +837,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Bilirrubina",
@@ -840,6 +867,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "Glicemia",
@@ -867,6 +895,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "HbA1c",
@@ -896,6 +925,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "PCR",
@@ -930,6 +960,7 @@
     "time_sensitive": false,
     "time_window_start": null,
     "time_window_end": null,
+    "seasonal": false,
     "low_reliability_methods": [],
     "aliases": [
       "TSH",

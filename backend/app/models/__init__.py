@@ -6,6 +6,7 @@ from app.models.intervention import Intervention
 from app.models.lab_report import LabReport, Result
 from app.models.photo import ProgressPhoto
 from app.models.provider import Doctor, Lab
+from app.models.repeat import ScheduledRepeat
 from app.models.user import User
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "LabReport",
     "ProgressPhoto",
     "Result",
+    "ScheduledRepeat",
     "User",
 ]
