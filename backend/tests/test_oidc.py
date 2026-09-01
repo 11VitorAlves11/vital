@@ -14,6 +14,7 @@ from httpx import ASGITransport, AsyncClient
 from starlette.responses import RedirectResponse
 
 from app.api.routes import auth as auth_routes
+from app.api.routes.auth import OIDC_CLIENT_NAME, get_oauth
 from app.core.config import get_settings
 from app.main import app
 from tests.conftest import TEST_PASSWORD
@@ -63,6 +64,33 @@ def fake_provider(
         return client
 
     yield install
+
+
+@pytest.fixture
+def fresh_oauth() -> Iterator[None]:
+    """The registry is cached, and these tests change what it would be built from."""
+    get_oauth.cache_clear()
+    yield
+    get_oauth.cache_clear()
+
+
+def test_the_authorization_request_carries_pkce(fresh_oauth: None) -> None:
+    """S256, so an intercepted authorization code cannot be spent elsewhere."""
+    client = get_oauth().create_client(OIDC_CLIENT_NAME)
+    assert client.client_kwargs["code_challenge_method"] == "S256"
+    assert client.client_kwargs["scope"] == get_settings().oidc_scopes
+
+
+def test_pkce_can_be_turned_off_for_a_provider_that_refuses_it(fresh_oauth: None) -> None:
+    settings = get_settings()
+    original = settings.oidc_pkce
+    settings.oidc_pkce = False
+    try:
+        get_oauth.cache_clear()
+        client = get_oauth().create_client(OIDC_CLIENT_NAME)
+        assert "code_challenge_method" not in client.client_kwargs
+    finally:
+        settings.oidc_pkce = original
 
 
 async def test_config_reports_oidc(client: AsyncClient, oidc_mode: None) -> None:

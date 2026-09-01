@@ -39,7 +39,7 @@ clinical catalogue (31 biomarkers, 20 body-composition metrics) already loaded.
 | Mode | What it does |
 |---|---|
 | `local` | Email and password, registration open. No identity provider needed — the default in the dev stack |
-| `oidc` | Authorization-code flow against any OIDC provider (Authentik, Keycloak, Pocket ID, Google). Set `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and register `https://your-host/auth/callback` as the redirect URI |
+| `oidc` | Authorization-code flow **with PKCE** against any OIDC provider (Authentik, Keycloak, Pocket ID, Google), discovered from the issuer's `.well-known/openid-configuration`. Set `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and register `https://your-host/auth/callback` as the redirect URI. `OIDC_PKCE=false` for a provider that refuses the extra parameters |
 
 Either way the session is a signed, httpOnly, `SameSite=Lax` cookie: no token is readable
 from JavaScript and there is no session store to run. Set `SECRET_KEY` in production —

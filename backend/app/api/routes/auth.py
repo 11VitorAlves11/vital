@@ -38,13 +38,21 @@ _DUMMY_HASH = hash_password("not-a-real-password")
 @lru_cache
 def get_oauth() -> OAuth:
     settings = get_settings()
+    client_kwargs: dict[str, Any] = {"scope": settings.oidc_scopes}
+    if settings.oidc_pkce:
+        # PKCE: authlib generates the verifier, keeps it in the signed session
+        # cookie for the round trip, and sends it at the token exchange. It binds
+        # the authorization code to this browser, so a code intercepted on the
+        # redirect cannot be spent by anyone else.
+        client_kwargs["code_challenge_method"] = "S256"
+
     oauth = OAuth()
     oauth.register(
         name=OIDC_CLIENT_NAME,
         server_metadata_url=settings.oidc_metadata_url,
         client_id=settings.oidc_client_id,
         client_secret=settings.oidc_client_secret,
-        client_kwargs={"scope": settings.oidc_scopes},
+        client_kwargs=client_kwargs,
     )
     return oauth
 

@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     oidc_client_id: str | None = None
     oidc_client_secret: str | None = None
     oidc_scopes: str = "openid email profile"
+    # PKCE (RFC 7636) on the authorization request. On by default: some providers
+    # now require it, and it costs a confidential client nothing. The switch is
+    # here for the provider that chokes on the extra parameters rather than
+    # ignoring them, which is the only way this can go wrong.
+    oidc_pkce: bool = True
     # Set it when the API sits behind a proxy that rewrites scheme or host, so the
     # redirect URI matches the one registered with the provider exactly.
     oidc_redirect_uri: str | None = None
