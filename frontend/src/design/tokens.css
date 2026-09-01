@@ -14,9 +14,9 @@
   --text-3xl: 2.441rem;
 
   /* Font families */
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-display: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 
   /* Spacing — 4px base. Groups are tight, sections are separated: a heading
      always gets more space above it than below. */
