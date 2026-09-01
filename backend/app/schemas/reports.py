@@ -169,6 +169,38 @@ class ReportSummary(BaseModel):
     has_file: bool
 
 
+class ComparisonRow(BaseModel):
+    """One biomarker across the two collections.
+
+    Either side may be null: a marker measured once and not the next time is part
+    of what the comparison shows, not a row to leave out.
+    """
+
+    biomarker_id: int
+    biomarker_slug: str
+    biomarker_name: str
+    category: BiomarkerCategory
+    previous: ResultOut | None
+    current: ResultOut | None
+    #: Later minus earlier, in `unit`. Null when the two had no common scale.
+    delta: Decimal | None
+    #: Against the earlier value, in per cent. Null when that value was zero.
+    percent_change: Decimal | None
+    #: The unit the difference is expressed in, which is not always either report's.
+    unit: str | None
+    #: Why the two numbers may not be strictly subtractable — a changed assay, a
+    #: reference interval that moved, units with no conversion between them.
+    caveats: list[CaveatOut] = Field(default_factory=list)
+
+
+class ReportComparison(BaseModel):
+    """Two collections side by side, oldest first whatever order they were asked in."""
+
+    previous: ReportSummary
+    current: ReportSummary
+    rows: list[ComparisonRow]
+
+
 class ReportOut(BaseModel):
     id: uuid.UUID
     collected_on: date

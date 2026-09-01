@@ -27,6 +27,10 @@ class CaveatCode(StrEnum):
     OUTSIDE_TIME_WINDOW = "outside_time_window"
     LOW_RELIABILITY_METHOD = "low_reliability_method"
     METHOD_CHANGED = "method_changed"
+    # Only a comparison between two collections can raise these two: one draw on
+    # its own has nothing to be incomparable with.
+    REFERENCE_CHANGED = "reference_changed"
+    UNITS_INCOMPARABLE = "units_incomparable"
 
 
 @dataclass(frozen=True, slots=True)

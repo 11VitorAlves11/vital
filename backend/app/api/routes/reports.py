@@ -18,6 +18,8 @@ from app.models.enums import ReportSource
 from app.schemas.catalog import ReferenceBandOut
 from app.schemas.reports import (
     CaveatOut,
+    ComparisonRow,
+    ReportComparison,
     ReportCreate,
     ReportOut,
     ReportPatch,
@@ -26,7 +28,7 @@ from app.schemas.reports import (
     ResultPatch,
     ResultPrefill,
 )
-from app.services import caveats, providers, storage
+from app.services import caveats, comparison, providers, storage
 from app.services import results as result_service
 from app.services.flags import Reference, band_label
 
@@ -76,6 +78,26 @@ def to_result_out(result: Result, report: LabReport) -> ResultOut:
             for caveat in caveats.for_result(result, report)
         ],
         flag=result.flag,
+    )
+
+
+def to_report_summary(report: LabReport) -> ReportSummary:
+    return ReportSummary(
+        id=report.id,
+        collected_on=report.collected_on,
+        collected_at=report.collected_at,
+        lab_id=report.lab_id,
+        lab_name=report.lab.name,
+        doctor_id=report.doctor_id,
+        doctor_name=report.doctor.name if report.doctor else None,
+        fasting_state=report.fasting_state,
+        fasting_hours=report.fasting_hours,
+        source=report.source,
+        notes=report.notes,
+        notes_at=report.notes_at,
+        created_at=report.created_at,
+        result_count=len(report.results),
+        has_file=bool(report.file_path),
     )
 
 
@@ -132,26 +154,7 @@ async def list_reports(
     if doctor_id is not None:
         statement = statement.where(LabReport.doctor_id == doctor_id)
     reports = (await db.execute(statement)).scalars().all()
-    return [
-        ReportSummary(
-            id=report.id,
-            collected_on=report.collected_on,
-            collected_at=report.collected_at,
-            lab_id=report.lab_id,
-            lab_name=report.lab.name,
-            doctor_id=report.doctor_id,
-            doctor_name=report.doctor.name if report.doctor else None,
-            fasting_state=report.fasting_state,
-            fasting_hours=report.fasting_hours,
-            source=report.source,
-            notes=report.notes,
-            notes_at=report.notes_at,
-            created_at=report.created_at,
-            result_count=len(report.results),
-            has_file=bool(report.file_path),
-        )
-        for report in reports
-    ]
+    return [to_report_summary(report) for report in reports]
 
 
 @router.get("/prefill", response_model=list[ResultPrefill])
@@ -195,6 +198,52 @@ async def prefill(
         )
         for result, report in (await db.execute(statement)).all()
     ]
+
+
+@router.get("/compare", response_model=ReportComparison)
+async def compare_reports(
+    user: CurrentUser,
+    db: DbSession,
+    a: Annotated[uuid.UUID, Query()],
+    b: Annotated[uuid.UUID, Query()],
+) -> ReportComparison:
+    """Two collections marker by marker, with what moved between them.
+
+    Which one is `a` and which is `b` does not matter: the pair is ordered by the
+    date of the draw before anything is subtracted, so a difference always reads
+    forward in time.
+    """
+    if a == b:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="A report cannot be compared with itself",
+        )
+    # Both go through the ownership check; neither id can reach another account's
+    # report, and a comparison is not a way around that.
+    pair = [await _owned_report(a, user, db), await _owned_report(b, user, db)]
+    previous, current = sorted(pair, key=lambda report: (report.collected_on, report.created_at))
+
+    return ReportComparison(
+        previous=to_report_summary(previous),
+        current=to_report_summary(current),
+        rows=[
+            ComparisonRow(
+                biomarker_id=row.biomarker.id,
+                biomarker_slug=row.biomarker.slug,
+                biomarker_name=row.biomarker.name,
+                category=row.biomarker.category,
+                previous=to_result_out(row.previous, previous) if row.previous else None,
+                current=to_result_out(row.current, current) if row.current else None,
+                delta=row.delta,
+                percent_change=row.percent_change,
+                unit=row.unit,
+                caveats=[
+                    CaveatOut(code=caveat.code, values=caveat.values) for caveat in row.caveats
+                ],
+            )
+            for row in comparison.compare(previous, current)
+        ],
+    )
 
 
 @router.post("", response_model=ReportOut, status_code=status.HTTP_201_CREATED)
