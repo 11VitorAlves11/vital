@@ -100,7 +100,9 @@ class ResultPatch(BaseModel):
 class ResultOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: uuid.UUID
+    #: Null for a derived value, which is computed on read and never stored —
+    #: there is no row to note, annotate, or schedule a repeat from.
+    id: uuid.UUID | None = None
     biomarker_id: int
     biomarker_slug: str
     biomarker_name: str
@@ -125,6 +127,9 @@ class ResultOut(BaseModel):
     #: What the collection context, or the assay, means for reading this value.
     caveats: list[CaveatOut] = Field(default_factory=list)
     flag: ResultFlag | None
+    #: The measured markers this value was computed from, by name, in formula
+    #: order. Null for anything the laboratory actually printed.
+    derived_from: list[str] | None = None
 
 
 class ResultPrefill(BaseModel):

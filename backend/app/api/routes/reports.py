@@ -14,7 +14,7 @@ from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, LabReport, Result
-from app.models.enums import ReportSource
+from app.models.enums import ReportSource, Sex
 from app.schemas.catalog import ReferenceBandOut
 from app.schemas.reports import (
     CaveatOut,
@@ -28,9 +28,9 @@ from app.schemas.reports import (
     ResultPatch,
     ResultPrefill,
 )
-from app.services import caveats, comparison, providers, storage
+from app.services import caveats, comparison, derived_biomarkers, providers, storage
 from app.services import results as result_service
-from app.services.flags import Reference, band_label
+from app.services.flags import Reference, band_label, canonical_reference, compute_flag
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -81,6 +81,65 @@ def to_result_out(result: Result, report: LabReport) -> ResultOut:
     )
 
 
+def to_derived_result_out(
+    item: derived_biomarkers.Derived,
+    biomarker: Biomarker,
+    sex: Sex | None,
+    source_names: dict[str, str],
+) -> ResultOut:
+    """A computed value in the same shape as a measured one, minus everything
+    that only exists because a lab actually printed a line: no id (nothing was
+    stored), no note, no caveats about how it was drawn."""
+    reference = canonical_reference(biomarker, sex)
+    return ResultOut(
+        id=None,
+        biomarker_id=biomarker.id,
+        biomarker_slug=biomarker.slug,
+        biomarker_name=biomarker.name,
+        category=biomarker.category,
+        value=item.value,
+        unit=biomarker.canonical_unit,
+        canonical_value=item.value,
+        canonical_unit=biomarker.canonical_unit,
+        ref_min=reference.minimum,
+        ref_max=reference.maximum,
+        reference_kind=reference.kind,
+        reference_bands=None,
+        band_label=None,
+        method=None,
+        note=None,
+        note_at=None,
+        caveats=[],
+        flag=compute_flag(item.value, reference),
+        derived_from=[source_names[slug] for slug in item.source_slugs if slug in source_names],
+    )
+
+
+async def derived_results(report: LabReport, sex: Sex | None, db: DbSession) -> list[ResultOut]:
+    """Every value this report's own numbers make computable but did not print,
+    skipping anything it did — a lab's own LDL beats Friedewald's estimate."""
+    measured = {
+        result.biomarker.slug: result.canonical_value
+        for result in report.results
+        if result.canonical_value is not None
+    }
+    items = derived_biomarkers.derive(measured)
+    if not items:
+        return []
+
+    slugs = {item.biomarker_slug for item in items} | {
+        source for item in items for source in item.source_slugs
+    }
+    statement = select(Biomarker).where(Biomarker.slug.in_(slugs))
+    catalogue = {row.slug: row for row in (await db.execute(statement)).scalars().all()}
+    source_names = {slug: row.name for slug, row in catalogue.items()}
+    return [
+        to_derived_result_out(item, catalogue[item.biomarker_slug], sex, source_names)
+        for item in items
+        if item.biomarker_slug in catalogue
+    ]
+
+
 def to_report_summary(report: LabReport) -> ReportSummary:
     return ReportSummary(
         id=report.id,
@@ -101,7 +160,9 @@ def to_report_summary(report: LabReport) -> ReportSummary:
     )
 
 
-def to_report_out(report: LabReport) -> ReportOut:
+async def to_report_out(report: LabReport, sex: Sex | None, db: DbSession) -> ReportOut:
+    results = [to_result_out(result, report) for result in report.results]
+    results += await derived_results(report, sex, db)
     return ReportOut(
         id=report.id,
         collected_on=report.collected_on,
@@ -117,7 +178,7 @@ def to_report_out(report: LabReport) -> ReportOut:
         notes_at=report.notes_at,
         created_at=report.created_at,
         has_file=bool(report.file_path),
-        results=[to_result_out(result, report) for result in report.results],
+        results=results,
     )
 
 
@@ -295,12 +356,13 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
     db.add(report)
     await db.commit()
     await db.refresh(report)
-    return to_report_out(report)
+    return await to_report_out(report, user.sex, db)
 
 
 @router.get("/{report_id}", response_model=ReportOut)
 async def read_report(report_id: uuid.UUID, user: CurrentUser, db: DbSession) -> ReportOut:
-    return to_report_out(await _owned_report(report_id, user, db))
+    report = await _owned_report(report_id, user, db)
+    return await to_report_out(report, user.sex, db)
 
 
 @router.patch("/{report_id}", response_model=ReportOut)
@@ -326,7 +388,7 @@ async def update_report(
 
     await db.commit()
     await db.refresh(report)
-    return to_report_out(report)
+    return await to_report_out(report, user.sex, db)
 
 
 @router.patch("/{report_id}/results/{result_id}", response_model=ResultOut)

@@ -165,3 +165,108 @@ async def test_delete_removes_the_report_and_its_results(
     assert (await user_client.get(f"/api/reports/{report_id}")).status_code == 404
     marker_id = catalogue["biomarkers"]["hemoglobina"]["id"]
     assert (await user_client.get(f"/api/biomarkers/{marker_id}/series")).json()["points"] == []
+
+
+def _lipid_result(catalogue: dict[str, Any], slug: str, value: float) -> dict[str, Any]:
+    return {"biomarker_id": catalogue["biomarkers"][slug]["id"], "value": value}
+
+
+async def test_a_full_lipid_panel_gains_the_computed_values(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    response = await _create(
+        user_client,
+        catalogue,
+        results=[
+            _lipid_result(catalogue, "colesterol-total", 220),
+            _lipid_result(catalogue, "hdl", 50),
+            _lipid_result(catalogue, "triglicerideos", 150),
+        ],
+    )
+    results = {item["biomarker_slug"]: item for item in response.json()["results"]}
+    assert set(results) == {
+        "colesterol-total",
+        "hdl",
+        "triglicerideos",
+        "ldl",
+        "nao-hdl",
+        "racio-ct-hdl",
+    }
+
+    ldl = results["ldl"]
+    assert ldl["value"] == "140.0000"
+    assert ldl["id"] is None
+    assert ldl["derived_from"] == ["Colesterol total", "Colesterol HDL", "Triglicéridos"]
+    # 140 is above the catalogue's 115 mg/dL fallback — a real, flagged reading,
+    # not a footnote.
+    assert ldl["flag"] == "high"
+
+    assert results["colesterol-total"]["id"] is not None
+    assert results["colesterol-total"]["derived_from"] is None
+
+
+async def test_ldl_is_not_duplicated_when_the_lab_reported_its_own(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    response = await _create(
+        user_client,
+        catalogue,
+        results=[
+            _lipid_result(catalogue, "colesterol-total", 220),
+            _lipid_result(catalogue, "hdl", 50),
+            _lipid_result(catalogue, "triglicerideos", 150),
+            _lipid_result(catalogue, "ldl", 130),
+        ],
+    )
+    ldl_rows = [item for item in response.json()["results"] if item["biomarker_slug"] == "ldl"]
+    assert len(ldl_rows) == 1
+    assert ldl_rows[0]["value"] == "130.0000"
+    assert ldl_rows[0]["id"] is not None
+    assert ldl_rows[0]["derived_from"] is None
+
+
+async def test_ldl_is_suppressed_above_the_friedewald_limit(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    """A wrong value would be worse than none — Friedewald's estimate is not
+    trustworthy once triglycerides run this high."""
+    response = await _create(
+        user_client,
+        catalogue,
+        results=[
+            _lipid_result(catalogue, "colesterol-total", 220),
+            _lipid_result(catalogue, "hdl", 50),
+            _lipid_result(catalogue, "triglicerideos", 450),
+        ],
+    )
+    slugs = {item["biomarker_slug"] for item in response.json()["results"]}
+    assert "ldl" not in slugs
+    # What it could not compute, it still computed: non-HDL does not need TG.
+    assert "nao-hdl" in slugs
+
+
+async def test_no_derived_values_without_the_inputs_to_support_them(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    response = await _create(user_client, catalogue)  # a single haemoglobin result
+    slugs = {item["biomarker_slug"] for item in response.json()["results"]}
+    assert slugs == {"hemoglobina"}
+
+
+async def test_a_high_percentage_with_a_normal_absolute_count_is_not_flagged(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    """Backlog 3.4's own acceptance criterion: 53,2 % with a normal absolute
+    count is not an alert — the percentage is arithmetic on another line
+    changing, and only the absolute value is read against a clinical bound."""
+    response = await _create(
+        user_client,
+        catalogue,
+        results=[
+            _lipid_result(catalogue, "linfocitos", 3.28),
+            _lipid_result(catalogue, "linfocitos-pct", 53.2),
+        ],
+    )
+    results = {item["biomarker_slug"]: item for item in response.json()["results"]}
+    assert results["linfocitos"]["flag"] == "normal"
+    assert results["linfocitos-pct"]["flag"] is None

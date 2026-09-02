@@ -107,5 +107,5 @@ async def test_the_shared_catalogue_is_visible_to_everyone(make_user: UserFactor
     """Scoping applies to the data, not to the catalogue — that one is shared by design."""
     alice, _ = await make_user()
     bob, _ = await make_user()
-    assert len((await alice.get("/api/biomarkers")).json()) == 31
-    assert len((await bob.get("/api/biomarkers")).json()) == 31
+    assert len((await alice.get("/api/biomarkers")).json()) == 44
+    assert len((await bob.get("/api/biomarkers")).json()) == 44

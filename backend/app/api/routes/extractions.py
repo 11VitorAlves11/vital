@@ -219,7 +219,7 @@ async def confirm_extraction(
     job.report_id = report.id
     await db.commit()
     await db.refresh(report)
-    return to_report_out(report)
+    return await to_report_out(report, user.sex, db)
 
 
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
