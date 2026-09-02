@@ -100,16 +100,23 @@ export function ReportDetail() {
       </Card>
 
       <Card title={t("reports.results")}>
-        {data.results.map((result) => (
-          <ResultRow
-            key={result.id}
-            result={result}
-            onAnnotate={async (note) => {
-              await reports.annotate(id, result.id, note);
-              reload();
-            }}
-          />
-        ))}
+        {data.results.map((result) => {
+          const resultId = result.id;
+          return (
+            <ResultRow
+              key={resultId ?? `derived-${result.biomarker_id}`}
+              result={result}
+              onAnnotate={
+                resultId
+                  ? async (note) => {
+                      await reports.annotate(id, resultId, note);
+                      reload();
+                    }
+                  : undefined
+              }
+            />
+          );
+        })}
       </Card>
     </section>
   );

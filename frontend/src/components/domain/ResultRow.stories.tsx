@@ -23,6 +23,7 @@ const RESULT: Result = {
   note_at: null,
   caveats: [],
   flag: "low",
+  derived_from: null,
 };
 
 const meta = {
@@ -63,6 +64,23 @@ export const High: Story = {
 /** The lab gave no interval and the catalogue has none for this reader. */
 export const NoRange: Story = {
   args: { result: { ...RESULT, ref_min: null, ref_max: null, flag: null } },
+};
+
+/** A value the server computed rather than one a lab printed — no note, no
+ *  repeat action, only where it came from. */
+export const Derived: Story = {
+  args: {
+    result: {
+      ...RESULT,
+      id: null,
+      biomarker_name: "Colesterol LDL",
+      value: "140",
+      ref_min: null,
+      ref_max: "115",
+      flag: "high",
+      derived_from: ["Colesterol total", "Colesterol HDL", "Triglicéridos"],
+    },
+  },
 };
 
 /** A whole report, which is where the tabular figures have to line up. */

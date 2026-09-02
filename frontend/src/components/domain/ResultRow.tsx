@@ -1,11 +1,11 @@
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Sigma } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import type { Result } from "../../lib/api/types";
 import { cn } from "../../lib/cn";
-import { formatRange, formatValue } from "../../lib/format";
+import { formatList, formatRange, formatValue } from "../../lib/format";
 import { Button } from "../ui/Button";
 import { FlagChip } from "../ui/FlagChip";
 import { Markdown } from "../ui/Markdown";
@@ -55,31 +55,46 @@ export function ResultRow({ result, onAnnotate }: ResultRowProps) {
         </div>
       </div>
       <CaveatList caveats={result.caveats} className="mt-1.5" />
-      {onAnnotate ? (
-        <NoteEditor
-          note={result.note}
-          noteAt={result.note_at}
-          label={t("reports.resultNote")}
-          placeholder={t("notes.resultPlaceholder")}
-          onSave={onAnnotate}
-        />
-      ) : result.note ? (
-        <Markdown className="mt-1.5 text-sm">{result.note}</Markdown>
-      ) : null}
-      <Button
-        variant="ghost"
-        className="mt-1.5"
-        icon={<CalendarClock size={16} aria-hidden="true" />}
-        onClick={() => setScheduling(true)}
-      >
-        {t("repeats.schedule")}
-      </Button>
-      <ScheduleRepeatForm
-        open={scheduling}
-        onOpenChange={setScheduling}
-        resultId={result.id}
-        biomarkerName={result.biomarker_name}
-      />
+      {/* A computed value has nothing to annotate or repeat: there is no row
+          behind it to attach a note to, or to schedule a fresh reading from. */}
+      {result.derived_from ? (
+        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-ink-muted">
+          <Sigma size={14} aria-hidden="true" className="shrink-0" />
+          {t("reports.derivedFrom", { sources: formatList(result.derived_from, locale) })}
+        </p>
+      ) : (
+        <>
+          {onAnnotate ? (
+            <NoteEditor
+              note={result.note}
+              noteAt={result.note_at}
+              label={t("reports.resultNote")}
+              placeholder={t("notes.resultPlaceholder")}
+              onSave={onAnnotate}
+            />
+          ) : result.note ? (
+            <Markdown className="mt-1.5 text-sm">{result.note}</Markdown>
+          ) : null}
+          {result.id ? (
+            <>
+              <Button
+                variant="ghost"
+                className="mt-1.5"
+                icon={<CalendarClock size={16} aria-hidden="true" />}
+                onClick={() => setScheduling(true)}
+              >
+                {t("repeats.schedule")}
+              </Button>
+              <ScheduleRepeatForm
+                open={scheduling}
+                onOpenChange={setScheduling}
+                resultId={result.id}
+                biomarkerName={result.biomarker_name}
+              />
+            </>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

@@ -31,6 +31,12 @@ export function formatMonthYear(year: number, month: number, locale: string): st
   );
 }
 
+/** "Colesterol total, HDL e Triglicéridos" — the sources of a computed value,
+ *  joined the way the reader's own language joins a list, not with commas. */
+export function formatList(items: string[], locale: string): string {
+  return new Intl.ListFormat(locale, { style: "long", type: "conjunction" }).format(items);
+}
+
 export function formatDate(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
 }

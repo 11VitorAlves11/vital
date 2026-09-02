@@ -118,7 +118,8 @@
     "filterLab": "Laboratório",
     "allLabs": "Todos os laboratórios",
     "resultNote": "Nota sobre este resultado",
-    "prefilledFrom": "Pré-preenchido a partir de {{source}}."
+    "prefilledFrom": "Pré-preenchido a partir de {{source}}.",
+    "derivedFrom": "Calculado a partir de {{sources}}"
   },
   "compare": {
     "title": "Comparar colheitas",

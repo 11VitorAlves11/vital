@@ -120,7 +120,9 @@ export type BodyMetric = {
 };
 
 export type Result = {
-  id: string;
+  /** Null for a value the server computed rather than stored — nothing to
+   *  annotate or schedule a repeat from. */
+  id: string | null;
   biomarker_id: number;
   biomarker_slug: string;
   biomarker_name: string;
@@ -144,6 +146,9 @@ export type Result = {
   note_at: string | null;
   caveats: Caveat[];
   flag: ResultFlag | null;
+  /** The measured markers this value was computed from, by name, in formula
+   *  order. Null for anything the laboratory actually printed. */
+  derived_from: string[] | null;
 };
 
 /** What the last reading of a marker looked like — a suggestion the form fills

@@ -118,7 +118,8 @@
     "filterLab": "Laboratory",
     "allLabs": "All laboratories",
     "resultNote": "Note on this result",
-    "prefilledFrom": "Pre-filled from {{source}}."
+    "prefilledFrom": "Pre-filled from {{source}}.",
+    "derivedFrom": "Computed from {{sources}}"
   },
   "compare": {
     "title": "Compare collections",

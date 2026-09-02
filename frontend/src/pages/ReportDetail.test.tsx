@@ -115,6 +115,34 @@ describe("ReportDetail", () => {
     expect(screen.getByText(/Escrita em/)).toBeInTheDocument();
   });
 
+  it("shows a computed value with no note editor and no repeat action", async () => {
+    const derived = {
+      ...RESULT,
+      id: null,
+      biomarker_id: 5,
+      biomarker_slug: "ldl",
+      biomarker_name: "Colesterol LDL",
+      value: "140.0000",
+      canonical_value: "140.0000",
+      ref_min: null,
+      ref_max: "115.0000",
+      flag: "high",
+      derived_from: ["Colesterol total", "Colesterol HDL", "Triglicéridos"],
+    };
+    render({ ...REPORT, results: [RESULT, derived] });
+
+    await screen.findByText("Colesterol LDL");
+    expect(
+      screen.getByText("Calculado a partir de Colesterol total, Colesterol HDL e Triglicéridos"),
+    ).toBeInTheDocument();
+    // One "Adicionar nota" for the report itself, one for the real result —
+    // the derived row adds neither that nor a repeat action of its own.
+    const buttons = screen.getAllByRole("button", { name: "Adicionar nota" });
+    expect(buttons).toHaveLength(2);
+    const scheduleButtons = screen.getAllByRole("button", { name: "Agendar repetição" });
+    expect(scheduleButtons).toHaveLength(1);
+  });
+
   it("schedules a repeat from one result", async () => {
     const fetchMock = mockApi([
       { pattern: /\/api\/repeats/, body: { id: "rep-1" } },
