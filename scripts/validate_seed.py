@@ -195,6 +195,30 @@ def check_bands(slug: str, sex: str, bands: list[dict[str, Any]]) -> None:
             )
 
 
+def check_age_bands(slug: str, sex: str, brackets: list[dict[str, Any]]) -> None:
+    """A second, age-partitioned layer of the same band shape.
+
+    Unlike bands_m/bands_f, brackets do not have to cover every age: a
+    reference that only studied ages 20–79 has nothing to say outside that
+    range, and a gap there is the honest answer, not a bug.
+    """
+    if not brackets:
+        fail(f"métrica {slug} ({sex}): age_bands vazio — usar null quando não há referência")
+        return
+    previous_max: float | None = None
+    for bracket in brackets:
+        age_min, age_max = bracket.get("age_min"), bracket.get("age_max")
+        if age_min is None:
+            fail(f"métrica {slug} ({sex}): escalão de idade sem 'age_min'")
+            continue
+        if age_max is not None and age_min >= age_max:
+            fail(f"métrica {slug} ({sex}): escalão {age_min}–{age_max} com age_min >= age_max")
+        if previous_max is not None and age_min < previous_max:
+            fail(f"métrica {slug} ({sex}): escalões de idade sobrepostos em {age_min}")
+        previous_max = age_max
+        check_bands(f"{slug} [{age_min}–{age_max}]", sex, bracket.get("bands"))
+
+
 def check_body_metrics(entries: list[dict[str, Any]]) -> None:
     seen: set[str] = set()
     for entry in entries:
@@ -205,6 +229,8 @@ def check_body_metrics(entries: list[dict[str, Any]]) -> None:
             "unit",
             "bands_m",
             "bands_f",
+            "age_bands_m",
+            "age_bands_f",
             "source",
             "trend_reason",
             "notes",
@@ -225,6 +251,14 @@ def check_body_metrics(entries: list[dict[str, Any]]) -> None:
         if has_m:
             check_bands(slug, "M", entry["bands_m"])
             check_bands(slug, "F", entry["bands_f"])
+
+        has_age_m = entry.get("age_bands_m") is not None
+        has_age_f = entry.get("age_bands_f") is not None
+        if has_age_m != has_age_f:
+            fail(f"métrica {slug}: age_bands definidas para um sexo apenas")
+        if has_age_m:
+            check_age_bands(slug, "M", entry["age_bands_m"])
+            check_age_bands(slug, "F", entry["age_bands_f"])
 
         # A metric that cannot produce a flag has to say why, in one line: the
         # card shows that sentence where a classified metric shows its standard.

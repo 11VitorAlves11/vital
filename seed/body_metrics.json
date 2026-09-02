@@ -81,7 +81,9 @@
         "flag": "alert"
       }
     ],
-    "notes": "Classificação da OMS, igual para ambos os sexos. Não distingue massa gorda de massa muscular: em pessoas muito musculadas sobrestima a adiposidade — ler em conjunto com a percentagem de gordura corporal."
+    "notes": "Classificação da OMS, igual para ambos os sexos. Não distingue massa gorda de massa muscular: em pessoas muito musculadas sobrestima a adiposidade — ler em conjunto com a percentagem de gordura corporal.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "body-fat-pct",
@@ -165,7 +167,803 @@
         "flag": null
       }
     ],
-    "notes": "Categorias do American Council on Exercise: são de aptidão física, não clínicas, e não dependem da idade — por isso nomeiam a leitura mas não a classificam. A estimativa por bioimpedância tem margem de erro considerável: a tendência na mesma balança e nas mesmas condições é o sinal fiável, não o valor absoluto. Para seguir a gordura ao longo do tempo o IMG é mais estável, porque não se mexe quando só a massa magra muda. Gold standard: DEXA."
+    "notes": "Categorias do American Council on Exercise: são de aptidão física, não clínicas, e não dependem da idade — por isso nomeiam a leitura mas não a classificam. A estimativa por bioimpedância tem margem de erro considerável: a tendência na mesma balança e nas mesmas condições é o sinal fiável, não o valor absoluto. Para seguir a gordura ao longo do tempo o IMG é mais estável, porque não se mexe quando só a massa magra muda. Gold standard: DEXA. Percentil por idade (20–79 anos, fora deste intervalo sem contexto etário): Imboden et al. 2017, PLOS ONE (PMC5384668), amostra de conveniência de dois laboratórios universitários dos EUA, 95% caucasiana, DXA GE-Healthcare — não é uma amostra populacional. A Tabela 2 do artigo publica os percentis invertidos (o \"P90\" impresso é o valor mais baixo/magro da linha); os limiares aqui estão reordenados para a direção estatística habitual (P90 = mais gordura, não menos). Nomeia sem classificar, como a escala ACE — o percentil é contexto, nunca veredicto.",
+    "age_bands_m": [
+      {
+        "age_min": 20,
+        "age_max": 30,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 11.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 11.0,
+            "max": 14.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 14.0,
+            "max": 16.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 16.5,
+            "max": 18.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 18.5,
+            "max": 20.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 20.2,
+            "max": 22.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 22.7,
+            "max": 25.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 25.6,
+            "max": 28.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 28.7,
+            "max": 31.8,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 31.8,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 30,
+        "age_max": 40,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 11.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 11.2,
+            "max": 17.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 17.2,
+            "max": 19.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 19.2,
+            "max": 23.3,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 23.3,
+            "max": 26.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 26.4,
+            "max": 30.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 30.2,
+            "max": 33.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 33.7,
+            "max": 36.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 36.6,
+            "max": 39.9,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 39.9,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 40,
+        "age_max": 50,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 15.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 15.8,
+            "max": 22.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 22.2,
+            "max": 25.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 25.8,
+            "max": 28.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 28.4,
+            "max": 30.1,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 30.1,
+            "max": 31.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 31.5,
+            "max": 33.9,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 33.9,
+            "max": 36.9,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 36.9,
+            "max": 41.0,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 41.0,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 50,
+        "age_max": 60,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 20.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 20.0,
+            "max": 24.1,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 24.1,
+            "max": 26.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 26.8,
+            "max": 29.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 29.4,
+            "max": 31.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 31.4,
+            "max": 33.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 33.7,
+            "max": 35.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 35.7,
+            "max": 37.9,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 37.9,
+            "max": 40.8,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 40.8,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 60,
+        "age_max": 70,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 21.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 21.0,
+            "max": 25.1,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 25.1,
+            "max": 27.3,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 27.3,
+            "max": 29.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 29.4,
+            "max": 31.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 31.6,
+            "max": 33.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 33.5,
+            "max": 34.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 34.7,
+            "max": 37.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 37.2,
+            "max": 40.7,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 40.7,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 70,
+        "age_max": 80,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 23.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 23.0,
+            "max": 25.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 25.7,
+            "max": 28.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 28.0,
+            "max": 29.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 29.4,
+            "max": 32.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 32.4,
+            "max": 34.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 34.0,
+            "max": 35.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 35.7,
+            "max": 37.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 37.4,
+            "max": 39.6,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 39.6,
+            "max": null,
+            "flag": null
+          }
+        ]
+      }
+    ],
+    "age_bands_f": [
+      {
+        "age_min": 20,
+        "age_max": 30,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 22.1,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 22.1,
+            "max": 24.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 24.5,
+            "max": 26.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 26.4,
+            "max": 28.1,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 28.1,
+            "max": 29.9,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 29.9,
+            "max": 32.1,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 32.1,
+            "max": 35.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 35.4,
+            "max": 38.3,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 38.3,
+            "max": 43.2,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 43.2,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 30,
+        "age_max": 40,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 21.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 21.4,
+            "max": 26.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 26.8,
+            "max": 29.3,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 29.3,
+            "max": 33.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 33.4,
+            "max": 36.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 36.8,
+            "max": 40.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 40.6,
+            "max": 43.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 43.6,
+            "max": 46.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 46.8,
+            "max": 50.7,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 50.7,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 40,
+        "age_max": 50,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 24.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 24.5,
+            "max": 31.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 31.4,
+            "max": 34.3,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 34.3,
+            "max": 37.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 37.4,
+            "max": 40.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 40.0,
+            "max": 42.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 42.6,
+            "max": 44.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 44.5,
+            "max": 48.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 48.2,
+            "max": 51.0,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 51.0,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 50,
+        "age_max": 60,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 30.3,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 30.3,
+            "max": 34.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 34.4,
+            "max": 38.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 38.0,
+            "max": 40.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 40.5,
+            "max": 42.7,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 42.7,
+            "max": 45.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 45.0,
+            "max": 47.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 47.0,
+            "max": 49.3,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 49.3,
+            "max": 51.8,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 51.8,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 60,
+        "age_max": 70,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 32.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 32.5,
+            "max": 35.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 35.5,
+            "max": 38.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 38.6,
+            "max": 40.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 40.8,
+            "max": 42.4,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 42.4,
+            "max": 44.9,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 44.9,
+            "max": 47.0,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 47.0,
+            "max": 49.1,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 49.1,
+            "max": 52.2,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 52.2,
+            "max": null,
+            "flag": null
+          }
+        ]
+      },
+      {
+        "age_min": 70,
+        "age_max": 80,
+        "bands": [
+          {
+            "label": "Abaixo do percentil 10",
+            "min": null,
+            "max": 30.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 10–20",
+            "min": 30.5,
+            "max": 35.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 20–30",
+            "min": 35.5,
+            "max": 37.9,
+            "flag": null
+          },
+          {
+            "label": "Percentil 30–40",
+            "min": 37.9,
+            "max": 39.6,
+            "flag": null
+          },
+          {
+            "label": "Percentil 40–50",
+            "min": 39.6,
+            "max": 41.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 50–60",
+            "min": 41.2,
+            "max": 43.5,
+            "flag": null
+          },
+          {
+            "label": "Percentil 60–70",
+            "min": 43.5,
+            "max": 45.8,
+            "flag": null
+          },
+          {
+            "label": "Percentil 70–80",
+            "min": 45.8,
+            "max": 48.2,
+            "flag": null
+          },
+          {
+            "label": "Percentil 80–90",
+            "min": 48.2,
+            "max": 50.1,
+            "flag": null
+          },
+          {
+            "label": "Acima do percentil 90",
+            "min": 50.1,
+            "max": null,
+            "flag": null
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "waist-circumference",
@@ -213,7 +1011,9 @@
         "flag": "alert"
       }
     ],
-    "notes": "Medição manual (fita métrica) — não vem da balança. Limiares OMS/IDF para populações europeias. É o indicador clínico de gordura visceral, ao contrário do «índice» proprietário das balanças de bioimpedância."
+    "notes": "Medição manual (fita métrica) — não vem da balança. Limiares OMS/IDF para populações europeias. É o indicador clínico de gordura visceral, ao contrário do «índice» proprietário das balanças de bioimpedância.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "weight",
@@ -223,7 +1023,9 @@
     "trend_reason": "A leitura clínica faz-se pelo IMC",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: o peso isolado não é classificável. A leitura clínica é feita pelo IMC."
+    "notes": "Trend-only: o peso isolado não é classificável. A leitura clínica é feita pelo IMC.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "fat-mass",
@@ -233,7 +1035,9 @@
     "trend_reason": "A leitura clínica faz-se pelo IMG",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. A classificação faz-se pela percentagem de gordura corporal."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. A classificação faz-se pela percentagem de gordura corporal.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "fmi",
@@ -243,7 +1047,9 @@
     "trend_reason": "Percentis publicados são de DXA; a leitura é de bioimpedância",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Massa gorda a dividir pela altura ao quadrado. Ao contrário da percentagem de gordura, não muda quando só a massa magra muda — o que o torna melhor para seguir a gordura ao longo do tempo. Trend-only: os percentis publicados são de DXA e a leitura é de bioimpedância."
+    "notes": "Massa gorda a dividir pela altura ao quadrado. Ao contrário da percentagem de gordura, não muda quando só a massa magra muda — o que o torna melhor para seguir a gordura ao longo do tempo. Trend-only: os percentis publicados são de DXA e a leitura é de bioimpedância.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "fat-free-mass",
@@ -253,7 +1059,9 @@
     "trend_reason": "A leitura clínica faz-se pelo IMLG",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "ffmi",
@@ -289,7 +1097,9 @@
         "flag": "normal"
       }
     ],
-    "notes": "Massa livre de gordura a dividir pela altura ao quadrado. Limiares GLIM/ESPEN para massa muscular reduzida no diagnóstico de desnutrição: <17 kg/m² (homens) e <15 kg/m² (mulheres). São limiares de rastreio clínico, não escalões de aptidão: acima deles não há gradação — só diz que não está reduzida. Derivado da altura do perfil; o valor vem da balança e a bioimpedância sobrestima a massa magra face ao DXA."
+    "notes": "Massa livre de gordura a dividir pela altura ao quadrado. Limiares GLIM/ESPEN para massa muscular reduzida no diagnóstico de desnutrição: <17 kg/m² (homens) e <15 kg/m² (mulheres). São limiares de rastreio clínico, não escalões de aptidão: acima deles não há gradação — só diz que não está reduzida. Derivado da altura do perfil; o valor vem da balança e a bioimpedância sobrestima a massa magra face ao DXA.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "muscle-mass",
@@ -299,7 +1109,9 @@
     "trend_reason": "Sem limiar para massa total; o rastreio faz-se pelo IMLG",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "muscle-rate",
@@ -309,7 +1121,9 @@
     "trend_reason": "Sem limiar para massa total; o rastreio faz-se pelo IMLG",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "skeletal-muscle-mass",
@@ -319,7 +1133,9 @@
     "trend_reason": "Os limiares do EWGSOP2 são para massa apendicular",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only, e deliberadamente sem os limiares do EWGSOP2. Os cut-offs de 7,0 kg/m² (homens) e 5,5 kg/m² (mulheres) são para o índice de massa muscular *apendicular* — só braços e pernas, cerca de três quartos deste valor. Aplicá-los à massa muscular total daria quase toda a gente como normal, incluindo quem tem massa muscular reduzida. Para rastreio, ver o IMLG (limiares GLIM/ESPEN), que é definido sobre a massa livre de gordura que a balança realmente reporta."
+    "notes": "Trend-only, e deliberadamente sem os limiares do EWGSOP2. Os cut-offs de 7,0 kg/m² (homens) e 5,5 kg/m² (mulheres) são para o índice de massa muscular *apendicular* — só braços e pernas, cerca de três quartos deste valor. Aplicá-los à massa muscular total daria quase toda a gente como normal, incluindo quem tem massa muscular reduzida. Para rastreio, ver o IMLG (limiares GLIM/ESPEN), que é definido sobre a massa livre de gordura que a balança realmente reporta.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "bone-mass",
@@ -329,7 +1145,9 @@
     "trend_reason": "O osso avalia-se por DEXA, não por bioimpedância",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: a bioimpedância não mede densidade mineral óssea. A avaliação clínica do osso faz-se por DEXA."
+    "notes": "Trend-only: a bioimpedância não mede densidade mineral óssea. A avaliação clínica do osso faz-se por DEXA.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "protein-mass",
@@ -339,7 +1157,9 @@
     "trend_reason": "Estimativa da balança, sem bandas validadas",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "protein-pct",
@@ -349,7 +1169,9 @@
     "trend_reason": "Estimativa da balança, sem bandas validadas",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "water-mass",
@@ -359,7 +1181,9 @@
     "trend_reason": "Estimativa da balança, sensível à hidratação do momento",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. Muito sensível ao estado de hidratação no momento da medição."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. Muito sensível ao estado de hidratação no momento da medição.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "water-pct",
@@ -369,7 +1193,9 @@
     "trend_reason": "Estimativa da balança, sensível à hidratação do momento",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. Muito sensível ao estado de hidratação no momento da medição."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas. Muito sensível ao estado de hidratação no momento da medição.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "subcutaneous-fat-pct",
@@ -379,7 +1205,9 @@
     "trend_reason": "Estimativa da balança, sem bandas validadas",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas."
+    "notes": "Trend-only: estimativa de bioimpedância sem bandas clínicas validadas.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "visceral-fat-index",
@@ -389,7 +1217,9 @@
     "trend_reason": "Índice proprietário da balança, não é unidade clínica",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: o «índice» é proprietário da balança e não é uma unidade clínica. A avaliação de gordura visceral faz-se por perímetro abdominal ou imagiologia."
+    "notes": "Trend-only: o «índice» é proprietário da balança e não é uma unidade clínica. A avaliação de gordura visceral faz-se por perímetro abdominal ou imagiologia.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "bmr",
@@ -399,7 +1229,9 @@
     "trend_reason": "Calculada por fórmula, não medida por calorimetria",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: valor calculado por fórmula a partir das estimativas da balança, não medido por calorimetria."
+    "notes": "Trend-only: valor calculado por fórmula a partir das estimativas da balança, não medido por calorimetria.",
+    "age_bands_m": null,
+    "age_bands_f": null
   },
   {
     "slug": "metabolic-age",
@@ -409,6 +1241,8 @@
     "trend_reason": "Métrica proprietária da balança, sem definição clínica",
     "bands_m": null,
     "bands_f": null,
-    "notes": "Trend-only: métrica proprietária da balança, sem definição clínica nem standard de referência."
+    "notes": "Trend-only: métrica proprietária da balança, sem definição clínica nem standard de referência.",
+    "age_bands_m": null,
+    "age_bands_f": null
   }
 ]

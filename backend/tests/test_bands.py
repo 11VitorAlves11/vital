@@ -13,7 +13,7 @@ import pytest
 from app.db.seed import seed_dir
 from app.models.body import BodyMetric
 from app.models.enums import Sex
-from app.services.bands import bands_for, classify
+from app.services.bands import age_band_for, bands_for, classify
 
 BMI_BANDS = [
     {"label": "Baixo peso", "min": None, "max": 18.5, "flag": "warn"},
@@ -110,3 +110,75 @@ def test_the_body_fat_scale_names_without_judging(
     """
     bands = _seed_metric("body-fat-pct")[sex]
     assert classify(Decimal(value), bands) == (None, expected_label)  # type: ignore[arg-type]
+
+
+AGE_BRACKETS = [
+    {
+        "age_min": 20,
+        "age_max": 30,
+        "bands": [
+            {"label": "Abaixo do percentil 10", "min": None, "max": 22.1, "flag": None},
+            {"label": "Percentil 10–20", "min": 22.1, "max": 24.5, "flag": None},
+            {"label": "Acima do percentil 90", "min": 43.2, "max": None, "flag": None},
+        ],
+    },
+    {
+        "age_min": 30,
+        "age_max": 40,
+        "bands": [{"label": "Percentil 50–60", "min": 29.9, "max": 32.1, "flag": None}],
+    },
+]
+
+
+def test_age_band_picks_the_bracket_the_age_falls_in() -> None:
+    metric = BodyMetric(
+        slug="body-fat-pct", name="Gordura corporal", unit="%", age_bands_f=AGE_BRACKETS
+    )
+    assert age_band_for(metric, Sex.F, 25) == AGE_BRACKETS[0]["bands"]
+    assert age_band_for(metric, Sex.F, 35) == AGE_BRACKETS[1]["bands"]
+
+
+def test_age_band_bracket_limits_are_min_inclusive_max_exclusive() -> None:
+    metric = BodyMetric(
+        slug="body-fat-pct", name="Gordura corporal", unit="%", age_bands_f=AGE_BRACKETS
+    )
+    assert age_band_for(metric, Sex.F, 29) == AGE_BRACKETS[0]["bands"]
+    assert age_band_for(metric, Sex.F, 30) == AGE_BRACKETS[1]["bands"]
+
+
+def test_age_outside_every_bracket_has_no_context() -> None:
+    """The reference studied ages 20–79; it has nothing to say about 15 or 85,
+    and a gap here is the honest answer, not a bug to fill by extrapolating."""
+    metric = BodyMetric(
+        slug="body-fat-pct", name="Gordura corporal", unit="%", age_bands_f=AGE_BRACKETS
+    )
+    assert age_band_for(metric, Sex.F, 19) is None
+    assert age_band_for(metric, Sex.F, 40) is None
+
+
+def test_a_metric_with_no_age_reference_has_no_age_context() -> None:
+    metric = BodyMetric(slug="bmi", name="IMC", unit="kg/m²")
+    assert age_band_for(metric, Sex.M, 30) is None
+
+
+def test_unknown_sex_or_age_yields_no_age_context() -> None:
+    metric = BodyMetric(
+        slug="body-fat-pct", name="Gordura corporal", unit="%", age_bands_f=AGE_BRACKETS
+    )
+    assert age_band_for(metric, None, 30) is None
+    assert age_band_for(metric, Sex.F, None) is None
+
+
+def test_the_seeded_age_bands_classify_body_fat_percentage_within_a_bracket() -> None:
+    """22 % at 25 lands just inside the deficiency-adjacent low end for a woman
+    that age (Imboden, 20–29): the published boundary was 22.1."""
+    entry = _seed_metric("body-fat-pct")
+    metric = BodyMetric(
+        slug="body-fat-pct", name="Gordura corporal", unit="%", age_bands_f=entry["age_bands_f"]
+    )
+    bands = age_band_for(metric, Sex.F, 25)
+    assert bands is not None
+    _, label = classify(Decimal("22"), bands)
+    assert label == "Abaixo do percentil 10"
+    # Every band names without judging (D1/DT8): no age-context band ever flags.
+    assert all(band["flag"] is None for band in bands)

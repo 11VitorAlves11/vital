@@ -30,6 +30,13 @@ class BodyMetric(Base):
     # so "has no clinical bands" stays queryable.
     bands_m: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
     bands_f: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
+    # `[{age_min, age_max, bands: [{label, min, max, flag}]}]` — the same band
+    # shape as bands_m/bands_f, partitioned by age at the date of measurement,
+    # `[age_min, age_max)`. Only body-fat-pct has these (5.3): a reference that
+    # covers ages 20–79 has nothing to say about a 19- or 85-year-old, so a scan
+    # outside every bracket simply carries no age context, not a guessed one.
+    age_bands_m: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
+    age_bands_f: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB(none_as_null=True))
     source: Mapped[str | None] = mapped_column(String)
     # Why this metric carries no verdict, in one line — set on every metric that
     # cannot produce a flag, whether it has no bands at all or bands that only

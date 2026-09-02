@@ -23,16 +23,19 @@ from app.schemas.dashboard import SPARKLINE_POINTS
 from app.schemas.interventions import InterventionOut
 from app.schemas.series import BodyPoint, BodySeries
 from app.services import anthropometrics
-from app.services.bands import bands_for, classify
+from app.services.age import age_at
+from app.services.bands import age_band_for, bands_for, classify
 from app.services.overlay import overlapping_interventions
 
 router = APIRouter(prefix="/body", tags=["body"])
 
 
-def to_value_out(value: BodyScanValue, user: User) -> ScanValueOut:
+def to_value_out(value: BodyScanValue, user: User, measured_at: datetime) -> ScanValueOut:
     """The stored flag is authoritative; the band label is looked up for display,
     because a colour on its own is not a signal."""
     _, label = classify(value.value, bands_for(value.metric, user.sex))
+    age_years = age_at(user.birth_date, measured_at.date()) if user.birth_date else None
+    _, age_label = classify(value.value, age_band_for(value.metric, user.sex, age_years))
     return ScanValueOut(
         id=value.id,
         metric_id=value.metric_id,
@@ -42,6 +45,7 @@ def to_value_out(value: BodyScanValue, user: User) -> ScanValueOut:
         value=value.value,
         flag=value.flag,  # type: ignore[arg-type]
         label=label,
+        age_context=age_label,
     )
 
 
@@ -88,7 +92,7 @@ def to_scan_out(scan: BodyScan, user: User, catalogue: dict[str, BodyMetric]) ->
         source=scan.source,
         device=scan.device,
         notes=scan.notes,
-        values=[to_value_out(value, user) for value in scan.values]
+        values=[to_value_out(value, user, scan.measured_at) for value in scan.values]
         + derived_values(scan, user, catalogue),
     )
 
@@ -167,7 +171,7 @@ async def _readings(
     return [
         (
             scan.measured_at,
-            [to_value_out(value, user) for value in scan.values]
+            [to_value_out(value, user, scan.measured_at) for value in scan.values]
             + derived_values(scan, user, metrics),
         )
         for scan in scans
@@ -188,6 +192,7 @@ async def metric_series(metric_id: int, user: CurrentUser, db: DbSession) -> Bod
             value=value.value,
             flag=value.flag,
             label=value.label,
+            age_context=value.age_context,
             scan_id=str(value.id) if value.id else "",
         )
         for measured_at, values in readings

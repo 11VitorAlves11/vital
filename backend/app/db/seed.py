@@ -49,6 +49,8 @@ BODY_METRIC_FIELDS = (
     "unit",
     "bands_m",
     "bands_f",
+    "age_bands_m",
+    "age_bands_f",
     "source",
     "trend_reason",
     "notes",

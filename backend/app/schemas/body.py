@@ -43,6 +43,10 @@ class ScanValueOut(BaseModel):
     # The metric this was computed from, for the indices height makes possible.
     # Null on a measured value — the distinction is the reader's to see.
     derived_from: str | None = None
+    #: Which age-referenced percentile bracket this reading falls in, at the
+    #: age its owner was on the date of the scan. Null outside every bracket
+    #: the reference covers, and for every metric that has none at all.
+    age_context: str | None = None
 
 
 class BodyScanOut(BaseModel):

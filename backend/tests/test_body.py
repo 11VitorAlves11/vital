@@ -219,3 +219,83 @@ async def test_delete_removes_the_scan(user_client: AsyncClient, catalogue: dict
     assert (await user_client.delete(f"/api/body/scans/{scan_id}")).status_code == 204
     assert (await user_client.get("/api/body/scans")).json() == []
     assert (await user_client.delete(f"/api/body/scans/{scan_id}")).status_code == 404
+
+
+async def test_body_fat_carries_an_age_context_at_the_age_of_the_measurement(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    """Backlog 5.3: age at the date of the scan, not today's — a 25-year-old's
+    reading and a 36-year-old's fall in different Imboden brackets even though
+    both scans belong to the same account."""
+    ac, _ = await make_user(sex="F", birth_date="2000-01-15")
+    fat_id = catalogue["metrics"]["body-fat-pct"]["id"]
+
+    # 25 years old on this date (born 2000-01-15).
+    young = await ac.post(
+        "/api/body/scans",
+        json={
+            "measured_at": "2025-06-01T08:00:00Z",
+            "values": [{"metric_id": fat_id, "value": 22}],
+        },
+    )
+    # 36 years old on this one.
+    older = await ac.post(
+        "/api/body/scans",
+        json={
+            "measured_at": "2036-06-01T08:00:00Z",
+            "values": [{"metric_id": fat_id, "value": 22}],
+        },
+    )
+
+    assert young.json()["values"][0]["age_context"] == "Abaixo do percentil 10"
+    # The same 22 % reads differently at 36: the Imboden 30–39 bracket's own
+    # 10th-percentile boundary (21.4) sits lower than 20–29's (22.1).
+    assert older.json()["values"][0]["age_context"] == "Percentil 10–20"
+    assert older.json()["values"][0]["label"] is not None  # still names by the ACE scale too
+
+
+async def test_no_age_context_without_a_birth_date(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    ac, _ = await make_user(sex="F")
+    fat_id = catalogue["metrics"]["body-fat-pct"]["id"]
+    response = await ac.post(
+        "/api/body/scans",
+        json={
+            "measured_at": "2026-03-01T08:00:00Z",
+            "values": [{"metric_id": fat_id, "value": 22}],
+        },
+    )
+    assert response.json()["values"][0]["age_context"] is None
+
+
+async def test_no_age_context_outside_the_reference_range(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    """The Imboden reference studied ages 20–79; an 85-year-old's reading gets
+    no age context rather than one borrowed from the nearest bracket."""
+    ac, _ = await make_user(sex="F", birth_date="1940-01-01")
+    fat_id = catalogue["metrics"]["body-fat-pct"]["id"]
+    response = await ac.post(
+        "/api/body/scans",
+        json={
+            "measured_at": "2026-03-01T08:00:00Z",
+            "values": [{"metric_id": fat_id, "value": 22}],
+        },
+    )
+    assert response.json()["values"][0]["age_context"] is None
+
+
+async def test_a_metric_without_an_age_reference_never_carries_one(
+    make_user: UserFactory, catalogue: dict[str, Any]
+) -> None:
+    ac, _ = await make_user(sex="M", birth_date="1990-01-01")
+    weight_id = catalogue["metrics"]["weight"]["id"]
+    response = await ac.post(
+        "/api/body/scans",
+        json={
+            "measured_at": "2026-03-01T08:00:00Z",
+            "values": [{"metric_id": weight_id, "value": 80}],
+        },
+    )
+    assert response.json()["values"][0]["age_context"] is None

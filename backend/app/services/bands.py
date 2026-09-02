@@ -23,6 +23,30 @@ def bands_for(metric: BodyMetric, sex: Sex | None) -> list[dict[str, Any]] | Non
     return metric.bands_f if sex is Sex.F else metric.bands_m
 
 
+def age_band_for(
+    metric: BodyMetric, sex: Sex | None, age_years: int | None
+) -> list[dict[str, Any]] | None:
+    """The age-partitioned band set for this reading, or None when the metric
+    has no such reference, the sex or birth date is unknown, or this age falls
+    outside every bracket the reference actually covers.
+
+    A gap between brackets is not filled by the nearest one: a reference that
+    studied ages 20–79 has nothing to say about 85, and guessing would lend a
+    number authority the source never gave it.
+    """
+    if sex is None or age_years is None:
+        return None
+    brackets = metric.age_bands_f if sex is Sex.F else metric.age_bands_m
+    if brackets is None:
+        return None
+    for bracket in brackets:
+        minimum, maximum = bracket["age_min"], bracket["age_max"]
+        if age_years >= minimum and (maximum is None or age_years < maximum):
+            bands: list[dict[str, Any]] = bracket["bands"]
+            return bands
+    return None
+
+
 def _matches(value: Decimal, band: dict[str, Any]) -> bool:
     """`[min, max)` — lower limit inclusive, upper exclusive, null unbounded."""
     minimum, maximum = band.get("min"), band.get("max")

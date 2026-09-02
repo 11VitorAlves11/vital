@@ -54,6 +54,9 @@ class BodyPoint(BaseModel):
     value: Decimal
     flag: Literal["normal", "warn", "alert"] | None = None
     label: str | None = None
+    #: The age-referenced percentile bracket this point fell in, at the age
+    #: its owner was on this date — not the metric's flag, and never one.
+    age_context: str | None = None
     scan_id: str
 
 
