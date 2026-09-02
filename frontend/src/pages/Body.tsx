@@ -1,4 +1,4 @@
-import { Plus, Sigma } from "lucide-react";
+import { Plus, Sigma, Users } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -108,6 +108,16 @@ export function Body() {
                       source:
                         metricNames.get(entry.latest.derived_from) ?? entry.latest.derived_from,
                     })}
+                  </p>
+                ) : null}
+
+                {/* Names without judging (D1/DT8): a percentile against people
+                    the reader's own age and sex, from a reference the card
+                    also names — never a second flag competing with the first. */}
+                {entry.latest.age_context ? (
+                  <p className="flex items-center gap-1.5 text-sm text-ink-muted">
+                    <Users size={14} aria-hidden="true" className="shrink-0" />
+                    {entry.latest.age_context}
                   </p>
                 ) : null}
 

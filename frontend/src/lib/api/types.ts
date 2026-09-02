@@ -288,6 +288,10 @@ export type ScanValue = {
   /** The metric this was computed from, for the indices height makes possible.
    *  Null on a measured value — the distinction is the reader's to see. */
   derived_from: string | null;
+  /** Which age-referenced percentile bracket this reading falls in, at the
+   *  age its owner was on the date of the scan. Null outside every bracket
+   *  the reference covers, and for every metric that has none at all. */
+  age_context: string | null;
 };
 
 export type BodyScan = {
@@ -346,6 +350,9 @@ export type BodyPoint = {
   value: string;
   flag: BandFlag | null;
   label: string | null;
+  /** The age-referenced percentile bracket this point fell in, at the age its
+   *  owner was on this date. */
+  age_context: string | null;
   scan_id: string;
 };
 

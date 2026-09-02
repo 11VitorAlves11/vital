@@ -69,17 +69,22 @@ export function BodyMetricDetail() {
           <Card title={t("biomarker.history")}>
             <ul className="flex flex-col">
               {[...points].reverse().map((point) => (
-                <li
-                  key={point.scan_id}
-                  className="flex flex-wrap items-center justify-between gap-2 border-t border-border py-3"
-                >
-                  <span className="text-ink-muted">{formatDateTime(point.date, locale)}</span>
-                  <span className="flex items-center gap-3">
-                    <span className="data text-ink">
-                      {formatValue(point.value, locale)} {metric.unit}
+                <li key={point.scan_id} className="border-t border-border py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-ink-muted">{formatDateTime(point.date, locale)}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="data text-ink">
+                        {formatValue(point.value, locale)} {metric.unit}
+                      </span>
+                      {point.label ? <FlagChip flag={point.flag} label={point.label} /> : null}
                     </span>
-                    {point.label ? <FlagChip flag={point.flag} label={point.label} /> : null}
-                  </span>
+                  </div>
+                  {/* The age this reading was taken at, not the age its owner
+                      is today — the whole reason 5.3 reads it off the scan's
+                      own date. */}
+                  {point.age_context ? (
+                    <p className="mt-1 text-right text-sm text-ink-muted">{point.age_context}</p>
+                  ) : null}
                 </li>
               ))}
             </ul>

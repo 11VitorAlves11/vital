@@ -528,6 +528,36 @@ describe("Body", () => {
     expect(screen.queryByText("Sem referência clínica")).not.toBeInTheDocument();
   });
 
+  it("shows the age-referenced percentile beside the fitness label", async () => {
+    mockApi([
+      ...SESSION_ROUTES,
+      {
+        pattern: /\/api\/body\/summary/,
+        body: [
+          {
+            metric: { ...BMI, id: 2, slug: "body-fat-pct", name: "Gordura corporal" },
+            latest: {
+              id: "v1",
+              metric_id: 2,
+              metric_slug: "body-fat-pct",
+              metric_name: "Gordura corporal",
+              unit: "%",
+              value: "22.0000",
+              flag: null,
+              label: "Aceitável",
+              age_context: "Abaixo do percentil 10",
+            },
+            measured_at: "2026-03-01T08:00:00Z",
+            sparkline: [{ date: "2026-03-01T08:00:00Z", value: "22.0000" }],
+          },
+        ],
+      },
+    ]);
+    renderWithSession(<Body />);
+    expect(await screen.findByText("Aceitável")).toBeInTheDocument();
+    expect(screen.getByText("Abaixo do percentil 10")).toBeInTheDocument();
+  });
+
   it("asks for the missing sex instead of showing values it cannot classify", async () => {
     mockApi([
       { pattern: /\/api\/auth\/config/, body: { mode: "local" } },
