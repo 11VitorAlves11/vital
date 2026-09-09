@@ -151,15 +151,34 @@ async def create_extraction(
 
     file_sha256 = hashlib.sha256(content).hexdigest()
     duplicate = await db.scalar(
-        select(ExtractionJob.id).where(
+        select(ExtractionJob).where(
             ExtractionJob.user_id == user.id, ExtractionJob.file_sha256 == file_sha256
         )
     )
-    if duplicate is not None:
+    if duplicate is not None and duplicate.status is not ExtractionStatus.FAILED:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="This file has already been imported",
         )
+
+    # A failed provider call did not import anything. Reuse that audit record
+    # and its stable storage path so correcting a key or model lets the reader
+    # retry the exact document without weakening duplicate protection for jobs
+    # that are active, awaiting confirmation, or already confirmed.
+    if duplicate is not None:
+        duplicate.file_path = storage.store_report_upload(
+            user.id, duplicate.id, content, media_type
+        )
+        duplicate.media_type = media_type
+        duplicate.filename = file.filename
+        duplicate.status = ExtractionStatus.PENDING
+        duplicate.provider = None
+        duplicate.raw_output = None
+        duplicate.error = None
+        await db.commit()
+        await db.refresh(duplicate)
+        background.add_task(run_extraction, duplicate.id)
+        return ExtractionOut.model_validate(duplicate)
 
     job = ExtractionJob(
         id=uuid.uuid4(),

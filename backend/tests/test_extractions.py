@@ -160,6 +160,22 @@ class TestUpload:
 
         assert response.status_code == 409
 
+    async def test_retries_the_same_file_after_a_failed_extraction(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        content = make_pdf(lines=30)
+        stub_model(monkeypatch, "not json")
+        failed = await upload(user_client, content)
+        assert (await user_client.get(f"/api/extractions/{failed['id']}")).json()["status"] == "failed"
+
+        stub_model(monkeypatch, ANSWER)
+        retried = await upload(user_client, content)
+
+        assert retried["id"] == failed["id"]
+        polled = (await user_client.get(f"/api/extractions/{retried['id']}")).json()
+        assert polled["status"] == "preview"
+        assert polled["error"] is None
+
     async def test_rejects_a_file_over_the_limit(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:
