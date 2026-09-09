@@ -267,6 +267,19 @@
     "noWeight": "No weigh-ins recorded yet.",
     "weightNote": "From the last weigh-in, not editable here: weight is a measurement with a history.",
     "derived": "Computed from {{source}} and your height"
+    ,"modelTitle": "AI model",
+    "modelDescription": "Configure the model that reads your reports. Use LiteLLM's provider/model format.",
+    "model": "Model",
+    "modelHint": "Leave blank to use this instance's default configuration.",
+    "baseUrl": "Model URL",
+    "baseUrlHint": "Required for local models such as Ollama; usually blank for cloud providers.",
+    "apiKey": "API key",
+    "apiKeyHint": "Leave blank to keep the stored key. Local models usually need no key.",
+    "keyStored": "Key stored",
+    "clearApiKey": "Remove the key stored for this account",
+    "modelPrivacy": "The key is encrypted on the server and is never shown again. Anonymisation happens locally before any model request.",
+    "saveModel": "Save model",
+    "modelSaved": "Model configuration updated."
   },
   "flags": {
     "low": "Low",

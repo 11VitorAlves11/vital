@@ -7,7 +7,7 @@ import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Select } from "../components/ui/Select";
 import { useToast } from "../components/ui/Toast";
-import { auth, body as bodyApi } from "../lib/api";
+import { auth, body as bodyApi, modelSettings as modelSettingsApi } from "../lib/api";
 import { ApiError } from "../lib/api/client";
 import type { Sex } from "../lib/api/types";
 import { formatDate, formatValue } from "../lib/format";
@@ -39,10 +39,17 @@ export function Profile() {
   const [heightCm, setHeightCm] = useState(user?.height_cm ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [model, setModel] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [clearApiKey, setClearApiKey] = useState(false);
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [modelBusy, setModelBusy] = useState(false);
   // The latest weigh-in, read-only here: weight is a measurement with a history,
   // not a profile field, and having two places to change it would mean two
   // answers to what someone weighs.
   const { data: body } = useAsync(() => bodyApi.summary());
+  const { data: storedModel, reload: reloadModel } = useAsync(() => modelSettingsApi.read());
   const weight = (body ?? []).find((item) => item.metric.slug === "weight");
   const age = ageFrom(birthDate);
 
@@ -54,6 +61,12 @@ export function Profile() {
     setBirthDate(user?.birth_date ?? "");
     setHeightCm(user?.height_cm ?? "");
   }, [user]);
+
+  useEffect(() => {
+    if (!storedModel || typeof storedModel.model !== "string") return;
+    setModel(storedModel.model);
+    setBaseUrl(storedModel.base_url ?? "");
+  }, [storedModel]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -73,6 +86,30 @@ export function Profile() {
       setError(cause instanceof ApiError ? cause.message : t("errors.generic"));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function submitModel(event: FormEvent) {
+    event.preventDefault();
+    setModelError(null);
+    setModelBusy(true);
+    try {
+      const updated = await modelSettingsApi.update({
+        model: model.trim() || null,
+        base_url: baseUrl.trim() || null,
+        ...(apiKey ? { api_key: apiKey } : {}),
+        clear_api_key: clearApiKey,
+      });
+      setModel(updated.model);
+      setBaseUrl(updated.base_url ?? "");
+      reloadModel();
+      setApiKey("");
+      setClearApiKey(false);
+      notify(t("profile.modelSaved"));
+    } catch (cause) {
+      setModelError(cause instanceof ApiError ? cause.message : t("errors.generic"));
+    } finally {
+      setModelBusy(false);
     }
   }
 
@@ -161,6 +198,61 @@ export function Profile() {
 
           <Button type="submit" loading={busy}>
             {t("actions.save")}
+          </Button>
+        </form>
+      </Card>
+
+      <Card title={t("profile.modelTitle")}>
+        <form className="flex flex-col gap-4" onSubmit={submitModel} noValidate>
+          <p className="text-sm text-ink-muted">{t("profile.modelDescription")}</p>
+          <Input
+            label={t("profile.model")}
+            value={model}
+            placeholder="ollama/llama3.2-vision"
+            autoComplete="off"
+            onChange={(event) => setModel(event.target.value)}
+            hint={t("profile.modelHint")}
+          />
+          <Input
+            label={t("profile.baseUrl")}
+            type="url"
+            value={baseUrl}
+            placeholder="http://host.docker.internal:11434"
+            autoComplete="url"
+            onChange={(event) => setBaseUrl(event.target.value)}
+            hint={t("profile.baseUrlHint")}
+          />
+          <Input
+            label={t("profile.apiKey")}
+            type="password"
+            value={apiKey}
+            placeholder={storedModel?.has_api_key ? t("profile.keyStored") : ""}
+            autoComplete="new-password"
+            disabled={clearApiKey}
+            onChange={(event) => setApiKey(event.target.value)}
+            hint={t("profile.apiKeyHint")}
+          />
+          {storedModel?.has_account_api_key ? (
+            <label className="flex min-h-[var(--touch-target)] items-center gap-3 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={clearApiKey}
+                onChange={(event) => {
+                  setClearApiKey(event.target.checked);
+                  if (event.target.checked) setApiKey("");
+                }}
+              />
+              {t("profile.clearApiKey")}
+            </label>
+          ) : null}
+          <p className="text-sm text-ink-muted">{t("profile.modelPrivacy")}</p>
+          {modelError ? (
+            <p role="alert" className="text-sm text-flag-alert">
+              {modelError}
+            </p>
+          ) : null}
+          <Button type="submit" loading={modelBusy}>
+            {t("profile.saveModel")}
           </Button>
         </form>
       </Card>

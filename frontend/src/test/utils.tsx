@@ -104,5 +104,5 @@ export const USER = {
 /** The two calls SessionProvider makes on mount, for tests that do not care. */
 export const SESSION_ROUTES = [
   { pattern: /\/api\/auth\/config/, body: { mode: "local" } },
-  { pattern: /\/api\/users\/me/, body: USER },
+  { pattern: /\/api\/users\/me$/, body: USER },
 ];

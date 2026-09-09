@@ -67,6 +67,15 @@ export type User = {
   created_at: string;
 };
 
+export type ModelSettings = {
+  model: string;
+  base_url: string | null;
+  has_api_key: boolean;
+  has_account_api_key: boolean;
+  uses_instance_model: boolean;
+  uses_instance_base_url: boolean;
+};
+
 export type Band = {
   label: string;
   min: number | null;

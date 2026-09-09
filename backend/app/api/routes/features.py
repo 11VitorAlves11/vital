@@ -9,6 +9,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.api.deps import AppSettings, CurrentUser
+from app.services.model_credentials import effective_model_config
 
 router = APIRouter(prefix="/features", tags=["features"])
 
@@ -19,4 +20,4 @@ class FeaturesOut(BaseModel):
 
 @router.get("", response_model=FeaturesOut)
 async def read_features(user: CurrentUser, settings: AppSettings) -> FeaturesOut:
-    return FeaturesOut(extraction=settings.extraction_enabled)
+    return FeaturesOut(extraction=effective_model_config(user, settings).enabled)

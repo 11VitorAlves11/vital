@@ -267,6 +267,19 @@
     "noWeight": "Ainda não há pesagens registadas.",
     "weightNote": "Vem da última pesagem, não se edita aqui: o peso é uma medição com histórico.",
     "derived": "Calculado a partir de {{source}} e da altura"
+    ,"modelTitle": "Modelo de IA",
+    "modelDescription": "Configura o modelo que lê os teus boletins. O formato é provider/modelo, conforme o LiteLLM.",
+    "model": "Modelo",
+    "modelHint": "Deixa vazio para usar a configuração geral desta instância.",
+    "baseUrl": "URL do modelo",
+    "baseUrlHint": "Necessária para modelos locais, como Ollama; normalmente vazia para fornecedores cloud.",
+    "apiKey": "Chave de API",
+    "apiKeyHint": "Deixa vazio para manter a chave guardada. Modelos locais normalmente não precisam de chave.",
+    "keyStored": "Chave guardada",
+    "clearApiKey": "Remover a chave guardada nesta conta",
+    "modelPrivacy": "A chave é cifrada no servidor e nunca volta a ser mostrada. A anonimização acontece localmente antes de qualquer pedido ao modelo.",
+    "saveModel": "Guardar modelo",
+    "modelSaved": "Configuração do modelo atualizada."
   },
   "flags": {
     "low": "Baixo",

@@ -28,6 +28,11 @@ class User(Base):
     # same reason as sex: without it those indices are not computed at all,
     # rather than computed against a guess.
     height_cm: Mapped[Decimal | None] = mapped_column(Numeric(4, 1))
+    # Optional per-account model override. The API key is encrypted with a key
+    # kept in storage and is never included in a response.
+    llm_model: Mapped[str | None] = mapped_column(String(300))
+    llm_base_url: Mapped[str | None] = mapped_column(String(500))
+    llm_api_key_encrypted: Mapped[str | None] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

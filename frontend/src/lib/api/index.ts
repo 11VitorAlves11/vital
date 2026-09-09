@@ -14,6 +14,7 @@ import type {
   Intervention,
   InterventionKind,
   Lab,
+  ModelSettings,
   Photo,
   Pose,
   RepeatStatus,
@@ -58,6 +59,20 @@ export const auth = {
 
 export const features = {
   read: () => request<Features>("/api/features"),
+};
+
+export const modelSettings = {
+  read: () => request<ModelSettings>("/api/users/me/model-settings"),
+  update: (payload: {
+    model?: string | null;
+    base_url?: string | null;
+    api_key?: string;
+    clear_api_key?: boolean;
+  }) =>
+    request<ModelSettings>("/api/users/me/model-settings", {
+      method: "PATCH",
+      body: payload,
+    }),
 };
 
 /** One result on the way in. The server derives everything else about it —

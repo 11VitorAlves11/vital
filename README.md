@@ -54,6 +54,11 @@ Point Vital at any model LiteLLM supports and **Import lab report** appears next
 entry form. Leave `LLM_MODEL` empty and the button does not: no model configured means no
 extraction, not a broken one.
 
+Each signed-in user can also configure a model, base URL and API key under **Profile → AI
+model**. Account settings override these instance defaults. API keys are encrypted with a
+Fernet key generated once in the persistent storage volume; the key itself and the original
+credential are never returned to the browser.
+
 ```bash
 # In .env. A model you host yourself: no key, and nothing leaves the machine.
 LLM_MODEL=ollama/llama3.2-vision

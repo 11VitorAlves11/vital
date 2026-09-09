@@ -42,6 +42,7 @@ from app.services.extraction import (
     page_contents,
     parse_answer,
 )
+from app.services.model_credentials import CredentialError, effective_model_config
 
 logger = logging.getLogger(__name__)
 
@@ -71,9 +72,6 @@ async def run_extraction(job_id: uuid.UUID) -> None:
         if job is None:
             return
         job.status = ExtractionStatus.PROCESSING
-        job.provider = settings.llm_model
-        await db.commit()
-
         try:
             content = storage.read_file(job.file_path)
             if content is None:
@@ -81,9 +79,24 @@ async def run_extraction(job_id: uuid.UUID) -> None:
             owner = await db.get(User, job.user_id)
             if owner is None:
                 raise ExtractionError("The account no longer exists")
+            try:
+                model_config = effective_model_config(owner, settings)
+            except CredentialError as error:
+                raise ExtractionError(str(error)) from error
+            if not model_config.enabled:
+                raise ExtractionError("Extraction is not configured for this account")
+            model_settings = settings.model_copy(
+                update={
+                    "llm_model": model_config.model,
+                    "llm_base_url": model_config.base_url,
+                    "llm_api_key": model_config.api_key,
+                }
+            )
+            job.provider = model_config.model
+            await db.commit()
             identity = Identity(name=owner.name, email=owner.email, birth_date=owner.birth_date)
-            safe_content = page_contents(content, settings, identity, job.media_type)
-            answer, provider = await ask_model(safe_content, settings)
+            safe_content = page_contents(content, model_settings, identity, job.media_type)
+            answer, provider = await ask_model(safe_content, model_settings)
             payload = parse_answer(answer)
         except ExtractionError as error:
             job.status = ExtractionStatus.FAILED
@@ -113,10 +126,10 @@ async def create_extraction(
     background: BackgroundTasks,
     file: Annotated[UploadFile, File()],
 ) -> ExtractionOut:
-    if not settings.extraction_enabled:
+    if not effective_model_config(user, settings).enabled:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Extraction is not configured on this instance",
+            detail="Extraction is not configured for this account",
         )
 
     content = await file.read(settings.upload_max_bytes + 1)

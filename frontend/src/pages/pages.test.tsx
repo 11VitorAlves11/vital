@@ -580,6 +580,45 @@ describe("Body", () => {
 });
 
 describe("Profile", () => {
+  it("saves account model credentials without showing a stored key", async () => {
+    const fetchMock = mockApi([
+      {
+        pattern: /\/api\/users\/me\/model-settings/,
+        body: {
+          model: "ollama/llama3.2-vision",
+          base_url: "http://localhost:11434",
+          has_api_key: true,
+          has_account_api_key: true,
+          uses_instance_model: false,
+          uses_instance_base_url: false,
+        },
+      },
+      ...SESSION_ROUTES,
+      { pattern: /\/api\/body\/summary/, body: [] },
+    ]);
+    renderWithSession(<Profile />);
+
+    expect(await screen.findByLabelText("Modelo")).toHaveValue("ollama/llama3.2-vision");
+    expect(screen.getByLabelText("Chave de API")).toHaveAttribute(
+      "placeholder",
+      "Chave guardada",
+    );
+    await userEvent.clear(screen.getByLabelText("Modelo"));
+    await userEvent.type(screen.getByLabelText("Modelo"), "openai/gpt-4.1-mini");
+    await userEvent.type(screen.getByLabelText("Chave de API"), "new-secret-key");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar modelo" }));
+
+    await waitFor(() => {
+      const patch = fetchMock.mock.calls.find(
+        ([url, init]) => String(url).includes("model-settings") && init?.method === "PATCH",
+      );
+      expect(JSON.parse(String(patch?.[1]?.body))).toMatchObject({
+        model: "openai/gpt-4.1-mini",
+        api_key: "new-secret-key",
+      });
+    });
+  });
+
   it("saves the sex, which is what every band and range depends on", async () => {
     const fetchMock = mockApi([
       ...SESSION_ROUTES,
