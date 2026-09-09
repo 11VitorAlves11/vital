@@ -89,15 +89,14 @@ select {
   }
 }
 
-/* Tabular numerals wherever clinical values are shown in columns. */
+/* The whole product uses Geist; clinical columns keep tabular numerals without
+   switching to a separate monospace face. */
 .data {
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
 }
 
-/* Hero numbers use the display face: in a monospace, the decimal separator gets
-   a full cell of its own and "10,5" reads as "10 , 5" at this size. Columns
-   still align, because the digits stay tabular. */
+/* Hero numbers use the same family with tighter display spacing. */
 .metric {
   font-family: var(--font-display);
   font-variant-numeric: tabular-nums;

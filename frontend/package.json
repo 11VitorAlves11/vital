@@ -20,9 +20,7 @@
     "e2e:shots": "playwright test --grep @shots"
   },
   "dependencies": {
-    "@fontsource/atkinson-hyperlegible-next": "^5.3.0",
-    "@fontsource/jetbrains-mono": "^5.3.0",
-    "@fontsource/public-sans": "^5.3.0",
+    "@fontsource-variable/geist": "^5.3.0",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-label": "^2.1.15",
     "@radix-ui/react-select": "^2.3.7",
