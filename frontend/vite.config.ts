@@ -12,6 +12,12 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      workbox: {
+        // Authentication and API navigations belong to FastAPI. If Workbox's
+        // SPA fallback handles them, an installed PWA serves index.html and an
+        // OIDC login appears to loop without ever reaching the provider.
+        navigateFallbackDenylist: [/^\/auth(?:\/|$)/, /^\/api(?:\/|$)/],
+      },
       manifest: {
         name: "Vital",
         short_name: "Vital",

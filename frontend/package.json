@@ -14,7 +14,8 @@
     "lint:css": "stylelint \"src/**/*.css\"",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
-    "e2e": "playwright test --grep-invert @shots",
+    "e2e": "playwright test --grep-invert '@shots|@pwa'",
+    "e2e:pwa": "playwright test --config playwright.pwa.config.ts",
     "e2e:docker": "docker run --rm --network vital_default -v \"$PWD\":/work -w /work -e E2E_BASE_URL=http://web:5173 mcr.microsoft.com/playwright:v1.62.1-noble npx playwright test",
     "e2e:shots": "playwright test --grep @shots"
   },

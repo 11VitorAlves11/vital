@@ -78,6 +78,7 @@
     "labRange": "Intervalo reportado pelo laboratório",
     "noRange": "Sem intervalo de referência",
     "ordinalScale": "Escala de referência",
+    "rangePosition": "{{position}}% do intervalo · {{quartile}}.º quartil",
     "unconvertedPoints": "{{count}} valor fora do gráfico: unidade sem conversão conhecida para {{unit}}.",
     "unconvertedPoints_other": "{{count}} valores fora do gráfico: unidade sem conversão conhecida para {{unit}}."
   },

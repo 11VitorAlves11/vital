@@ -30,7 +30,13 @@ from app.schemas.reports import (
 )
 from app.services import caveats, comparison, derived_biomarkers, providers, storage
 from app.services import results as result_service
-from app.services.flags import Reference, band_label, canonical_reference, compute_flag
+from app.services.flags import (
+    Reference,
+    band_label,
+    canonical_reference,
+    compute_flag,
+    relative_position,
+)
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -70,6 +76,7 @@ def to_result_out(result: Result, report: LabReport) -> ResultOut:
             if result.canonical_value is not None
             else None
         ),
+        range_position=relative_position(result.value, reference),
         method=result.method,
         note=result.note,
         note_at=result.note_at,
@@ -106,6 +113,7 @@ def to_derived_result_out(
         reference_kind=reference.kind,
         reference_bands=None,
         band_label=None,
+        range_position=relative_position(item.value, reference),
         method=None,
         note=None,
         note_at=None,

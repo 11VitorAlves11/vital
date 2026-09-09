@@ -139,6 +139,8 @@ export type Result = {
   reference_bands: ReferenceBand[] | null;
   /** Which step of an ordinal scale it landed on ("insuficiência"). */
   band_label: string | null;
+  /** Percentage from the lower to the upper bound of a finite interval. */
+  range_position?: string | null;
   /** The assay behind the number, as the report named it. */
   method: string | null;
   /** Context someone wrote against this one value, and when. */

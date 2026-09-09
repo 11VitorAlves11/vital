@@ -58,6 +58,32 @@ async def test_flags_are_computed_server_side(
     assert flags == {"hemoglobina": "low", "ferritina": "high"}
 
 
+async def test_position_is_only_computed_inside_a_two_sided_interval(
+    user_client: AsyncClient, catalogue: dict[str, Any]
+) -> None:
+    response = await _create(
+        user_client,
+        catalogue,
+        results=[
+            {
+                "biomarker_id": catalogue["biomarkers"]["hemoglobina"]["id"],
+                "value": 14.1,
+                "ref_min": 13,
+                "ref_max": 17,
+            },
+            {
+                "biomarker_id": catalogue["biomarkers"]["ferritina"]["id"],
+                "value": 200,
+                "ref_min": 15,
+                "ref_max": 150,
+            },
+        ],
+    )
+    by_slug = {item["biomarker_slug"]: item for item in response.json()["results"]}
+    assert by_slug["hemoglobina"]["range_position"] == "27.5"
+    assert by_slug["ferritina"]["range_position"] is None
+
+
 async def test_a_client_supplied_flag_is_ignored(
     user_client: AsyncClient, catalogue: dict[str, Any]
 ) -> None:

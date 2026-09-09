@@ -59,6 +59,36 @@ async def test_register_sets_an_httponly_session_cookie(
     assert (await client.get("/api/users/me")).status_code == 200
 
 
+async def test_registration_stores_the_height_given_up_front(
+    client: AsyncClient, database: None
+) -> None:
+    response = await client.post(
+        "/auth/register",
+        json={
+            "email": f"{uuid.uuid4().hex}@example.com",
+            "password": TEST_PASSWORD,
+            "height_cm": 168,
+        },
+    )
+    assert response.status_code == 201
+    assert response.json()["height_cm"] == "168.0"
+    assert (await client.get("/api/users/me")).json()["height_cm"] == "168.0"
+
+
+async def test_registration_rejects_an_out_of_range_height(
+    client: AsyncClient, database: None
+) -> None:
+    response = await client.post(
+        "/auth/register",
+        json={
+            "email": f"{uuid.uuid4().hex}@example.com",
+            "password": TEST_PASSWORD,
+            "height_cm": 50,
+        },
+    )
+    assert response.status_code == 422
+
+
 async def test_registration_never_returns_the_password_hash(make_user: UserFactory) -> None:
     _, user = await make_user()
     assert "password" not in user

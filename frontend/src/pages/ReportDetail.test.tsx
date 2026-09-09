@@ -68,6 +68,11 @@ describe("ReportDetail", () => {
     expect(line).toHaveTextContent("12 h de jejum");
   });
 
+  it("shows where an in-range value sits within its interval", async () => {
+    render({ ...REPORT, results: [{ ...RESULT, range_position: "27.5" }] });
+    expect(await screen.findByText("27,5% do intervalo · 2.º quartil")).toBeInTheDocument();
+  });
+
   it("leaves out what nobody recorded", async () => {
     render({
       ...REPORT,

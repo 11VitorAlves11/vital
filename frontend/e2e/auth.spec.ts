@@ -40,4 +40,11 @@ test.describe("local authentication", () => {
     await page.reload();
     await expect(page.getByRole("heading", { name: "Início" })).toBeVisible();
   });
+
+  test("height given at sign-up shows on the profile", async ({ page }) => {
+    await signUp(page, "F", { heightCm: "168" });
+    await page.goto("/profile");
+    // Numeric(4, 1) on the server always answers with one decimal place.
+    await expect(page.getByLabel("Altura")).toHaveValue("168.0");
+  });
 });

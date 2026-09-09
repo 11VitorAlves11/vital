@@ -27,6 +27,9 @@ export function ResultRow({ result, onAnnotate }: ResultRowProps) {
   // On a named scale the step is the reference; the two numbers around it read
   // as a pass/fail the marker deliberately is not.
   const range = result.band_label ?? formatRange(result.ref_min, result.ref_max, locale);
+  const position = result.range_position === null ? null : Number(result.range_position);
+  const quartile =
+    position === null || Number.isNaN(position) ? null : Math.min(4, Math.floor(position / 25) + 1);
 
   return (
     <div className="border-t border-border py-3">
@@ -54,6 +57,14 @@ export function ResultRow({ result, onAnnotate }: ResultRowProps) {
           />
         </div>
       </div>
+      {quartile ? (
+        <p className="mt-1 text-sm text-ink-muted">
+          {t("biomarker.rangePosition", {
+            position: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(position!),
+            quartile,
+          })}
+        </p>
+      ) : null}
       <CaveatList caveats={result.caveats} className="mt-1.5" />
       {/* A computed value has nothing to annotate or repeat: there is no row
           behind it to attach a note to, or to schedule a fresh reading from. */}

@@ -78,6 +78,7 @@
     "labRange": "Range reported by the laboratory",
     "noRange": "No reference range",
     "ordinalScale": "Reference scale",
+    "rangePosition": "{{position}}% through the range · quartile {{quartile}}",
     "unconvertedPoints": "{{count}} value left off the chart: its unit has no known conversion to {{unit}}.",
     "unconvertedPoints_other": "{{count}} values left off the chart: their unit has no known conversion to {{unit}}."
   },

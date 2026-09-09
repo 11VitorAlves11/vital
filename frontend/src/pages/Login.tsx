@@ -22,6 +22,7 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [sex, setSex] = useState<Sex | "">("");
+  const [heightCm, setHeightCm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -34,7 +35,13 @@ export function Login() {
     setError(null);
     try {
       const account = registering
-        ? await auth.register({ email, password, name: name || undefined, sex: sex || null })
+        ? await auth.register({
+            email,
+            password,
+            name: name || undefined,
+            sex: sex || null,
+            height_cm: heightCm === "" ? null : Number(heightCm),
+          })
         : await auth.login(email, password);
       setUser(account);
     } catch (cause) {
@@ -106,6 +113,18 @@ export function Login() {
                   ]}
                 />
                 <p className="text-sm text-ink-muted">{t("sex.why")}</p>
+                <Input
+                  label={t("profile.height")}
+                  type="number"
+                  inputMode="decimal"
+                  min={100}
+                  max={250}
+                  step="0.5"
+                  unit="cm"
+                  value={heightCm}
+                  onChange={(event) => setHeightCm(event.target.value)}
+                  hint={t("profile.heightHint")}
+                />
               </>
             ) : null}
 

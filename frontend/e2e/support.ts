@@ -9,7 +9,11 @@ function escapeRegExp(value: string): string {
 
 /** Registers a fresh account per test, the same way the API tests do: every
  * assertion then runs against data no other test can have touched. */
-export async function signUp(page: Page, sex: "M" | "F" | "" = "F") {
+export async function signUp(
+  page: Page,
+  sex: "M" | "F" | "" = "F",
+  { heightCm }: { heightCm?: string } = {},
+) {
   const email = `e2e-${Date.now()}-${Math.random().toString(16).slice(2)}@example.com`;
 
   await page.goto("/login");
@@ -18,6 +22,7 @@ export async function signUp(page: Page, sex: "M" | "F" | "" = "F") {
   await page.getByLabel("Palavra-passe").fill(PASSWORD);
   await page.getByLabel("Nome").fill("Ana Teste");
   if (sex) await page.getByLabel("Sexo").selectOption(sex);
+  if (heightCm) await page.getByLabel("Altura").fill(heightCm);
   await page.getByRole("button", { name: "Criar conta", exact: true }).click();
 
   await expect(page.getByRole("heading", { name: "Início" })).toBeVisible();

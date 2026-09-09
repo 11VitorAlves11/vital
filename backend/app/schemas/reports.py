@@ -120,6 +120,9 @@ class ResultOut(BaseModel):
     reference_bands: list[ReferenceBandOut] | None = None
     #: Which step of that scale it landed on ("insuficiência"), for ordinal markers.
     band_label: str | None = None
+    #: Percentage from the lower to the upper bound, only while inside a finite
+    #: two-sided interval. Null for open intervals, ordinal scales and outliers.
+    range_position: Decimal | None = None
     method: str | None = None
     #: Context someone wrote against this one value, and when.
     note: str | None = None

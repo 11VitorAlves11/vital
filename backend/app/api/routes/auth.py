@@ -158,6 +158,7 @@ async def register(
         name=payload.name,
         sex=payload.sex,
         birth_date=payload.birth_date,
+        height_cm=payload.height_cm,
     )
     db.add(user)
     await db.commit()

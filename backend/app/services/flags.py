@@ -10,7 +10,7 @@ nothing about how low is too low, so a value under it is `normal`, not `low`.
 """
 
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from app.models.biomarker import Biomarker
@@ -95,3 +95,26 @@ def compute_flag(value: Decimal, reference: Reference) -> ResultFlag | None:
     if reference.maximum is not None and value > reference.maximum:
         return ResultFlag.HIGH
     return ResultFlag.NORMAL
+
+
+def relative_position(value: Decimal, reference: Reference) -> Decimal | None:
+    """Position from 0 to 100 inside a closed, two-sided interval.
+
+    One-sided and ordinal references have no finite span to divide. Values
+    outside the interval are also omitted: their flag already carries the
+    useful fact, while a negative or >100% "position inside" would misname it.
+    """
+    if (
+        reference.kind is not ReferenceKind.TWO_SIDED
+        or reference.minimum is None
+        or reference.maximum is None
+        or value < reference.minimum
+        or value > reference.maximum
+    ):
+        return None
+    width = reference.maximum - reference.minimum
+    if width <= 0:
+        return None
+    return (((value - reference.minimum) / width) * 100).quantize(
+        Decimal("0.1"), rounding=ROUND_HALF_UP
+    )
