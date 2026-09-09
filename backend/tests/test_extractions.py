@@ -199,6 +199,25 @@ class TestUpload:
 
 
 class TestPreview:
+    async def test_preserves_visual_column_order_in_text_pdfs(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        document = pymupdf.open()
+        page = document.new_page()
+        # Inserted in the misleading content-stream order used by many lab PDFs:
+        # reference first, then the visually earlier current result.
+        page.insert_text((360, 100), "13,0 - 16,5")
+        page.insert_text((50, 100), "Hemoglobina")
+        page.insert_text((250, 100), "15,2 g/dL")
+        monkeypatch.setattr(get_settings(), "extraction_text_threshold", 0, raising=False)
+        seen = stub_model(monkeypatch, ANSWER)
+
+        await upload(user_client, bytes(document.tobytes()))
+
+        payload = seen[0][0]["text"]
+        assert "Hemoglobina 15,2 g/dL 13,0 - 16,5" in payload
+        assert "Resultado Atual" in payload
+
     async def test_matches_the_catalogue_through_aliases_and_accents(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:

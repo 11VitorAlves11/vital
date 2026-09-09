@@ -19,6 +19,7 @@ os.environ.setdefault("SECRET_KEY", "test-secret-not-used-anywhere-real")
 
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 from sqlalchemy import text  # noqa: E402
+from sqlalchemy.engine import make_url  # noqa: E402
 from sqlalchemy.ext.asyncio import create_async_engine  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
@@ -52,6 +53,9 @@ def database() -> None:
     Going through Alembic rather than `create_all` means the suite runs against the
     schema the deployment actually gets, so model/migration drift fails the tests.
     """
+    database_name = make_url(get_settings().database_url).database or ""
+    if not database_name.endswith("_test"):
+        pytest.skip("refusing to rebuild a database whose name does not end in _test")
     if not _database_reachable():
         pytest.skip("no database reachable at DATABASE_URL")
     for arguments in (["downgrade", "base"], ["upgrade", "head"]):

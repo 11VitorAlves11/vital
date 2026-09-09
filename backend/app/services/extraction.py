@@ -48,6 +48,11 @@ Responde APENAS com JSON válido, sem markdown:
 Usa null quando um campo não constar. Converte vírgulas decimais para ponto.
 Não inventes valores: transcreve apenas o que está no documento."""
 
+LAYOUT_RULE = """O texto abaixo preserva a posição visual de cada linha.
+Quando existirem colunas, usa exclusivamente a coluna "Resultado Atual" como value.
+Não uses limites de "Valores de Referência" nem "Resultados Históricos" como resultado.
+Os limites pertencem apenas a ref_min e ref_max."""
+
 
 _FASTING_STATES = {
     True: FastingState.FASTING,
@@ -63,6 +68,31 @@ class ExtractionError(RuntimeError):
 def _image_part(png: bytes) -> dict[str, Any]:
     encoded = base64.b64encode(png).decode()
     return {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded}"}}
+
+
+def spatial_text(page: Any) -> str:
+    """Rebuild text in visual rows instead of the PDF content-stream order.
+
+    Laboratory PDFs commonly paint the current result, reference range and
+    history as independent columns. Plain ``get_text()`` can return those
+    columns in a different order, turning a reference maximum into the result.
+    Grouping words by their vertical position and then sorting left-to-right
+    preserves the table the reader sees.
+    """
+    words = sorted(page.get_text("words"), key=lambda word: (word[1], word[0]))
+    rows: list[list[tuple[Any, ...]]] = []
+    for word in words:
+        for row in reversed(rows[-3:]):
+            if abs(row[0][1] - word[1]) <= 2:
+                row.append(word)
+                break
+        else:
+            rows.append([word])
+    rows.sort(key=lambda row: min(word[1] for word in row))
+    return "\n".join(
+        " ".join(str(word[4]) for word in sorted(row, key=lambda item: item[0]))
+        for row in rows
+    )
 
 
 def page_contents(
@@ -108,12 +138,14 @@ def page_contents(
             document.load_page(index)  # type: ignore[no-untyped-call]
             for index in range(document.page_count)
         ]
-        texts = [page.get_text() for page in pages]
+        texts = [spatial_text(page) for page in pages]
         average = sum(len(text.strip()) for text in texts) / len(texts)
 
         if average >= settings.extraction_text_threshold:
             safe_text = "\n\n".join(redact_text(text, identity) for text in texts)
-            return [{"type": "text", "text": f"{PROMPT}\n\n---\n\n{safe_text}"}]
+            return [
+                {"type": "text", "text": f"{PROMPT}\n\n{LAYOUT_RULE}\n\n---\n\n{safe_text}"}
+            ]
 
         # A scan. 144 dpi is twice the PDF default: enough for the small print a
         # reference range is set in, without doubling the payload again.
