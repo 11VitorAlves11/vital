@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 import { TrendChart } from "../components/domain/TrendChart";
+import { TrendInsight } from "../components/domain/TrendInsight";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
@@ -45,6 +46,14 @@ export function BodyMetricDetail() {
       ) : (
         <>
           <Card title={t("biomarker.trendTitle")}>
+            <TrendInsight
+              value={toNumber(points.at(-1)?.value)}
+              previousValue={points.length > 1 ? toNumber(points.at(-2)?.value) : undefined}
+              unit={metric.unit}
+              date={points.at(-1)?.date ?? ""}
+              flag={points.at(-1)?.flag}
+              flagLabel={points.at(-1)?.label}
+            />
             <TrendChart
               name={metric.name}
               unit={metric.unit}
@@ -54,16 +63,10 @@ export function BodyMetricDetail() {
               points={points.map((point) => ({
                 timestamp: new Date(point.date).getTime(),
                 value: toNumber(point.value),
-                refMin: normalBand?.min ?? null,
-                refMax: normalBand?.max ?? null,
+                refMin: null,
+                refMax: null,
               }))}
             />
-            {interventions.length > 0 ? (
-              <p className="mt-2 text-sm text-ink-muted">
-                {t("chart.interventions")}:{" "}
-                {interventions.map((intervention) => intervention.name).join(" · ")}
-              </p>
-            ) : null}
           </Card>
 
           <Card title={t("biomarker.history")}>
@@ -73,7 +76,7 @@ export function BodyMetricDetail() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-ink-muted">{formatDateTime(point.date, locale)}</span>
                     <span className="flex items-center gap-3">
-                      <span className="data text-ink">
+                      <span className="metric text-ink">
                         {formatValue(point.value, locale)} {metric.unit}
                       </span>
                       {point.label ? <FlagChip flag={point.flag} label={point.label} /> : null}

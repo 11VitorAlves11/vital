@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { CaveatList } from "../components/domain/CaveatList";
 import { TrendChart } from "../components/domain/TrendChart";
+import { TrendInsight } from "../components/domain/TrendInsight";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
@@ -75,6 +76,14 @@ export function BiomarkerDetail() {
       ) : (
         <>
           <Card title={t("biomarker.trendTitle")}>
+            <TrendInsight
+              value={toNumber(plotted.at(-1)?.canonical_value)}
+              previousValue={plotted.length > 1 ? toNumber(plotted.at(-2)?.canonical_value) : undefined}
+              unit={unit}
+              date={plotted.at(-1)?.date ?? points.at(-1)?.date ?? ""}
+              flag={points.at(-1)?.flag}
+              flagLabel={points.at(-1) ? flagLabel(points.at(-1)!) : null}
+            />
             <TrendChart
               name={biomarker.name}
               unit={unit}
@@ -94,31 +103,12 @@ export function BiomarkerDetail() {
                 refMax: point.canonical_ref_max === null ? null : toNumber(point.canonical_ref_max),
               }))}
             />
-            {/* Named under the chart rather than painted across it: four
-                captions on a narrow plot is an unreadable smear. */}
-            {data.moments.length > 0 ? (
-              <p className="mt-2 text-sm text-ink-muted">
-                {t("chart.moments")}:{" "}
-                {data.moments
-                  .map(
-                    (event) =>
-                      `${t(`timelineKinds.${event.kind}`)} (${formatDate(event.occurred_on, locale)})`,
-                  )
-                  .join(" · ")}
-              </p>
-            ) : null}
             {data.has_unconverted_points ? (
               <p className="mt-2 text-sm text-ink-muted">
                 {t("biomarker.unconvertedPoints", {
                   count: points.length - plotted.length,
                   unit,
                 })}
-              </p>
-            ) : null}
-            {interventions.length > 0 ? (
-              <p className="mt-2 text-sm text-ink-muted">
-                {t("chart.interventions")}:{" "}
-                {interventions.map((intervention) => intervention.name).join(" · ")}
               </p>
             ) : null}
           </Card>
@@ -181,7 +171,7 @@ export function BiomarkerDetail() {
                 {newestFirst.map((point) => (
                   <li key={point.report_id} className="border-t border-border pt-3">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="data text-lg text-ink">
+                      <span className="metric text-lg text-ink">
                         {formatValue(point.value, locale)} {point.unit}
                       </span>
                       <FlagChip flag={point.flag} label={flagLabel(point)} />

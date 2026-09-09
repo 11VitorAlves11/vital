@@ -51,7 +51,7 @@ describe("TrendChart", () => {
 });
 
 describe("referenceBandElements", () => {
-  it("draws the limits as labelled lines, not only as shading", () => {
+  it("uses the laboratory range without duplicating it with catalogue limits", () => {
     const elements = referenceBandElements({
       hasLabRange: true,
       canonicalMin: 13,
@@ -60,12 +60,7 @@ describe("referenceBandElements", () => {
       maxLabel: (value) => `Máx. ${value}`,
     });
     const keys = elements.map((element) => element.key);
-    expect(keys).toEqual(["lab-range", "canonical-min", "canonical-max"]);
-
-    const [, min, max] = elements;
-    expect(min.props.strokeDasharray).toBe("6 4");
-    expect(min.props.label.value).toBe("Mín. 13");
-    expect(max.props.label.value).toBe("Máx. 17");
+    expect(keys).toEqual(["lab-range"]);
   });
 
   it("omits the shaded area when no lab reported a range", () => {

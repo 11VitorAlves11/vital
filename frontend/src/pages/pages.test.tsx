@@ -120,7 +120,7 @@ describe("Dashboard", () => {
       },
     ]);
     renderWithProviders(<Dashboard />);
-    expect(await screen.findByRole("heading", { name: "Hematologia" })).toBeInTheDocument();
+    expect(await screen.findByText("Hematologia")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Hemoglobina" })).toHaveLength(2);
     expect(screen.getAllByText("Baixo")).toHaveLength(2);
   });
@@ -166,9 +166,7 @@ describe("Dashboard", () => {
       },
     ]);
     renderWithProviders(<Dashboard />);
-    expect(
-      await screen.findByRole("heading", { name: "1 valor fora do intervalo" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Desde a última colheita" })).toBeInTheDocument();
     // Only the flagged one is lifted; the normal one stays in its panel alone.
     expect(screen.getAllByRole("link", { name: "Hemoglobina" })).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Plaquetas" })).toHaveLength(1);
@@ -203,8 +201,8 @@ describe("Dashboard", () => {
       },
     ]);
     renderWithProviders(<Dashboard />);
-    await screen.findByRole("heading", { name: "Hematologia" });
-    expect(screen.queryByText(/fora do intervalo/)).not.toBeInTheDocument();
+    await screen.findByText("Hematologia");
+    expect(screen.queryByText("Está agora fora do intervalo de referência.")).not.toBeInTheDocument();
   });
 
   it("points at the next action when there is nothing recorded", async () => {
@@ -336,13 +334,12 @@ describe("BiomarkerDetail", () => {
     expect(screen.getByRole("img")).toHaveAccessibleName(/Hemoglobina/);
     // The history is the chart's textual alternative, so it is not optional.
     expect(screen.getByText(/Synlab/)).toBeInTheDocument();
-    expect(screen.getByText("Normal")).toBeInTheDocument();
+    expect(screen.getAllByText("Normal").length).toBeGreaterThan(0);
     expect(screen.getByText(/Ferro/)).toBeInTheDocument();
     // A caveat is shown beside the point it qualifies, not as a page-level alert.
     expect(screen.getByText(/não ficou registado se a colheita foi em jejum/i)).toBeInTheDocument();
-    // What else happened in the period, named under the chart rather than
-    // painted across it.
-    expect(screen.getByText(/Composição corporal/)).toBeInTheDocument();
+    // Events outside the selected data period do not imply a correlation.
+    expect(screen.queryByText(/Composição corporal/)).not.toBeInTheDocument();
   });
 
   it("shows the history as a dense table on a desktop", async () => {

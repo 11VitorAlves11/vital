@@ -381,7 +381,9 @@ export type DashboardItem = {
   band_label: string | null;
   collected_on: string;
   lab_name: string;
-  sparkline: { date: string; value: string }[];
+  sparkline: { date: string; value: string; flag?: ResultFlag | null }[];
+  previous_flag?: ResultFlag | null;
+  percent_change?: string | null;
 };
 
 /** What a row on the timeline is, and therefore its icon and its colour.

@@ -16,6 +16,7 @@ class SparkPoint(BaseModel):
     date: date
     #: Canonical where the reading could be converted, as reported where it could not.
     value: Decimal
+    flag: ResultFlag | None
 
 
 class DashboardItem(BaseModel):
@@ -29,6 +30,8 @@ class DashboardItem(BaseModel):
     collected_on: date
     lab_name: str
     sparkline: list[SparkPoint]
+    previous_flag: ResultFlag | None = None
+    percent_change: Decimal | None = None
 
 
 class DashboardCategory(BaseModel):

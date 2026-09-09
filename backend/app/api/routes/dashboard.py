@@ -3,6 +3,7 @@ the panel it is read in (haematology, iron, lipids, ...)."""
 
 from collections import defaultdict
 from datetime import date
+from decimal import Decimal
 
 from fastapi import APIRouter
 from sqlalchemy import select
@@ -55,6 +56,24 @@ async def dashboard(user: CurrentUser, db: DbSession) -> DashboardOut:
     by_category: dict[BiomarkerCategory, list[DashboardItem]] = defaultdict(list)
     for entries in history.values():
         latest, latest_report = entries[-1]
+        previous = entries[-2][0] if len(entries) > 1 else None
+        latest_comparable = (
+            latest.canonical_value if latest.canonical_value is not None else latest.value
+        )
+        previous_comparable = (
+            (
+                previous.canonical_value
+                if previous.canonical_value is not None
+                else previous.value
+            )
+            if previous is not None
+            else None
+        )
+        percent_change = (
+            (latest_comparable - previous_comparable) / abs(previous_comparable) * Decimal(100)
+            if previous_comparable not in (None, Decimal(0))
+            else None
+        )
         by_category[latest.biomarker.category].append(
             DashboardItem(
                 biomarker=to_biomarker_out(latest.biomarker, user),
@@ -72,9 +91,12 @@ async def dashboard(user: CurrentUser, db: DbSession) -> DashboardOut:
                         value=result.canonical_value
                         if result.canonical_value is not None
                         else result.value,
+                        flag=result.flag,
                     )
                     for result, report in entries[-SPARKLINE_POINTS:]
                 ],
+                previous_flag=previous.flag if previous is not None else None,
+                percent_change=percent_change,
             )
         )
 

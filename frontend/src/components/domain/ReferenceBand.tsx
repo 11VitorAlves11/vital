@@ -51,7 +51,7 @@ export function referenceBandElements({
   const elements: ReactElement[] = [];
 
   if (hasLabRange) {
-    elements.push(
+    return [
       <Area
         key="lab-range"
         type="monotone"
@@ -61,6 +61,19 @@ export function referenceBandElements({
         isAnimationActive={false}
         activeDot={false}
         legendType="none"
+      />,
+    ];
+  }
+
+  if (canonicalMin !== null && canonicalMax !== null) {
+    elements.push(
+      <ReferenceArea
+        key="canonical-range"
+        y1={canonicalMin}
+        y2={canonicalMax}
+        fill="var(--color-band)"
+        fillOpacity={0.75}
+        stroke="none"
       />,
     );
   }
