@@ -116,16 +116,19 @@ export function Profile() {
   return (
     // A narrow column on a wide shell: centred, or it hangs off the left edge
     // of a page whose other views fill the full content width.
-    <section className="mx-auto flex w-full max-w-lg flex-col gap-6">
-      <h1 className="font-display text-2xl leading-tight font-medium text-ink">
-        {t("profile.title")}
-      </h1>
+    <section className="mx-auto flex w-full max-w-2xl flex-col gap-8">
+      <header>
+        <h1 className="font-display text-3xl font-semibold leading-tight tracking-[-0.025em] text-ink">
+          {t("profile.title")}
+        </h1>
+        <p className="mt-2 max-w-prose text-ink-muted">{t("profile.description")}</p>
+      </header>
 
-      <Card>
+      <Card title={t("profile.personalTitle")} className="p-5 sm:p-6">
         <form className="flex flex-col gap-4" onSubmit={submit} noValidate>
           {user?.email ? (
-            <p className="text-ink-muted">
-              {t("profile.email")}: <span className="data text-ink">{user.email}</span>
+            <p className="text-sm text-ink-muted">
+              {t("profile.email")}: <span className="font-medium text-ink">{user.email}</span>
             </p>
           ) : null}
 
@@ -176,7 +179,7 @@ export function Profile() {
             <span className="text-sm font-medium text-ink">{t("profile.weight")}</span>
             {weight ? (
               <p className="text-ink">
-                <span className="data">
+                <span className="metric font-medium">
                   {formatValue(weight.latest.value, locale)} {weight.metric.unit}
                 </span>
                 <span className="text-ink-muted">
@@ -202,7 +205,7 @@ export function Profile() {
         </form>
       </Card>
 
-      <Card title={t("profile.modelTitle")}>
+      <Card title={t("profile.modelTitle")} className="p-5 sm:p-6">
         <form className="flex flex-col gap-4" onSubmit={submitModel} noValidate>
           <p className="text-sm text-ink-muted">{t("profile.modelDescription")}</p>
           <Input
@@ -257,7 +260,7 @@ export function Profile() {
         </form>
       </Card>
 
-      <Card>
+      <Card title={t("profile.preferencesTitle")} className="p-5 sm:p-6">
         <Select
           label={t("profile.language")}
           value={i18n.resolvedLanguage ?? "pt-PT"}
@@ -269,9 +272,9 @@ export function Profile() {
         />
       </Card>
 
-      <Button variant="secondary" onClick={() => void signOut()}>
-        {t("actions.logout")}
-      </Button>
+      <div className="border-t border-border pt-6">
+        <Button variant="secondary" onClick={() => void signOut()}>{t("actions.logout")}</Button>
+      </div>
     </section>
   );
 }

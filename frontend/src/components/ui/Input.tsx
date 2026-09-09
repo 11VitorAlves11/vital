@@ -33,7 +33,7 @@ export function Input({ label, hint, error, unit, className, id, ...props }: Inp
             "min-h-[var(--touch-target)] w-full rounded-[var(--radius-md)] px-3",
             "border bg-surface-raised text-ink placeholder:text-ink-muted",
             error ? "border-flag-alert" : "border-border-strong",
-            "data",
+            "font-body [font-variant-numeric:tabular-nums]",
             className,
           )}
           {...props}

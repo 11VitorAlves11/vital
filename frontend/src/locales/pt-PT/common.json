@@ -266,6 +266,9 @@
   },
   "profile": {
     "title": "Perfil",
+    "description": "Gere os teus dados pessoais, preferências e a leitura automática de boletins.",
+    "personalTitle": "Dados pessoais",
+    "preferencesTitle": "Preferências",
     "name": "Nome",
     "email": "Email",
     "language": "Idioma",

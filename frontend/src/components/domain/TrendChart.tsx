@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, ComposedChart, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import type { Intervention, ReferenceBand } from "../../lib/api/types";
 import { formatDate, formatValue } from "../../lib/format";
@@ -48,24 +48,25 @@ export function TrendChart({ name, unit, points, interventions, canonicalMin = n
   const delta = first && last ? last.value - first.value : 0;
 
   return <div>
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-4 text-xs text-ink-muted" aria-label={t("chart.legend")}>
         <span className="flex items-center gap-2"><span className="h-0.5 w-5 bg-primary" />{t("chart.result")}</span>
         {(canonicalMin !== null || canonicalMax !== null || data.some((point) => point.range !== null) || bands) ? <span className="flex items-center gap-2"><span className="size-3 rounded-sm bg-[var(--color-band)]" />{t("chart.referenceBand")}</span> : null}
       </div>
-      <div className="inline-flex rounded-[var(--radius-md)] border border-border p-1" aria-label={t("chart.period")}>{(["6m", "1y", "all"] as Range[]).map((option) => <button key={option} type="button" aria-pressed={range === option} onClick={() => setRange(option)} className="min-h-[var(--touch-target)] rounded-[var(--radius-sm)] px-3 text-sm font-medium text-ink-muted hover:text-ink aria-pressed:bg-primary aria-pressed:text-on-primary">{t(`chart.ranges.${option}`)}</button>)}</div>
+      <div className="inline-flex rounded-[var(--radius-md)] bg-band p-1" aria-label={t("chart.period")}>{(["6m", "1y", "all"] as Range[]).map((option) => <button key={option} type="button" aria-pressed={range === option} onClick={() => setRange(option)} className="min-h-9 rounded-[var(--radius-sm)] px-3 text-sm font-medium text-ink-muted transition-colors hover:text-ink aria-pressed:bg-surface-raised aria-pressed:text-primary aria-pressed:shadow-sm">{t(`chart.ranges.${option}`)}</button>)}</div>
     </div>
     {visible.length < 4 ? <div role="img" aria-label={summary} tabIndex={0} className="rounded-[var(--radius-lg)] border border-border px-5 py-6 focus-visible:outline-2">
       <p className="text-sm text-ink-muted">{t("chart.limitedHistory", { count: visible.length })}</p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4"><p className="metric text-3xl font-semibold text-ink">{formatValue(last?.value, locale)} <span className="text-base">{unit}</span></p>{visible.length > 1 ? <p className="text-sm text-ink-muted">{t(delta < 0 ? "chart.decreasedInPeriod" : delta > 0 ? "chart.increasedInPeriod" : "chart.unchangedInPeriod", { value: formatValue(Math.abs(delta), locale), unit })}</p> : null}</div>
-    </div> : <div role="img" aria-label={summary} tabIndex={0} className="h-72 w-full rounded-[var(--radius-md)] focus-visible:outline-2">
-      <ResponsiveContainer width="100%" height="100%"><ComposedChart data={data} margin={{ top: 20, right: 12, bottom: 8, left: 0 }}>
-        <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey="timestamp" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={(value: number) => formatDate(new Date(value).toISOString(), locale)} stroke="var(--color-border-strong)" tick={{ fill: "var(--color-ink-muted)", fontSize: 12, fontFamily: "Atkinson Hyperlegible" }} />
-        <YAxis stroke="var(--color-border-strong)" tick={{ fill: "var(--color-ink-muted)", fontSize: 12, fontFamily: "Atkinson Hyperlegible" }} width={56} domain={yDomain} tickFormatter={(value: number) => formatValue(value, locale)} />
+    </div> : <div role="img" aria-label={summary} tabIndex={0} className="h-80 w-full rounded-[var(--radius-lg)] bg-surface px-2 py-3 focus-visible:outline-2 sm:px-4">
+      <ResponsiveContainer width="100%" height="100%"><ComposedChart data={data} margin={{ top: 16, right: 18, bottom: 4, left: 0 }}>
+        <CartesianGrid stroke="var(--color-border)" strokeDasharray="2 6" vertical={false} />
+        <XAxis dataKey="timestamp" type="number" scale="time" domain={["dataMin", "dataMax"]} axisLine={false} tickLine={false} tickMargin={12} minTickGap={32} tickFormatter={(value: number) => formatDate(new Date(value).toISOString(), locale)} tick={{ fill: "var(--color-ink-muted)", fontSize: 12, fontFamily: "Atkinson Hyperlegible" }} />
+        <YAxis axisLine={false} tickLine={false} tickMargin={8} tick={{ fill: "var(--color-ink-muted)", fontSize: 12, fontFamily: "Atkinson Hyperlegible" }} width={52} domain={yDomain} tickFormatter={(value: number) => formatValue(value, locale)} />
         {referenceBandElements({ hasLabRange: data.some((point) => point.range !== null), canonicalMin, canonicalMax, minLabel: (value) => t("chart.min", { value: formatValue(value, locale) }), maxLabel: (value) => t("chart.max", { value: formatValue(value, locale) }), bands, domain: yDomain })}
-        <Line type="monotone" dataKey="value" stroke="var(--color-primary)" strokeWidth={2.5} dot={{ r: 3, fill: "var(--color-primary)" }} activeDot={{ r: 5 }} isAnimationActive={false} />
-        <Tooltip contentStyle={{ background: "var(--color-surface-raised)", border: "1px solid var(--color-border-strong)", borderRadius: "var(--radius-md)", color: "var(--color-ink)", fontFamily: "Atkinson Hyperlegible" }} labelFormatter={(value) => formatDate(new Date(Number(value)).toISOString(), locale)} formatter={(value: number | string) => [`${formatValue(value, locale)} ${unit}`, name]} />
+        <Line type="monotone" dataKey="value" stroke="var(--color-primary)" strokeWidth={3} dot={false} activeDot={{ r: 5, fill: "var(--color-surface-raised)", stroke: "var(--color-primary)", strokeWidth: 3 }} isAnimationActive={false} />
+        {last ? <ReferenceDot x={last.timestamp} y={last.value} r={5} fill="var(--color-surface-raised)" stroke="var(--color-primary)" strokeWidth={3} /> : null}
+        <Tooltip cursor={{ stroke: "var(--color-border-strong)", strokeDasharray: "3 4" }} contentStyle={{ background: "var(--color-surface-raised)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-card)", color: "var(--color-ink)", fontFamily: "Atkinson Hyperlegible" }} labelFormatter={(value) => formatDate(new Date(Number(value)).toISOString(), locale)} formatter={(value: number | string) => [`${formatValue(value, locale)} ${unit}`, name]} />
       </ComposedChart></ResponsiveContainer>
     </div>}
     <InterventionRail interventions={interventions} moments={moments} start={domainStart} end={domainEnd} />

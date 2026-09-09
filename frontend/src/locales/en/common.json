@@ -266,6 +266,9 @@
   },
   "profile": {
     "title": "Profile",
+    "description": "Manage your personal details, preferences, and automatic report reading.",
+    "personalTitle": "Personal details",
+    "preferencesTitle": "Preferences",
     "name": "Name",
     "email": "Email",
     "language": "Language",
