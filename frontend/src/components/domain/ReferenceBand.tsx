@@ -94,6 +94,8 @@ export function referenceBandElements({
           position: "insideTopLeft",
           fill: "var(--color-ink-muted)",
           fontSize: 12,
+          fontFamily: "var(--font-body)",
+          fontWeight: 500,
         }}
       />,
     );
@@ -136,6 +138,8 @@ function ordinalBandElements(
         position: "insideBottomRight",
         fill: "var(--color-ink-muted)",
         fontSize: 11,
+        fontFamily: "var(--font-body)",
+        fontWeight: 500,
       }}
     />
   ));
