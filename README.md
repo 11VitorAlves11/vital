@@ -50,7 +50,7 @@ Vital declines to classify anything rather than guess which set applies.
 
 ## Reading a PDF with a model
 
-Point Vital at any model LiteLLM supports and **Import a PDF** appears next to the manual
+Point Vital at any model LiteLLM supports and **Import lab report** appears next to the manual
 entry form. Leave `LLM_MODEL` empty and the button does not: no model configured means no
 extraction, not a broken one.
 
@@ -67,15 +67,16 @@ LLM_BASE_URL=http://10.0.0.10:11434
 
 What happens to the file:
 
-1. PyMuPDF pulls the text out. Under `EXTRACTION_TEXT_THRESHOLD` characters per page the
-   report is a scan, and each page goes to the model as a 144 dpi image instead — so a
-   scanned report needs a model that can see.
+1. PDFs, JPEGs and PNGs are accepted. Before anything reaches the model, Vital removes
+   labelled identity data locally; photographed pages are re-encoded without metadata,
+   OCR-located identity and machine-readable codes, with faces blurred. Text PDFs are
+   reduced to sanitised text; scans go as sanitised 144 dpi page images.
 2. The model is asked for JSON and nothing else. The answer is validated against a schema,
    and each name it returns is matched against the catalogue by name and PT-PT alias.
 3. The result is a **preview**, not a report. Nothing reaches your history until you have
    looked at every row and confirmed it — two-column layouts are read across the columns
    often enough that this gate is not optional, and a wrong value entered as fact is worse
-   than no value. The original PDF is kept, so the reading can always be checked.
+   than no value. The original upload is kept locally, so the reading can always be checked.
 
 `EXTRACTION_MAX_PAGES` and `UPLOAD_MAX_BYTES` bound what a single upload can cost, in
 tokens and in memory. A cloud model means your blood work is sent to that provider; a

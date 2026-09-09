@@ -52,7 +52,7 @@ function toRows(job: ExtractionJob): Row[] {
 }
 
 /**
- * Upload a lab PDF, watch it being read, then correct what the model got wrong
+ * Upload a lab PDF or photograph, watch it being read, then correct what the model got wrong
  * before any of it is stored.
  *
  * The preview is the point of the screen, not a formality: every field is
@@ -194,7 +194,8 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
             <input
               ref={fileInput}
               type="file"
-              accept="application/pdf"
+              accept="application/pdf,image/jpeg,image/png"
+              capture="environment"
               className="sr-only"
               onChange={(event) => void pick(event)}
             />

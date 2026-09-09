@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential libpq-dev \
+    && apt-get install -y --no-install-recommends \
+        build-essential libpq-dev libzbar0 tesseract-ocr tesseract-ocr-eng tesseract-ocr-por \
     && rm -rf /var/lib/apt/lists/*
 
 # Built from the repository root: the image has to carry the clinical catalogue,

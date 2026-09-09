@@ -106,7 +106,7 @@
     "deleted": "Colheita eliminada.",
     "created": "Colheita registada.",
     "pickBiomarker": "Escolher biomarcador",
-    "import": "Importar PDF",
+    "import": "Importar boletim",
     "openFile": "Ver o boletim original",
     "collectedTime": "Hora da colheita",
     "collectedTimeHint": "Hora local impressa no boletim. Relevante em marcadores com variação diária.",
@@ -155,10 +155,10 @@
     "cancel": "Cancelar lembrete"
   },
   "extraction": {
-    "title": "Importar PDF",
+    "title": "Importar boletim",
     "description": "O modelo lê o boletim; tu confirmas o que fica guardado.",
-    "pickFile": "Escolher o PDF do boletim",
-    "pickHint": "Boletins com texto ou digitalizados. Nada é guardado antes de confirmares.",
+    "pickFile": "Escolher ou fotografar o boletim",
+    "pickHint": "PDF, JPEG ou PNG. Nome, identificação, morada, códigos e rostos são removidos localmente antes da leitura por IA. O original fica nesta instância e nada é guardado no histórico antes de confirmares.",
     "uploading": "A enviar o ficheiro…",
     "reading": "A ler o boletim. Pode demorar até um minuto.",
     "checkHint": "Confere cada linha contra o boletim antes de guardar. Corrige o que estiver errado e remove o que não quiseres.",

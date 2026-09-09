@@ -181,7 +181,7 @@ export type ReportSummary = CollectionContext & {
   notes_at: string | null;
   created_at: string;
   result_count: number;
-  /** Whether the original PDF is still on the server for this report. */
+  /** Whether the original document is still on the server for this report. */
   has_file: boolean;
 };
 

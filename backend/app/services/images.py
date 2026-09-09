@@ -18,6 +18,17 @@ class ImageError(ValueError):
     """An upload that is not a usable photo, phrased for the reader."""
 
 
+def detect_media_type(content: bytes, settings: Settings) -> str | None:
+    """Return a safe image MIME type based on decoded bytes, never the filename."""
+    Image.MAX_IMAGE_PIXELS = settings.photo_max_pixels
+    try:
+        with Image.open(io.BytesIO(content)) as image:
+            image.verify()
+            return {"JPEG": "image/jpeg", "PNG": "image/png"}.get(image.format or "")
+    except (Image.DecompressionBombError, OSError, ValueError):
+        return None
+
+
 def process(content: bytes, settings: Settings) -> tuple[bytes, int, int]:
     """Returns (jpeg, width, height), oriented upright and free of metadata."""
     # A decompression bomb is a small file that decodes to gigabytes. Pillow's

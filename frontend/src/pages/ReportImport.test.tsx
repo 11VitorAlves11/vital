@@ -78,7 +78,7 @@ async function uploadPdf() {
   const file = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], "analises.pdf", {
     type: "application/pdf",
   });
-  await userEvent.upload(screen.getByLabelText(/Escolher o PDF/), file);
+  await userEvent.upload(screen.getByLabelText(/Escolher ou fotografar o boletim/), file);
 }
 
 describe("ReportImport", () => {
@@ -86,7 +86,7 @@ describe("ReportImport", () => {
     open();
 
     expect(
-      await screen.findByText(/Nada é guardado antes de confirmares/),
+      await screen.findByText(/nada é guardado no histórico antes de confirmares/),
     ).toBeInTheDocument();
   });
 

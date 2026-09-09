@@ -11,6 +11,8 @@ from pathlib import Path
 from app.core.config import get_settings
 
 PDF_MAGIC = b"%PDF-"
+JPEG_MAGIC = b"\xff\xd8\xff"
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
 def reports_dir(user_id: uuid.UUID) -> Path:
@@ -30,8 +32,17 @@ def _store(directory: Path, name: str, content: bytes) -> str:
     return str(path)
 
 
+def store_report_upload(
+    user_id: uuid.UUID, job_id: uuid.UUID, content: bytes, media_type: str
+) -> str:
+    """Keep the original upload locally; this path is never sent to the model."""
+    suffix = ".pdf" if media_type == "application/pdf" else ".image"
+    return _store(reports_dir(user_id), f"{job_id}{suffix}", content)
+
+
 def store_pdf(user_id: uuid.UUID, job_id: uuid.UUID, content: bytes) -> str:
-    return _store(reports_dir(user_id), f"{job_id}.pdf", content)
+    """Compatibility wrapper for callers and older tests."""
+    return store_report_upload(user_id, job_id, content, "application/pdf")
 
 
 def store_photo(user_id: uuid.UUID, photo_id: uuid.UUID, content: bytes) -> str:
@@ -47,6 +58,16 @@ def looks_like_pdf(content: bytes) -> bool:
     """Checked on the bytes, not on the declared content type, which the client
     picks and can be wrong about without meaning any harm."""
     return content.startswith(PDF_MAGIC)
+
+
+def media_type_for(content: bytes) -> str | None:
+    if looks_like_pdf(content):
+        return "application/pdf"
+    if content.startswith(JPEG_MAGIC):
+        return "image/jpeg"
+    if content.startswith(PNG_MAGIC):
+        return "image/png"
+    return None
 
 
 def discard(file_path: str) -> None:

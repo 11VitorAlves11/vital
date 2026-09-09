@@ -25,6 +25,12 @@ dependencies = [
     "python-multipart>=0.0.20",
     # Progress photos: decode, re-orient and re-encode without the metadata.
     "pillow>=11.0",
+    # Local-only anonymisation before any extraction payload crosses the LLM
+    # boundary: OCR locates labelled PII, pyzbar removes machine-readable IDs,
+    # and OpenCV finds faces in photographed documents.
+    "pytesseract>=0.3.13",
+    "pyzbar>=0.1.9",
+    "opencv-python-headless>=4.10,<5",
 ]
 
 [project.optional-dependencies]

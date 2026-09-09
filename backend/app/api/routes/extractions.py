@@ -8,6 +8,7 @@ approved there.
 Every query is scoped to the session user, jobs and stored files alike.
 """
 
+import hashlib
 import logging
 import uuid
 from typing import Annotated
@@ -27,12 +28,13 @@ from app.api.deps import AppSettings, CurrentUser, DbSession
 from app.api.routes.reports import to_report_out, utcnow
 from app.core.config import get_settings
 from app.db.session import get_sessionmaker
-from app.models import Biomarker, ExtractionJob, LabReport
+from app.models import Biomarker, ExtractionJob, LabReport, User
 from app.models.enums import ExtractionStatus, ReportSource
 from app.schemas.extractions import ExtractionConfirm, ExtractionOut, ExtractionPayload
 from app.schemas.reports import ReportOut
-from app.services import providers, storage
+from app.services import images, providers, storage
 from app.services import results as result_service
+from app.services.anonymization import Identity
 from app.services.extraction import (
     ExtractionError,
     ask_model,
@@ -76,7 +78,12 @@ async def run_extraction(job_id: uuid.UUID) -> None:
             content = storage.read_file(job.file_path)
             if content is None:
                 raise ExtractionError("The uploaded file is no longer on disk")
-            answer, provider = await ask_model(page_contents(content, settings), settings)
+            owner = await db.get(User, job.user_id)
+            if owner is None:
+                raise ExtractionError("The account no longer exists")
+            identity = Identity(name=owner.name, email=owner.email, birth_date=owner.birth_date)
+            safe_content = page_contents(content, settings, identity, job.media_type)
+            answer, provider = await ask_model(safe_content, settings)
             payload = parse_answer(answer)
         except ExtractionError as error:
             job.status = ExtractionStatus.FAILED
@@ -118,20 +125,40 @@ async def create_extraction(
             status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"The file is larger than {settings.upload_max_bytes // (1024 * 1024)} MB",
         )
-    if not storage.looks_like_pdf(content):
+    media_type = (
+        "application/pdf"
+        if storage.looks_like_pdf(content)
+        else images.detect_media_type(content, settings)
+    )
+    if media_type is None:
         raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Only PDF files are accepted"
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Only PDF, JPEG and PNG files are accepted",
+        )
+
+    file_sha256 = hashlib.sha256(content).hexdigest()
+    duplicate = await db.scalar(
+        select(ExtractionJob.id).where(
+            ExtractionJob.user_id == user.id, ExtractionJob.file_sha256 == file_sha256
+        )
+    )
+    if duplicate is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This file has already been imported",
         )
 
     job = ExtractionJob(
         id=uuid.uuid4(),
         user_id=user.id,
         file_path="",
+        file_sha256=file_sha256,
+        media_type=media_type,
         # The upload's own name is stored to show back, never used as a path.
         filename=file.filename,
         status=ExtractionStatus.PENDING,
     )
-    job.file_path = storage.store_pdf(user.id, job.id, content)
+    job.file_path = storage.store_report_upload(user.id, job.id, content, media_type)
     db.add(job)
     await db.commit()
     await db.refresh(job)

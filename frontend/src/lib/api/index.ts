@@ -83,7 +83,7 @@ type ReportPayload = {
 } & CollectionContext;
 
 /**
- * The PDF pipeline. `create` only ever produces a preview: nothing an extraction
+ * The document pipeline. `create` only ever produces a preview: nothing an extraction
  * read reaches the history until `confirm` is called with what a human approved.
  */
 export const extractions = {

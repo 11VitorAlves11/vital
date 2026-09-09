@@ -424,7 +424,7 @@ async def update_result(
 
 @router.get("/{report_id}/file")
 async def read_report_file(report_id: uuid.UUID, user: CurrentUser, db: DbSession) -> Response:
-    """The original PDF, for a report that came from one.
+    """The original PDF or photographed report, for an extracted report.
 
     Served through the API rather than from a static path: the file holds
     someone's blood work, and the only thing standing between it and the open
@@ -437,13 +437,17 @@ async def read_report_file(report_id: uuid.UUID, user: CurrentUser, db: DbSessio
     # The lab name is whatever the account typed, and it lands in a header:
     # anything but plain characters is dropped rather than escaped.
     label = re.sub(r"[^A-Za-z0-9 ._-]", "", report.lab.name).strip() or "report"
+    media_type = storage.media_type_for(content) or "application/octet-stream"
+    suffix = {"application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png"}.get(
+        media_type, "bin"
+    )
     return Response(
         content=content,
-        media_type="application/pdf",
+        media_type=media_type,
         headers={
             # inline, so the browser shows it instead of downloading it, and a
             # filename built from the report rather than from the upload.
-            "Content-Disposition": f'inline; filename="{report.collected_on}-{label}.pdf"',
+            "Content-Disposition": f'inline; filename="{report.collected_on}-{label}.{suffix}"',
             "Cache-Control": "private, no-store",
         },
     )

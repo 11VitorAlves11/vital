@@ -1,10 +1,12 @@
-"""The PDF pipeline, and the one rule it exists to enforce.
+"""The document extraction pipeline, and the one rule it exists to enforce.
 
 No extracted value reaches `results` without a human confirming it: the tests
 that matter here are the ones proving `POST /api/extractions` writes nothing,
 and that `confirm` writes exactly what was approved and no more.
 """
 
+import base64
+import io
 import json
 import uuid
 from decimal import Decimal
@@ -13,10 +15,12 @@ from typing import Any
 import pymupdf
 import pytest
 from httpx import AsyncClient
+from PIL import Image
 
 from app.api.routes import extractions as extraction_routes
 from app.core.config import get_settings
 from app.schemas.extractions import ExtractionPayload
+from app.services import anonymization as anonymization_service
 from app.services import extraction as extraction_service
 from tests.conftest import UserFactory
 
@@ -64,12 +68,24 @@ def make_pdf(lines: int = 0, pages: int = 1) -> bytes:
     return bytes(document.tobytes())
 
 
+def make_report_photo() -> bytes:
+    image = Image.new("RGB", (800, 600), "white")
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG", exif=b"private metadata")
+    return buffer.getvalue()
+
+
 @pytest.fixture(autouse=True)
 def _configure_extraction(tmp_path: Any, monkeypatch: pytest.MonkeyPatch) -> None:
     """A model name and a scratch storage root, so uploads land under tmp_path."""
     settings = get_settings()
     monkeypatch.setattr(settings, "llm_model", "test/fake-model", raising=False)
     monkeypatch.setattr(settings, "storage_path", str(tmp_path), raising=False)
+    # OCR is an operating-system service in the production image. Most tests
+    # exercise the pipeline around it; dedicated tests below provide exact boxes.
+    monkeypatch.setattr(anonymization_service, "ocr_lines", lambda image: [])
+    monkeypatch.setattr(anonymization_service, "decode_barcodes", lambda image: [])
+    monkeypatch.setattr(anonymization_service, "_blur_faces", lambda image: image)
 
 
 def stub_model(monkeypatch: pytest.MonkeyPatch, answer: object) -> list[list[dict[str, Any]]]:
@@ -129,6 +145,20 @@ class TestUpload:
             files={"file": ("notes.txt", b"Hemoglobina 10.5", "application/pdf")},
         )
         assert response.status_code == 415
+
+    async def test_rejects_reimporting_the_same_file(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stub_model(monkeypatch, ANSWER)
+        content = make_pdf(lines=30)
+        await upload(user_client, content)
+
+        response = await user_client.post(
+            "/api/extractions",
+            files={"file": ("same-again.pdf", content, "application/pdf")},
+        )
+
+        assert response.status_code == 409
 
     async def test_rejects_a_file_over_the_limit(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
@@ -191,6 +221,47 @@ class TestPreview:
 
         assert [part["type"] for part in seen[0]] == ["text"]
         assert [part["type"] for part in seen[1]] == ["text", "image_url"]
+
+    async def test_removes_profile_identity_before_a_text_pdf_reaches_the_model(
+        self,
+        make_user: UserFactory,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        client, _ = await make_user(name="Ana Particular", email="ana.private@example.com")
+        seen = stub_model(monkeypatch, ANSWER)
+        document = pymupdf.open()  # type: ignore[no-untyped-call]
+        page = document.new_page()
+        lines = [
+            "Nome: Ana Particular",
+            "Email: ana.private@example.com",
+            "NIF: 123456789",
+            "Morada: Rua Particular 12, Lisboa",
+            *[f"Hemoglobina {index} 14,1 g/dL 13 - 17" for index in range(20)],
+        ]
+        for index, line in enumerate(lines):
+            page.insert_text((50, 40 + index * 20), line)
+
+        await upload(client, bytes(document.tobytes()))
+
+        payload = seen[0][0]["text"]
+        assert "Ana Particular" not in payload
+        assert "ana.private@example.com" not in payload
+        assert "123456789" not in payload
+        assert "Rua Particular" not in payload
+        assert "Hemoglobina" in payload
+
+    async def test_accepts_a_report_photo_and_only_sends_fresh_png_pixels(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        seen = stub_model(monkeypatch, ANSWER)
+
+        await upload(user_client, make_report_photo())
+
+        assert [part["type"] for part in seen[0]] == ["text", "image_url"]
+        encoded = seen[0][1]["image_url"]["url"].split(",", 1)[1]
+        safe = base64.b64decode(encoded)
+        assert safe.startswith(b"\x89PNG")
+        assert b"private metadata" not in safe
 
     async def test_records_a_failure_on_the_job_instead_of_losing_it(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
@@ -312,6 +383,33 @@ class TestConfirm:
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/pdf"
         assert response.content.startswith(b"%PDF-")
+
+    async def test_serves_the_original_report_photo_back(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, catalogue: dict[str, Any]
+    ) -> None:
+        stub_model(monkeypatch, ANSWER)
+        original = make_report_photo()
+        job = await upload(user_client, original)
+        report = (
+            await user_client.post(
+                f"/api/extractions/{job['id']}/confirm",
+                json={
+                    "collected_on": "2026-02-14",
+                    "lab_name": "Unilabs",
+                    "results": [
+                        {
+                            "biomarker_id": catalogue["biomarkers"]["hemoglobina"]["id"],
+                            "value": 10.9,
+                        }
+                    ],
+                },
+            )
+        ).json()
+
+        response = await user_client.get(f"/api/reports/{report['id']}/file")
+
+        assert response.headers["content-type"] == "image/jpeg"
+        assert response.content == original
 
     async def test_a_manual_report_has_no_file(
         self, user_client: AsyncClient, catalogue: dict[str, Any]

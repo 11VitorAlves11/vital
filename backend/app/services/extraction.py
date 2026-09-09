@@ -7,12 +7,14 @@ result — the output is a preview a human still has to confirm.
 """
 
 import base64
+import io
 import json
 import logging
 import re
 from typing import Any
 
 import pymupdf
+from PIL import Image
 from pydantic import ValidationError
 
 from app.core.config import Settings
@@ -24,6 +26,7 @@ from app.schemas.extractions import (
     ExtractionPreview,
     PreviewResult,
 )
+from app.services.anonymization import AnonymizationError, Identity, anonymize_image, redact_text
 from app.services.text import normalise
 
 logger = logging.getLogger(__name__)
@@ -57,16 +60,38 @@ class ExtractionError(RuntimeError):
     """Anything that stops a job reaching preview, phrased for the reader."""
 
 
-def page_contents(pdf_bytes: bytes, settings: Settings) -> list[dict[str, Any]]:
-    """The message content for the model: text when the PDF has any, else images.
+def _image_part(png: bytes) -> dict[str, Any]:
+    encoded = base64.b64encode(png).decode()
+    return {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded}"}}
+
+
+def page_contents(
+    content: bytes,
+    settings: Settings,
+    identity: Identity | None = None,
+    media_type: str = "application/pdf",
+) -> list[dict[str, Any]]:
+    """Build a locally anonymised payload from a PDF or photographed report.
 
     The heuristic is the spec's — under `extraction_text_threshold` characters a
     page is a scan, and sending its empty text layer would extract nothing while
     still costing a call.
     """
+    identity = identity or Identity()
+    if media_type != "application/pdf":
+        try:
+            with Image.open(io.BytesIO(content)) as image:
+                image.load()
+                safe_image = anonymize_image(image, identity)
+                return [{"type": "text", "text": PROMPT}, _image_part(safe_image)]
+        except AnonymizationError as error:
+            raise ExtractionError(str(error)) from error
+        except (OSError, ValueError) as error:
+            raise ExtractionError("The file could not be read as an image") from error
+
     try:
         # PyMuPDF ships annotations but leaves these two entry points untyped.
-        document = pymupdf.open(stream=pdf_bytes, filetype="pdf")  # type: ignore[no-untyped-call]
+        document = pymupdf.open(stream=content, filetype="pdf")  # type: ignore[no-untyped-call]
     except Exception as error:  # pymupdf raises several unrelated types
         raise ExtractionError("The file could not be read as a PDF") from error
 
@@ -87,18 +112,20 @@ def page_contents(pdf_bytes: bytes, settings: Settings) -> list[dict[str, Any]]:
         average = sum(len(text.strip()) for text in texts) / len(texts)
 
         if average >= settings.extraction_text_threshold:
-            return [{"type": "text", "text": f"{PROMPT}\n\n---\n\n{'\n\n'.join(texts)}"}]
+            safe_text = "\n\n".join(redact_text(text, identity) for text in texts)
+            return [{"type": "text", "text": f"{PROMPT}\n\n---\n\n{safe_text}"}]
 
         # A scan. 144 dpi is twice the PDF default: enough for the small print a
         # reference range is set in, without doubling the payload again.
-        content: list[dict[str, Any]] = [{"type": "text", "text": PROMPT}]
+        message_content: list[dict[str, Any]] = [{"type": "text", "text": PROMPT}]
         for page in pages:
             png = page.get_pixmap(dpi=144).tobytes("png")
-            encoded = base64.b64encode(png).decode()
-            content.append(
-                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded}"}}
-            )
-        return content
+            try:
+                with Image.open(io.BytesIO(png)) as image:
+                    message_content.append(_image_part(anonymize_image(image, identity)))
+            except AnonymizationError as error:
+                raise ExtractionError(str(error)) from error
+        return message_content
 
 
 def parse_answer(text: str) -> ExtractionPayload:

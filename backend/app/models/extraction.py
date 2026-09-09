@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -20,12 +20,15 @@ class ExtractionJob(Base):
     """
 
     __tablename__ = "extraction_jobs"
+    __table_args__ = (UniqueConstraint("user_id", "file_sha256", name="uq_extraction_user_hash"),)
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     file_path: Mapped[str] = mapped_column(String, nullable=False)
+    file_sha256: Mapped[str | None] = mapped_column(String(64), index=True)
+    media_type: Mapped[str] = mapped_column(String(50), nullable=False, default="application/pdf")
     filename: Mapped[str | None] = mapped_column(String)
     status: Mapped[ExtractionStatus] = mapped_column(
         pg_enum(ExtractionStatus, "extraction_status"),
