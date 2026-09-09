@@ -52,6 +52,10 @@ class Settings(BaseSettings):
     extraction_text_threshold: int = 200
     upload_max_bytes: int = 20 * 1024 * 1024
 
+    # Explicitly enabled by docker-compose.dev.yml only. A known demo password
+    # must never create an account in a production deployment.
+    seed_demo_data: bool = False
+
     # Progress photos are re-encoded on upload, so these bound what is kept on
     # disk rather than what may be sent. The pixel cap is the decompression-bomb
     # guard: a small file can decode to gigabytes.
@@ -79,6 +83,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _check_secrets(self) -> Self:
+        if self.seed_demo_data and self.environment != "dev":
+            raise ValueError("SEED_DEMO_DATA may only be enabled when ENVIRONMENT=dev")
         if not self.secret_key:
             if self.environment == "prod":
                 raise ValueError("SECRET_KEY is required when ENVIRONMENT=prod")
