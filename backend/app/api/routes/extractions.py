@@ -53,7 +53,9 @@ router = APIRouter(prefix="/extractions", tags=["extractions"])
 
 async def _owned_job(job_id: uuid.UUID, user: CurrentUser, db: DbSession) -> ExtractionJob:
     statement = select(ExtractionJob).where(
-        ExtractionJob.id == job_id, ExtractionJob.user_id == user.id
+        ExtractionJob.id == job_id,
+        ExtractionJob.user_id == user.id,
+        ExtractionJob.kind == "lab",
     )
     job = (await db.execute(statement)).scalar_one_or_none()
     if job is None:
@@ -71,7 +73,7 @@ async def run_extraction(job_id: uuid.UUID) -> None:
     settings = get_settings()
     async with get_sessionmaker()() as db:
         job = await db.get(ExtractionJob, job_id)
-        if job is None:
+        if job is None or job.kind != "lab":
             return
         job.status = ExtractionStatus.PROCESSING
         try:
@@ -154,7 +156,9 @@ async def create_extraction(
     file_sha256 = hashlib.sha256(content).hexdigest()
     duplicate = await db.scalar(
         select(ExtractionJob).where(
-            ExtractionJob.user_id == user.id, ExtractionJob.file_sha256 == file_sha256
+            ExtractionJob.user_id == user.id,
+            ExtractionJob.kind == "lab",
+            ExtractionJob.file_sha256 == file_sha256,
         )
     )
     if duplicate is not None and duplicate.status is not ExtractionStatus.FAILED:
@@ -185,6 +189,7 @@ async def create_extraction(
     job = ExtractionJob(
         id=uuid.uuid4(),
         user_id=user.id,
+        kind="lab",
         file_path="",
         file_sha256=file_sha256,
         media_type=media_type,

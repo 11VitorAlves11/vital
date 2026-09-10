@@ -4,6 +4,7 @@ import type {
   BiomarkerMatchRule,
   BiomarkerSeries,
   BodyMetric,
+  BodyExtractionJob,
   BodyMetricSummary,
   BodyScan,
   BodySeries,
@@ -233,4 +234,24 @@ export const body = {
     values: { metric_id: number; value: number }[];
   }) => request<BodyScan>("/api/body/scans", { method: "POST", body: payload }),
   removeScan: (id: string) => request<void>(`/api/body/scans/${id}`, { method: "DELETE" }),
+};
+
+export const bodyExtractions = {
+  create: (file: File) => upload<BodyExtractionJob>("/api/body/extractions", file),
+  read: (id: string) => request<BodyExtractionJob>(`/api/body/extractions/${id}`),
+  confirm: (
+    id: string,
+    payload: {
+      measured_at: string;
+      device?: string | null;
+      notes?: string | null;
+      values: { metric_id: number; value: number }[];
+    },
+  ) =>
+    request<BodyScan>(`/api/body/extractions/${id}/confirm`, {
+      method: "POST",
+      body: payload,
+    }),
+  discard: (id: string) =>
+    request<void>(`/api/body/extractions/${id}`, { method: "DELETE" }),
 };

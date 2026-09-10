@@ -481,6 +481,21 @@ describe("Interventions", () => {
 });
 
 describe("Body", () => {
+  it("offers photo import when a model is configured", async () => {
+    mockApi([
+      ...SESSION_ROUTES,
+      { pattern: /\/api\/features/, body: { extraction: true } },
+      { pattern: /\/api\/body\/summary/, body: [] },
+      { pattern: /\/api\/body\/metrics/, body: [] },
+    ]);
+    renderWithSession(<Body />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Importar pesagem" }));
+
+    expect(screen.getByRole("heading", { name: "Importar pesagem" })).toBeInTheDocument();
+    expect(screen.getByText(/captura de ecrã/)).toBeInTheDocument();
+  });
+
   it("shows the standard where one classifies, and the reason where none does", async () => {
     mockApi([
       ...SESSION_ROUTES,

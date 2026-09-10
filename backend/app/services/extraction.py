@@ -100,6 +100,7 @@ def page_contents(
     settings: Settings,
     identity: Identity | None = None,
     media_type: str = "application/pdf",
+    prompt: str = PROMPT,
 ) -> list[dict[str, Any]]:
     """Build a locally anonymised payload from a PDF or photographed report.
 
@@ -113,7 +114,7 @@ def page_contents(
             with Image.open(io.BytesIO(content)) as image:
                 image.load()
                 safe_image = anonymize_image(image, identity)
-                return [{"type": "text", "text": PROMPT}, _image_part(safe_image)]
+                return [{"type": "text", "text": prompt}, _image_part(safe_image)]
         except AnonymizationError as error:
             raise ExtractionError(str(error)) from error
         except (OSError, ValueError) as error:

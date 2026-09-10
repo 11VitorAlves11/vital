@@ -9,6 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.api.routes import (
     auth,
     body,
+    body_extractions,
     catalog,
     dashboard,
     extractions,
@@ -91,6 +92,7 @@ app.include_router(extractions.router, prefix="/api")
 app.include_router(match_rules.router, prefix="/api")
 app.include_router(interventions.router, prefix="/api")
 app.include_router(body.router, prefix="/api")
+app.include_router(body_extractions.router, prefix="/api")
 app.include_router(photos.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(timeline.router, prefix="/api")

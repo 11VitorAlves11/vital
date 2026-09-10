@@ -11,7 +11,7 @@ from app.models.enums import ExtractionStatus, pg_enum
 
 
 class ExtractionJob(Base):
-    """One PDF working its way through the extraction pipeline.
+    """One document working its way through either extraction pipeline.
 
     `raw_output` keeps what the model actually answered, unedited. When a value
     in someone's history looks wrong months later, the question is whether the
@@ -20,12 +20,15 @@ class ExtractionJob(Base):
     """
 
     __tablename__ = "extraction_jobs"
-    __table_args__ = (UniqueConstraint("user_id", "file_sha256", name="uq_extraction_user_hash"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "kind", "file_sha256", name="uq_extraction_user_kind_hash"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default="lab")
     file_path: Mapped[str] = mapped_column(String, nullable=False)
     file_sha256: Mapped[str | None] = mapped_column(String(64), index=True)
     media_type: Mapped[str] = mapped_column(String(50), nullable=False, default="application/pdf")
@@ -43,6 +46,9 @@ class ExtractionJob(Base):
     error: Mapped[str | None] = mapped_column(Text)
     report_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("lab_reports.id", ondelete="SET NULL")
+    )
+    body_scan_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("body_scans.id", ondelete="SET NULL")
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

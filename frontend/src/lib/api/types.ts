@@ -326,6 +326,32 @@ export type BodyScan = {
   values: ScanValue[];
 };
 
+export type BodyExtractionPreviewValue = {
+  metric_id: number | null;
+  metric_slug: string | null;
+  metric_name: string | null;
+  expected_unit: string | null;
+  source_name: string;
+  source_unit: string | null;
+  value: string | null;
+  warnings: string[];
+};
+
+export type BodyExtractionJob = {
+  id: string;
+  status: ExtractionStatus;
+  filename: string | null;
+  provider: string | null;
+  error: string | null;
+  body_scan_id: string | null;
+  created_at: string;
+  preview: {
+    measured_at: string | null;
+    device: string | null;
+    results: BodyExtractionPreviewValue[];
+  } | null;
+};
+
 export type BodyMetricSummary = {
   metric: BodyMetric;
   latest: ScanValue;

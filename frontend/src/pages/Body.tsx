@@ -1,4 +1,4 @@
-import { Plus, Sigma, Users } from "lucide-react";
+import { Plus, ScanLine, Sigma, Users } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -13,17 +13,20 @@ import { FlagChip } from "../components/ui/FlagChip";
 import { LinkButton } from "../components/ui/LinkButton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { Sparkline } from "../components/ui/Sparkline";
-import { body } from "../lib/api";
+import { body, features } from "../lib/api";
 import { formatDateTime, formatValue, toNumber } from "../lib/format";
 import { classifies, referenceLabel } from "../lib/reference";
 import { useSession } from "../lib/session";
 import { useAsync } from "../lib/useAsync";
+import { BodyImport } from "./BodyImport";
 
 export function Body() {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "pt-PT";
   const { user } = useSession();
   const [recording, setRecording] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const { data: available } = useAsync(() => features.read());
   const { data, loading, error, reload } = useAsync(() => body.summary());
   // The name of a derived index's source, so the card can say "from fat-free
   // mass" rather than repeating a slug at the reader.
@@ -43,9 +46,20 @@ export function Body() {
         <h1 className="font-display text-2xl leading-tight font-medium text-ink">
           {t("body.title")}
         </h1>
-        <Button icon={<Plus size={20} aria-hidden="true" />} onClick={() => setRecording(true)}>
-          {t("body.newScan")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {available?.extraction ? (
+            <Button
+              variant="secondary"
+              icon={<ScanLine size={20} aria-hidden="true" />}
+              onClick={() => setImporting(true)}
+            >
+              {t("bodyImport.open")}
+            </Button>
+          ) : null}
+          <Button icon={<Plus size={20} aria-hidden="true" />} onClick={() => setRecording(true)}>
+            {t("body.newScan")}
+          </Button>
+        </div>
       </header>
       <p className="mt-2 max-w-prose text-sm text-ink-muted">{t("body.estimateWarning")}</p>
 
@@ -151,6 +165,9 @@ export function Body() {
       </div>
 
       <BodyScanForm open={recording} onOpenChange={setRecording} onCreated={reload} />
+      {importing ? (
+        <BodyImport open onOpenChange={setImporting} onCreated={reload} />
+      ) : null}
     </section>
   );
 }

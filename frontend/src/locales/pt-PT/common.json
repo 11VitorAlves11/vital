@@ -269,6 +269,41 @@
       "other": "Outros"
     }
   },
+  "bodyImport": {
+    "title": "Importar pesagem",
+    "open": "Importar pesagem",
+    "description": "Fotografa a balança ou escolhe uma captura de ecrã; confirma os valores antes de os guardar.",
+    "pickFile": "Fotografar ou escolher imagem",
+    "pickHint": "JPEG ou PNG. Os dados pessoais são ocultados localmente antes da leitura por IA. A imagem original fica apenas nesta instalação.",
+    "uploading": "A enviar a imagem…",
+    "reading": "A ler a pesagem. Pode demorar até um minuto.",
+    "checkHint": "Confere cada valor com a imagem. As avaliações da balança, como «excelente» ou «alto», não são importadas.",
+    "metric": "Medição",
+    "pickMetric": "Escolher medição",
+    "value": "Valor",
+    "removeValue": "Remover valor",
+    "pickAtLeastOne": "Escolhe pelo menos uma medição com valor.",
+    "dateRequired": "Indica uma data e hora válidas para a pesagem.",
+    "invalidValue": "Confirma os valores: pelo menos um deles não é um número válido.",
+    "duplicateSelection": "A mesma medição está selecionada mais do que uma vez. Conserva apenas um valor.",
+    "confirm": "Confirmar e guardar",
+    "created": "Pesagem importada.",
+    "tryAnother": "Tentar outra imagem",
+    "errors": {
+      "alreadyImported": "Esta imagem já foi importada. Escolhe outra imagem.",
+      "tooLarge": "A imagem é demasiado grande. Escolhe uma imagem com menos de 20 MB.",
+      "invalidFile": "Não foi possível ler este ficheiro. Escolhe uma imagem JPEG ou PNG.",
+      "notConfigured": "A leitura automática não está configurada. Adiciona um modelo e uma chave de API no Perfil.",
+      "failed": "Não foi possível ler a pesagem. Verifica a configuração do modelo ou tenta outra imagem."
+    },
+    "warnings": {
+      "unmatched": "Medição não reconhecida — escolhe a medição correta ou remove este valor.",
+      "missing_value": "Não foi encontrado um valor — confirma a imagem.",
+      "unit_mismatch": "A unidade da imagem não corresponde à unidade desta medição — confirma o valor antes de guardar.",
+      "implausible_value": "O valor parece improvável — confirma os algarismos e a casa decimal.",
+      "duplicate": "A mesma medição aparece mais do que uma vez — conserva apenas o valor correto."
+    }
+  },
   "photos": {
     "title": "Fotos de progresso",
     "new": "Adicionar foto",

@@ -269,6 +269,41 @@
       "other": "Other"
     }
   },
+  "bodyImport": {
+    "title": "Import weigh-in",
+    "open": "Import weigh-in",
+    "description": "Photograph the scale or choose a screenshot; confirm the values before saving them.",
+    "pickFile": "Take or choose a picture",
+    "pickHint": "JPEG or PNG. Personal details are hidden locally before AI reading. The original image stays on this installation only.",
+    "uploading": "Uploading the image…",
+    "reading": "Reading the weigh-in. This may take up to a minute.",
+    "checkHint": "Check each value against the image. Scale ratings such as “excellent” or “high” are not imported.",
+    "metric": "Measurement",
+    "pickMetric": "Choose measurement",
+    "value": "Value",
+    "removeValue": "Remove value",
+    "pickAtLeastOne": "Choose at least one measurement with a value.",
+    "dateRequired": "Enter a valid date and time for the weigh-in.",
+    "invalidValue": "Check the values: at least one is not a valid number.",
+    "duplicateSelection": "The same measurement is selected more than once. Keep only one value.",
+    "confirm": "Confirm and save",
+    "created": "Weigh-in imported.",
+    "tryAnother": "Try another image",
+    "errors": {
+      "alreadyImported": "This image has already been imported. Choose another image.",
+      "tooLarge": "The image is too large. Choose an image smaller than 20 MB.",
+      "invalidFile": "This file could not be read. Choose a JPEG or PNG image.",
+      "notConfigured": "Automatic reading is not configured. Add a model and API key in Profile.",
+      "failed": "The weigh-in could not be read. Check the model configuration or try another image."
+    },
+    "warnings": {
+      "unmatched": "Measurement not recognised — choose the correct measurement or remove this value.",
+      "missing_value": "No value was found — check the image.",
+      "unit_mismatch": "The image unit does not match this measurement's unit — check the value before saving.",
+      "implausible_value": "The value looks implausible — check the digits and decimal place.",
+      "duplicate": "The same measurement appears more than once — keep only the correct value."
+    }
+  },
   "photos": {
     "title": "Progress photos",
     "new": "Add a photo",

@@ -27,6 +27,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-vital}:${POSTGRES_PASSWORD:-vital}@db:5432/${POSTGRES_DB:-vital}
       # Local accounts by default so the dev stack works without an identity provider.
       AUTH_MODE: ${AUTH_MODE:-local}
+      # Keep local sessions valid when Uvicorn reloads after a source edit.
+      SECRET_KEY: ${SECRET_KEY:-vital-local-development-secret-change-in-production}
       # A rich, idempotent local account for trying every main screen.
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
     env_file:
