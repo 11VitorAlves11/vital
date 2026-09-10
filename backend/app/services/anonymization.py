@@ -12,7 +12,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from datetime import date
-from typing import Any
+from typing import Any, cast
 
 import cv2
 import numpy as np
@@ -125,9 +125,9 @@ def decode_barcodes(image: Image.Image) -> list[Any]:
 def _blur_faces(image: Image.Image) -> Image.Image:
     pixels = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(pixels, cv2.COLOR_BGR2GRAY)
-    cascade = cv2.CascadeClassifier(  # type: ignore[attr-defined]
-        cv2.data.haarcascades  # type: ignore[attr-defined]
-        + "haarcascade_frontalface_default.xml"
+    cv2_module = cast(Any, cv2)
+    cascade = cv2_module.CascadeClassifier(
+        cv2_module.data.haarcascades + "haarcascade_frontalface_default.xml"
     )
     for x, y, width, height in cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5):
         box = (int(x), int(y), int(x + width), int(y + height))
