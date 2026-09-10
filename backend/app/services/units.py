@@ -23,6 +23,8 @@ _ONE = Decimal(1)
 #: `u` as an ASCII stand-in for `µ`, but only where it can only mean micro —
 #: never in `U/L` or `UI/mL`, where a `u` is an enzyme or international unit.
 _ASCII_MICRO = re.compile(r"(?<![a-z0-9])u(?=g|mol|l(?![a-z]))")
+_SUPERSCRIPT_DIGITS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
+_INVISIBLE = re.compile(r"[\u200b\u200c\u200d\u2060\ufeff]")
 
 
 def normalise_unit(unit: str) -> str:
@@ -32,7 +34,20 @@ def normalise_unit(unit: str) -> str:
     `µ` (micro sign) are written interchangeably. Everything else — including
     `mg` against `µg` — is a real difference and survives untouched.
     """
-    folded = re.sub(r"\s+", "", unit).casefold().replace("μ", "µ")
+    folded = _INVISIBLE.sub("", unit).casefold().replace("μ", "µ")
+    folded = re.sub(r"\s+", "", folded)
+    folded = folded.replace("−", "-").replace("–", "-")
+    # Cell counts are commonly printed as x10^9/L, ×10⁹/L or *10^9/L.
+    # The multiplier sign describes the scale; it is not a different unit.
+    folded = re.sub(r"^[x×*](?=10)", "", folded)
+    folded = re.sub(
+        r"10([⁰¹²³⁴⁵⁶⁷⁸⁹]+)",
+        lambda match: "10^" + match.group(1).translate(_SUPERSCRIPT_DIGITS),
+        folded,
+    )
+    folded = folded.replace("**", "^")
+    # Both forms occur in renal-function reports and denote square metres.
+    folded = re.sub(r"(?<=m)2(?=$|[/.)])", "²", folded)
     return _ASCII_MICRO.sub("µ", folded)
 
 

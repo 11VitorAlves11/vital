@@ -52,6 +52,11 @@ VITAMIN_D = Biomarker(
         ("umol/L", "µmol/l"),  # ASCII stand-in
         ("ug/dL", "µg/dl"),
         ("10^3/uL", "10^3/µl"),
+        ("x10^9/L", "10^9/l"),
+        ("×10⁹/L", "10^9/l"),
+        ("*10**12 / L", "10^12/l"),
+        ("mL/min/1,73m2", "ml/min/1,73m²"),
+        ("ng/\u200bmL", "ng/ml"),
     ],
 )
 def test_notation_differences_are_folded(written: str, expected: str) -> None:

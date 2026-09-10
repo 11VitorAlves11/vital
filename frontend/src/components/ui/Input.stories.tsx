@@ -26,7 +26,7 @@ export const WithUnit: Story = {
 };
 
 export const WithHint: Story = {
-  args: { hint: "O valor tal como vem no boletim, sem arredondar." },
+  args: { hint: "O valor tal como consta nas análises, sem arredondar." },
 };
 
 /** The message sits under the field that failed, never only in a summary. */
@@ -40,7 +40,7 @@ export const States: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <Input label="Normal" defaultValue="13.4" unit="g/dL" />
-      <Input label="Com pista" hint="Como vem no boletim." />
+      <Input label="Com pista" hint="Como consta nas análises." />
       <Input label="Com erro" error="Introduz um número." defaultValue="doze" />
       <Input label="Desativado" disabled defaultValue="13.4" />
     </div>

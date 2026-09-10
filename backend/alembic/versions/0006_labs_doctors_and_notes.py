@@ -6,7 +6,7 @@ Backlog 1.7 and 1.8.
 were the same place only by coincidence of spelling. It becomes a foreign key
 into a per-account `labs` table, keyed on a normalised name so "Synlab Braga"
 and "SYNLAB  braga" land on one row. Doctors get the same treatment, nullable,
-because the ordering physician is rarely on the boletim.
+because the ordering physician is rarely in the source file.
 
 Both tables are per-account rather than global: on a shared instance a global
 list of laboratories would tell every account which ones the others use.

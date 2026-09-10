@@ -11,6 +11,7 @@ import io
 import json
 import logging
 import re
+from decimal import Decimal
 from typing import Any
 
 import pymupdf
@@ -210,19 +211,20 @@ async def ask_model(content: list[dict[str, Any]], settings: Settings) -> tuple[
     return answer, settings.llm_model
 
 
-def build_index(biomarkers: list[Biomarker]) -> dict[str, Biomarker]:
-    """Name and every alias, normalised. First writer wins, so a catalogue name
-    is never shadowed by another marker's alias."""
-    index: dict[str, Biomarker] = {}
+def build_index(biomarkers: list[Biomarker]) -> dict[str, list[Biomarker]]:
+    """Name and aliases, retaining collisions for unit-aware disambiguation."""
+    index: dict[str, list[Biomarker]] = {}
     for biomarker in biomarkers:
         for candidate in (biomarker.slug, biomarker.name, *biomarker.aliases):
-            index.setdefault(normalise(candidate), biomarker)
+            matches = index.setdefault(normalise(candidate), [])
+            if biomarker not in matches:
+                matches.append(biomarker)
     return index
 
 
 def match(
     result: ExtractedResult,
-    index: dict[str, Biomarker],
+    index: dict[str, list[Biomarker]],
     lab_name: str | None = None,
     rules: dict[tuple[str, str, str], int] | None = None,
 ) -> Biomarker | None:
@@ -234,8 +236,22 @@ def match(
         )
         matched_id = rules.get(rule_key)
         if matched_id is not None:
-            return next((item for item in index.values() if item.id == matched_id), None)
-    return index.get(normalise(result.biomarker))
+            return next(
+                (item for items in index.values() for item in items if item.id == matched_id), None
+            )
+    candidates = index.get(normalise(result.biomarker), [])
+    if len(candidates) <= 1 or not result.unit:
+        return candidates[0] if candidates else None
+
+    # Simplifying names removes punctuation, so "Linfócitos" and
+    # "Linfócitos (%)" may share a key. The printed unit safely resolves that
+    # ambiguity without guessing from the numeric value.
+    compatible = [
+        candidate
+        for candidate in candidates
+        if to_canonical(candidate, result.value or Decimal(1), result.unit)[0] is not None
+    ]
+    return compatible[0] if len(compatible) == 1 else candidates[0]
 
 
 def preview_warnings(result: ExtractedResult, matched: Biomarker | None) -> list[str]:

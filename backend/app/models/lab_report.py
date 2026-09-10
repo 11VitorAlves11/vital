@@ -40,7 +40,7 @@ class LabReport(Base):
     lab_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("labs.id", ondelete="RESTRICT"), nullable=False, index=True
     )
-    #: Who ordered the analyses, when the report says. Rarely on the boletim.
+    #: Who ordered the analyses, when the report says. Rarely in the source file.
     doctor_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("doctors.id", ondelete="SET NULL"), index=True
     )

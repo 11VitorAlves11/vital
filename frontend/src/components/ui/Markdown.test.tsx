@@ -30,8 +30,8 @@ describe("Markdown", () => {
   });
 
   it("opens an external link without handing over the opener", () => {
-    renderWithProviders(<Markdown>{"[boletim](https://example.org)"}</Markdown>);
-    const link = screen.getByRole("link", { name: "boletim" });
+    renderWithProviders(<Markdown>{"[análises](https://example.org)"}</Markdown>);
+    const link = screen.getByRole("link", { name: "análises" });
     expect(link).toHaveAttribute("href", "https://example.org");
     expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
   });

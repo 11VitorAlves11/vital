@@ -78,7 +78,7 @@ async function uploadPdf() {
   const file = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], "analises.pdf", {
     type: "application/pdf",
   });
-  await userEvent.upload(screen.getByLabelText(/Escolher ou fotografar o boletim/), file);
+  await userEvent.upload(screen.getByLabelText(/Escolher ou fotografar as análises/), file);
 }
 
 describe("ReportImport", () => {
@@ -207,6 +207,6 @@ describe("ReportImport", () => {
 
     await uploadPdf();
 
-    expect(await screen.findByText(/A ler o boletim/)).toBeInTheDocument();
+    expect(await screen.findByText(/A ler as análises/)).toBeInTheDocument();
   });
 });

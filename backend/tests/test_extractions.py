@@ -215,6 +215,29 @@ class TestUpload:
 
 
 class TestPreview:
+    async def test_uses_the_unit_to_distinguish_absolute_and_percentage_markers(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stub_model(
+            monkeypatch,
+            {
+                **ANSWER,
+                "results": [
+                    {"biomarker": "Linfócitos", "value": 3.28, "unit": "x10^9/L"},
+                    {"biomarker": "Linfócitos %", "value": 42.1, "unit": "%"},
+                ],
+            },
+        )
+
+        job = await upload(user_client, make_pdf(lines=34))
+        preview = (await user_client.get(f"/api/extractions/{job['id']}")).json()["preview"]
+
+        assert [row["biomarker_slug"] for row in preview["results"]] == [
+            "linfocitos",
+            "linfocitos-pct",
+        ]
+        assert all("unit_mismatch" not in row["warnings"] for row in preview["results"])
+
     async def test_preserves_visual_column_order_in_text_pdfs(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:
