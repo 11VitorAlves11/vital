@@ -219,7 +219,21 @@ def build_index(biomarkers: list[Biomarker]) -> dict[str, Biomarker]:
     return index
 
 
-def match(result: ExtractedResult, index: dict[str, Biomarker]) -> Biomarker | None:
+def match(
+    result: ExtractedResult,
+    index: dict[str, Biomarker],
+    lab_name: str | None = None,
+    rules: dict[tuple[str, str, str], int] | None = None,
+) -> Biomarker | None:
+    if lab_name and rules:
+        rule_key = (
+            normalise(lab_name),
+            normalise(result.biomarker),
+            normalise(result.unit) if result.unit else "",
+        )
+        matched_id = rules.get(rule_key)
+        if matched_id is not None:
+            return next((item for item in index.values() if item.id == matched_id), None)
     return index.get(normalise(result.biomarker))
 
 
@@ -243,7 +257,11 @@ def preview_warnings(result: ExtractedResult, matched: Biomarker | None) -> list
     return warnings
 
 
-def build_preview(payload: ExtractionPayload, biomarkers: list[Biomarker]) -> ExtractionPreview:
+def build_preview(
+    payload: ExtractionPayload,
+    biomarkers: list[Biomarker],
+    rules: dict[tuple[str, str, str], int] | None = None,
+) -> ExtractionPreview:
     index = build_index(biomarkers)
     return ExtractionPreview(
         collected_on=payload.collected_on,
@@ -267,6 +285,6 @@ def build_preview(payload: ExtractionPayload, biomarkers: list[Biomarker]) -> Ex
                 warnings=preview_warnings(result, matched),
             )
             for result in payload.results
-            for matched in [match(result, index)]
+            for matched in [match(result, index, payload.lab_name, rules)]
         ],
     )

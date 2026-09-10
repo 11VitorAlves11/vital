@@ -10,6 +10,7 @@ import { Body } from "./pages/Body";
 import { Dashboard } from "./pages/Dashboard";
 import { Interventions } from "./pages/Interventions";
 import { Login } from "./pages/Login";
+import { MatchRules } from "./pages/MatchRules";
 import { Photos } from "./pages/Photos";
 import { Profile } from "./pages/Profile";
 import { ReportCompare } from "./pages/ReportCompare";
@@ -91,6 +92,14 @@ export function App() {
         element={
           <RequireSession>
             <ReportCompare />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/reports/match-rules"
+        element={
+          <RequireSession>
+            <MatchRules />
           </RequireSession>
         }
       />

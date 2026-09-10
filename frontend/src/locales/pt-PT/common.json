@@ -166,6 +166,20 @@
     "left": "{{count}} saiu do intervalo",
     "left_other": "{{count}} saíram do intervalo"
   },
+  "matchRules": {
+    "title": "Regras de correspondência",
+    "open": "Regras",
+    "back": "Voltar às análises",
+    "description": "Associações que confirmaste ao importar boletins. Cada regra só se aplica ao mesmo laboratório, nome original e unidade.",
+    "lab": "Laboratório",
+    "source": "No boletim",
+    "destination": "Biomarcador",
+    "noUnit": "Sem unidade",
+    "emptyTitle": "Ainda não existem regras",
+    "emptyDescription": "Quando corrigires ou confirmares um nome durante uma importação, a associação ficará visível aqui e será reutilizada nesse laboratório.",
+    "deleted": "Regra removida.",
+    "deleteLabel": "Remover regra para {{source}}"
+  },
   "repeats": {
     "schedule": "Agendar repetição",
     "scheduleTitle": "Repetir {{biomarker}}",

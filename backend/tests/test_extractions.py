@@ -313,6 +313,61 @@ class TestPreview:
 
 
 class TestConfirm:
+    async def test_learns_a_scoped_rule_that_can_be_reviewed_and_removed(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, catalogue: dict[str, Any]
+    ) -> None:
+        haemoglobin = catalogue["biomarkers"]["hemoglobina"]
+        learned_answer = {
+            **ANSWER,
+            "lab_name": "Laboratório Norte",
+            "results": [{"biomarker": "HGB-X", "value": 13.4, "unit": "g/dL"}],
+        }
+        stub_model(monkeypatch, learned_answer)
+        job = await upload(user_client, make_pdf(lines=31))
+        response = await user_client.post(
+            f"/api/extractions/{job['id']}/confirm",
+            json={
+                "collected_on": "2026-02-14",
+                "lab_name": "Laboratório Norte",
+                "results": [
+                    {
+                        "biomarker_id": haemoglobin["id"],
+                        "source_name": "HGB-X",
+                        "value": 13.4,
+                        "unit": "g/dL",
+                    }
+                ],
+            },
+        )
+        assert response.status_code == 201, response.text
+
+        rules = (await user_client.get("/api/biomarker-match-rules")).json()
+        assert len(rules) == 1
+        assert rules[0]["lab_name"] == "Laboratório Norte"
+        assert rules[0]["source_name"] == "HGB-X"
+        assert rules[0]["biomarker_name"] == haemoglobin["name"]
+
+        # The same spelling is learned only for this laboratory and unit.
+        stub_model(monkeypatch, learned_answer)
+        same_lab = await upload(user_client, make_pdf(lines=32))
+        same_preview = (await user_client.get(f"/api/extractions/{same_lab['id']}")).json()[
+            "preview"
+        ]
+        assert same_preview["results"][0]["biomarker_id"] == haemoglobin["id"]
+
+        other_lab_answer = {**learned_answer, "lab_name": "Clínica Sul"}
+        stub_model(monkeypatch, other_lab_answer)
+        other_lab = await upload(user_client, make_pdf(lines=33))
+        other_preview = (await user_client.get(f"/api/extractions/{other_lab['id']}")).json()[
+            "preview"
+        ]
+        assert other_preview["results"][0]["biomarker_id"] is None
+
+        assert (
+            await user_client.delete(f"/api/biomarker-match-rules/{rules[0]['id']}")
+        ).status_code == 204
+        assert (await user_client.get("/api/biomarker-match-rules")).json() == []
+
     async def test_writes_only_what_was_approved(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, catalogue: dict[str, Any]
     ) -> None:

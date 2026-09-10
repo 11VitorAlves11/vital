@@ -259,6 +259,17 @@ export type ExtractionJob = {
   preview: ExtractionPreview | null;
 };
 
+export type BiomarkerMatchRule = {
+  id: string;
+  lab_name: string;
+  source_name: string;
+  source_unit: string | null;
+  biomarker_id: number;
+  biomarker_name: string;
+  biomarker_unit: string;
+  created_at: string;
+};
+
 export type Features = { extraction: boolean };
 
 export type Pose = "frente" | "lado" | "costas" | "outro";

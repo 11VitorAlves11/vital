@@ -11,6 +11,7 @@ Every query is scoped to the session user, jobs and stored files alike.
 import hashlib
 import logging
 import uuid
+from collections.abc import Sequence
 from typing import Annotated
 
 from fastapi import (
@@ -28,7 +29,7 @@ from app.api.deps import AppSettings, CurrentUser, DbSession
 from app.api.routes.reports import to_report_out, utcnow
 from app.core.config import get_settings
 from app.db.session import get_sessionmaker
-from app.models import Biomarker, ExtractionJob, LabReport, User
+from app.models import Biomarker, BiomarkerMatchRule, ExtractionJob, LabReport, User
 from app.models.enums import ExtractionStatus, ReportSource
 from app.schemas.extractions import ExtractionConfirm, ExtractionOut, ExtractionPayload
 from app.schemas.reports import ReportOut
@@ -218,8 +219,33 @@ async def read_extraction(job_id: uuid.UUID, user: CurrentUser, db: DbSession) -
             .scalars()
             .all()
         )
+        extracted_payload = ExtractionPayload.model_validate(job.raw_output)
+        rules: Sequence[BiomarkerMatchRule] = []
+        if extracted_payload.lab_name:
+            rules = (
+                (
+                    await db.execute(
+                        select(BiomarkerMatchRule).where(
+                            BiomarkerMatchRule.user_id == user.id,
+                            BiomarkerMatchRule.lab_name_normalised
+                            == normalise(extracted_payload.lab_name),
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
         out.preview = build_preview(
-            ExtractionPayload.model_validate(job.raw_output), list(biomarkers)
+            extracted_payload,
+            list(biomarkers),
+            {
+                (
+                    rule.lab_name_normalised,
+                    rule.source_name_normalised,
+                    rule.source_unit_normalised,
+                ): rule.biomarker_id
+                for rule in rules
+            },
         )
     return out
 
@@ -278,12 +304,40 @@ async def confirm_extraction(
     )
     for entry in payload.results:
         biomarker = catalogue[entry.biomarker_id]
-        known_names = {
-            normalise(biomarker.name),
-            *(normalise(alias) for alias in biomarker.aliases),
-        }
-        if entry.source_name and normalise(entry.source_name) not in known_names:
-            biomarker.aliases = [*biomarker.aliases, entry.source_name.strip()]
+        if entry.source_name:
+            lab_key = normalise(payload.lab_name)
+            source_key = normalise(entry.source_name)
+            unit_key = normalise(entry.unit) if entry.unit else ""
+            rule = await db.scalar(
+                select(BiomarkerMatchRule).where(
+                    BiomarkerMatchRule.user_id == user.id,
+                    BiomarkerMatchRule.lab_name_normalised == lab_key,
+                    BiomarkerMatchRule.source_name_normalised == source_key,
+                    BiomarkerMatchRule.source_unit_normalised == unit_key,
+                )
+            )
+            known_names = {
+                normalise(biomarker.name),
+                *(normalise(alias) for alias in biomarker.aliases),
+            }
+            if rule is None and source_key not in known_names:
+                rule = BiomarkerMatchRule(
+                    user_id=user.id,
+                    biomarker_id=biomarker.id,
+                    lab_name=payload.lab_name.strip(),
+                    lab_name_normalised=lab_key,
+                    source_name=entry.source_name.strip(),
+                    source_name_normalised=source_key,
+                    source_unit=entry.unit.strip() if entry.unit else None,
+                    source_unit_normalised=unit_key,
+                )
+                db.add(rule)
+            elif rule is not None:
+                # The latest explicit human confirmation is authoritative.
+                rule.biomarker_id = biomarker.id
+                rule.lab_name = payload.lab_name.strip()
+                rule.source_name = entry.source_name.strip()
+                rule.source_unit = entry.unit.strip() if entry.unit else None
         # Flags and unit conversion stay server-side, extracted or not: the model
         # is never asked to classify or convert, only to transcribe.
         report.results.append(

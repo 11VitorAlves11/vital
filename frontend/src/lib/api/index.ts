@@ -1,6 +1,7 @@
 import { query, request, upload, uploadWithFields } from "./client";
 import type {
   Biomarker,
+  BiomarkerMatchRule,
   BiomarkerSeries,
   BodyMetric,
   BodyMetricSummary,
@@ -107,6 +108,12 @@ export const extractions = {
   confirm: (id: string, payload: ReportPayload) =>
     request<Report>(`/api/extractions/${id}/confirm`, { method: "POST", body: payload }),
   discard: (id: string) => request<void>(`/api/extractions/${id}`, { method: "DELETE" }),
+};
+
+export const matchRules = {
+  list: () => request<BiomarkerMatchRule[]>("/api/biomarker-match-rules"),
+  remove: (id: string) =>
+    request<void>(`/api/biomarker-match-rules/${id}`, { method: "DELETE" }),
 };
 
 /** Where the history came from — for filtering it, and for pre-filling a new

@@ -166,6 +166,20 @@
     "left": "{{count}} left the range",
     "left_other": "{{count}} left the range"
   },
+  "matchRules": {
+    "title": "Matching rules",
+    "open": "Rules",
+    "back": "Back to lab reports",
+    "description": "Mappings you confirmed while importing reports. Each rule only applies to the same laboratory, original name and unit.",
+    "lab": "Laboratory",
+    "source": "On the report",
+    "destination": "Biomarker",
+    "noUnit": "No unit",
+    "emptyTitle": "There are no rules yet",
+    "emptyDescription": "When you correct or confirm a name during an import, the mapping will appear here and be reused for that laboratory.",
+    "deleted": "Rule removed.",
+    "deleteLabel": "Remove rule for {{source}}"
+  },
   "repeats": {
     "schedule": "Schedule a repeat",
     "scheduleTitle": "Repeat {{biomarker}}",

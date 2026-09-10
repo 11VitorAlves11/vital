@@ -1,4 +1,4 @@
-import { FileUp, GitCompareArrows, Plus } from "lucide-react";
+import { FileUp, GitCompareArrows, GitMerge, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -46,6 +46,10 @@ export function Reports() {
           {t("reports.title")}
         </h1>
         <div className="flex flex-wrap gap-2">
+          <LinkButton to="/reports/match-rules" variant="secondary">
+            <GitMerge size={20} aria-hidden="true" />
+            {t("matchRules.open")}
+          </LinkButton>
           {/* Two collections are the minimum a diff can be about. */}
           {data && data.length > 1 ? (
             <LinkButton to="/reports/compare" variant="secondary">

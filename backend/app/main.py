@@ -15,6 +15,7 @@ from app.api.routes import (
     features,
     health,
     interventions,
+    match_rules,
     photos,
     providers,
     repeats,
@@ -87,6 +88,7 @@ app.include_router(catalog.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
 app.include_router(providers.router, prefix="/api")
 app.include_router(extractions.router, prefix="/api")
+app.include_router(match_rules.router, prefix="/api")
 app.include_router(interventions.router, prefix="/api")
 app.include_router(body.router, prefix="/api")
 app.include_router(photos.router, prefix="/api")
