@@ -70,9 +70,7 @@ async def run_body_extraction(job_id: uuid.UUID) -> None:
             )
             job.provider = model_config.model
             await db.commit()
-            identity = Identity(
-                name=owner.name, email=owner.email, birth_date=owner.birth_date
-            )
+            identity = Identity(name=owner.name, email=owner.email, birth_date=owner.birth_date)
             safe_content = page_contents(
                 content,
                 model_settings,
@@ -212,9 +210,7 @@ async def confirm_body_extraction(
 
 
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_body_extraction(
-    job_id: uuid.UUID, user: CurrentUser, db: DbSession
-) -> Response:
+async def delete_body_extraction(job_id: uuid.UUID, user: CurrentUser, db: DbSession) -> Response:
     job = await _owned(job_id, user, db)
     if job.status is not ExtractionStatus.CONFIRMED:
         storage.discard(job.file_path)

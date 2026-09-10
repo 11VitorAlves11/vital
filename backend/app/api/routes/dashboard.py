@@ -61,11 +61,7 @@ async def dashboard(user: CurrentUser, db: DbSession) -> DashboardOut:
             latest.canonical_value if latest.canonical_value is not None else latest.value
         )
         previous_comparable = (
-            (
-                previous.canonical_value
-                if previous.canonical_value is not None
-                else previous.value
-            )
+            (previous.canonical_value if previous.canonical_value is not None else previous.value)
             if previous is not None
             else None
         )

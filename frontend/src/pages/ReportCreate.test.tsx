@@ -53,11 +53,17 @@ function render(suggestion: object = SUGGESTION) {
   return fetchMock;
 }
 
+async function pickHaemoglobin() {
+  const input = screen.getByRole("combobox", { name: "Biomarcador" });
+  await userEvent.type(input, "hemo");
+  await userEvent.click(await screen.findByRole("option", { name: /^Hemoglobina \(/ }));
+}
+
 describe("ReportCreate", () => {
   it("fills a row from the last reading once a laboratory is recognised", async () => {
     render();
     await userEvent.type(await screen.findByLabelText("Laboratório"), "SYNLAB  braga");
-    await userEvent.selectOptions(screen.getByLabelText("Biomarcador"), "1");
+    await pickHaemoglobin();
 
     // The acceptance criterion for 4.2: a known value costs the marker, the
     // value and the date. The range and the assay come with it.
@@ -71,7 +77,7 @@ describe("ReportCreate", () => {
   it("never suggests the value itself", async () => {
     render();
     await userEvent.type(await screen.findByLabelText("Laboratório"), "Synlab Braga");
-    await userEvent.selectOptions(screen.getByLabelText("Biomarcador"), "1");
+    await pickHaemoglobin();
     await waitFor(() => expect(screen.getByLabelText("Ref. mín.")).toHaveValue("13.5000"));
     // The one thing that has to be read off the report every time.
     expect(screen.getByLabelText("Valor")).toHaveValue("");
@@ -81,7 +87,7 @@ describe("ReportCreate", () => {
     render();
     await userEvent.type(await screen.findByLabelText("Laboratório"), "Synlab Braga");
     await userEvent.type(screen.getByLabelText("Ref. mín."), "12");
-    await userEvent.selectOptions(screen.getByLabelText("Biomarcador"), "1");
+    await pickHaemoglobin();
 
     await waitFor(() => expect(screen.getByLabelText("Ref. máx.")).toHaveValue("17.5000"));
     expect(screen.getByLabelText("Ref. mín.")).toHaveValue("12");
@@ -92,7 +98,7 @@ describe("ReportCreate", () => {
     // that issued it. The assay is not lab-specific, so it still comes across.
     render({ ...SUGGESTION, same_lab: false, lab_name: "Unilabs" });
     await userEvent.type(await screen.findByLabelText("Laboratório"), "Laboratório novo");
-    await userEvent.selectOptions(screen.getByLabelText("Biomarcador"), "1");
+    await pickHaemoglobin();
 
     await waitFor(() =>
       expect(screen.getByLabelText(/Método analítico/)).toHaveValue("Citometria de fluxo"),

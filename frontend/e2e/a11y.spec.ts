@@ -31,7 +31,7 @@ test.describe("accessibility", () => {
     await signUp(page, "F");
     await recordCollection(page, { biomarker: "Hemoglobina", value: "10.5" });
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Hematologia" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Desde a última colheita" })).toBeVisible();
     expect(await scan(page)).toEqual([]);
   });
 
@@ -39,6 +39,7 @@ test.describe("accessibility", () => {
     await signUp(page, "F");
     await recordCollection(page, { biomarker: "Hemoglobina", value: "13.2" });
     await page.goto("/");
+    await page.getByText("Hematologia", { exact: true }).click();
     await page.getByRole("link", { name: "Hemoglobina", exact: true }).click();
     await expect(page.getByRole("img", { name: /Hemoglobina/ })).toBeVisible();
     expect(await scan(page)).toEqual([]);

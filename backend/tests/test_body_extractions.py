@@ -115,9 +115,7 @@ async def test_rejects_non_images(user_client: AsyncClient) -> None:
     assert response.status_code == 415
 
 
-async def test_jobs_are_private(
-    make_user: UserFactory, monkeypatch: pytest.MonkeyPatch
-) -> None:
+async def test_jobs_are_private(make_user: UserFactory, monkeypatch: pytest.MonkeyPatch) -> None:
     owner, _ = await make_user()
     stranger, _ = await make_user()
     stub_model(monkeypatch)

@@ -9,15 +9,12 @@ test.describe("recording and reading values", () => {
     await recordCollection(page, { biomarker: "Hemoglobina", value: "10.5" });
 
     await page.goto("/");
-    // The link, its flag-row parent, and that row's parent: BiomarkerCard's own
-    // outer div — the one that also holds the value. Flagged, so the card
-    // renders twice (out-of-range section, then its panel); either instance
-    // carries the same true value, so the first is enough.
+    // The notable-change row carries the marker, value and classification.
     const card = page
       .getByRole("link", { name: "Hemoglobina", exact: true })
       .first()
       .locator("xpath=../..");
-    await expect(page.getByRole("heading", { name: "Hematologia" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Desde a última colheita" })).toBeVisible();
     await expect(card.getByText("Baixo")).toBeVisible();
     await expect(card.getByText("10,5")).toBeVisible();
   });
@@ -35,12 +32,14 @@ test.describe("recording and reading values", () => {
     await expect(form).toBeHidden();
 
     await page.goto("/");
+    await page.getByText("Hematologia", { exact: true }).click();
     await page.getByRole("link", { name: "Hemoglobina", exact: true }).click();
 
     const chart = page.getByRole("img", { name: /Hemoglobina/ });
     await expect(chart).toBeVisible();
-    // The limits are drawn as labelled lines, not only as shading.
-    await expect(chart.locator("text=Mín.").first()).toBeVisible();
+    // With one point the compact comparison replaces the plot, while the
+    // catalogue interval remains stated explicitly beside the metric.
+    await expect(page.getByText(/Intervalo de referência do catálogo.*12–15 g\/dL/)).toBeVisible();
     await expect(page.getByText("Ferro bisglicinato").first()).toBeVisible();
     // The history is the chart's textual alternative, so it ships with it.
     await expect(page.getByText("Synlab Braga").first()).toBeVisible();
@@ -82,7 +81,7 @@ test.describe("recording and reading values", () => {
 
     await page.goto("/profile");
     await page.getByLabel("Sexo").selectOption("F");
-    await page.getByRole("button", { name: "Guardar" }).click();
+    await page.getByRole("button", { name: "Guardar", exact: true }).click();
 
     await page.goto("/body");
     await expect(page.getByText("Indica o sexo no perfil")).toBeHidden();

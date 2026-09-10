@@ -40,9 +40,7 @@ async def list_match_rules(user: CurrentUser, db: DbSession) -> list[BiomarkerMa
 
 
 @router.delete("/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_match_rule(
-    rule_id: uuid.UUID, user: CurrentUser, db: DbSession
-) -> Response:
+async def delete_match_rule(rule_id: uuid.UUID, user: CurrentUser, db: DbSession) -> Response:
     rule = await db.scalar(
         select(BiomarkerMatchRule).where(
             BiomarkerMatchRule.id == rule_id, BiomarkerMatchRule.user_id == user.id

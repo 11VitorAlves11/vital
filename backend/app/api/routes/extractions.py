@@ -163,11 +163,7 @@ async def create_extraction(
             ExtractionJob.file_sha256 == file_sha256,
         )
     )
-    if (
-        duplicate is not None
-        and duplicate.status is not ExtractionStatus.FAILED
-        and not replace
-    ):
+    if duplicate is not None and duplicate.status is not ExtractionStatus.FAILED and not replace:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="This file has already been imported",

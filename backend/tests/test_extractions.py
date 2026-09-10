@@ -363,9 +363,7 @@ class TestConfirm:
             "lab_name": "Unilabs",
             "results": [{"biomarker_id": marker_id, "value": 10.9, "unit": "g/dL"}],
         }
-        first = await user_client.post(
-            f"/api/extractions/{job['id']}/confirm", json=first_payload
-        )
+        first = await user_client.post(f"/api/extractions/{job['id']}/confirm", json=first_payload)
         report_id = first.json()["id"]
 
         replaced = await user_client.post(

@@ -46,14 +46,14 @@ export async function recordCollection(
   if (collectedOn) await form.getByLabel("Data da colheita").fill(collectedOn);
   await form.getByLabel("Laboratório").fill(lab);
 
-  // Options read "Hemoglobina (g/dL)". Anchored, because a substring match on
-  // "Hemoglobina" also hits "HGM (hemoglobina globular média)".
-  const select = form.getByLabel("Biomarcador");
-  const optionValue = await select
-    .locator("option", { hasText: new RegExp(`^${escapeRegExp(biomarker)}\\s*\\(`) })
+  // Search by prefix, then choose the anchored result: a substring match on
+  // "Hemoglobina" could also hit a longer, different catalogue label.
+  const selector = form.getByRole("combobox", { name: "Biomarcador" });
+  await selector.fill(biomarker);
+  await form
+    .getByRole("option", { name: new RegExp(`^${escapeRegExp(biomarker)}\\s*\\(`) })
     .first()
-    .getAttribute("value");
-  await select.selectOption(optionValue!);
+    .click();
 
   await form.getByLabel("Valor", { exact: true }).fill(value);
   await form.getByRole("button", { name: "Guardar" }).click();

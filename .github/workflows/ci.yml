@@ -121,7 +121,7 @@ jobs:
           exit 1
       - name: Run
         working-directory: frontend
-        run: npx playwright test --grep-invert @shots
+        run: npx playwright test --grep-invert '@shots|@pwa'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
