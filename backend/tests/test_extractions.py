@@ -166,7 +166,8 @@ class TestUpload:
         content = make_pdf(lines=30)
         stub_model(monkeypatch, "not json")
         failed = await upload(user_client, content)
-        assert (await user_client.get(f"/api/extractions/{failed['id']}")).json()["status"] == "failed"
+        failed_job = (await user_client.get(f"/api/extractions/{failed['id']}")).json()
+        assert failed_job["status"] == "failed"
 
         stub_model(monkeypatch, ANSWER)
         retried = await upload(user_client, content)

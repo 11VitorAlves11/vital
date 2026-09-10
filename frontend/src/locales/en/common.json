@@ -80,6 +80,18 @@
   },
   "biomarker": {
     "history": "History",
+    "about": "What it represents",
+    "categoryExplanation": {
+      "hematologia": "Helps show how blood carries oxygen, fights infection, or forms clots.",
+      "bioquimica": "Reflects essential chemical processes such as energy, metabolism, and organ function.",
+      "vitaminas": "Supports essential body functions; low or high levels can affect several systems.",
+      "ferro": "Helps assess available and stored iron, which is needed to carry oxygen.",
+      "hormonas": "A chemical messenger that influences metabolism, energy, growth, or reproduction.",
+      "lipidos": "Helps assess fats carried in the blood and cardiovascular context.",
+      "renal": "Helps show how the kidneys filter blood and balance water and salts.",
+      "hepatico": "Helps assess processes involving the liver and bile ducts.",
+      "outro": "Records a body measurement that should be read with its clinical context and laboratory range."
+    },
     "date": "Date",
     "value": "Value",
     "lab": "Laboratory",
@@ -178,6 +190,16 @@
     "checkHint": "Check every line against the report before saving. Correct what is wrong and remove what you do not want.",
     "unmatched": "{{count}} line does not match any biomarker in the catalogue — pick one or remove it.",
     "unmatched_other": "{{count}} lines do not match any biomarker in the catalogue — pick one or remove them.",
+    "createCustom": "Create custom biomarker",
+    "unitNeeded": "Enter the unit before creating the biomarker.",
+    "warnings": {
+      "missing_value": "The model did not find a value — check this row.",
+      "invalid_range": "The range looks invalid: the minimum is not below the maximum.",
+      "value_matches_limit": "The result matches a limit — check the report columns.",
+      "far_outside_range": "The value is far outside the range — check its decimal place and column.",
+      "unit_mismatch": "The unit is not compatible with this biomarker — check the match.",
+      "unmatched": "Unrecognised biomarker — match it, create a custom one, or remove the row."
+    },
     "pickAtLeastOne": "Pick at least one biomarker with a value.",
     "confirm": "Confirm and save",
     "tryAnotherFile": "Try another file"

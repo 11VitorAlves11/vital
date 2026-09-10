@@ -80,6 +80,18 @@
   },
   "biomarker": {
     "history": "Histórico",
+    "about": "O que representa",
+    "categoryExplanation": {
+      "hematologia": "Ajuda a perceber como o sangue transporta oxigénio, combate infeções ou coagula.",
+      "bioquimica": "Reflete processos químicos essenciais, como energia, metabolismo e funcionamento dos órgãos.",
+      "vitaminas": "Participa em funções essenciais do organismo; valores baixos ou altos podem afetar vários sistemas.",
+      "ferro": "Ajuda a avaliar o ferro disponível e armazenado, necessário para transportar oxigénio.",
+      "hormonas": "É um mensageiro químico que influencia metabolismo, energia, crescimento ou reprodução.",
+      "lipidos": "Ajuda a avaliar as gorduras transportadas no sangue e o contexto cardiovascular.",
+      "renal": "Ajuda a perceber como os rins filtram o sangue e equilibram água e sais.",
+      "hepatico": "Ajuda a avaliar processos ligados ao fígado e às vias biliares.",
+      "outro": "Regista uma medição do organismo que deve ser interpretada com o contexto clínico e o intervalo do laboratório."
+    },
     "date": "Data",
     "value": "Valor",
     "lab": "Laboratório",
@@ -178,6 +190,16 @@
     "checkHint": "Confere cada linha contra o boletim antes de guardar. Corrige o que estiver errado e remove o que não quiseres.",
     "unmatched": "{{count}} linha não corresponde a nenhum biomarcador do catálogo — escolhe um ou remove-a.",
     "unmatched_other": "{{count}} linhas não correspondem a nenhum biomarcador do catálogo — escolhe um ou remove-as.",
+    "createCustom": "Criar biomarcador personalizado",
+    "unitNeeded": "Indica a unidade antes de criar o biomarcador.",
+    "warnings": {
+      "missing_value": "O modelo não encontrou um valor — confirma esta linha.",
+      "invalid_range": "O intervalo parece inválido: o mínimo não é inferior ao máximo.",
+      "value_matches_limit": "O resultado coincide com um limite — confirma as colunas no boletim.",
+      "far_outside_range": "O valor está muito afastado do intervalo — confirma a casa decimal e a coluna.",
+      "unit_mismatch": "A unidade não é compatível com este biomarcador — confirma a associação.",
+      "unmatched": "Biomarcador não reconhecido — associa, cria um personalizado ou remove a linha."
+    },
     "pickAtLeastOne": "Escolhe pelo menos um biomarcador com valor.",
     "confirm": "Confirmar e guardar",
     "tryAnotherFile": "Tentar outro ficheiro"

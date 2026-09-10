@@ -4,16 +4,23 @@ Both are global, but what a caller sees is not: reference ranges and clinical ba
 are resolved for their sex before leaving the server, so no client ever has to pick.
 """
 
+import uuid
 from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, BodyMetric, LabReport, Result, User
-from app.models.enums import BiomarkerCategory
-from app.schemas.catalog import BandOut, BiomarkerOut, BodyMetricOut, ReferenceBandOut
+from app.models.enums import BiomarkerCategory, ReferenceKind
+from app.schemas.catalog import (
+    BandOut,
+    BiomarkerOut,
+    BodyMetricOut,
+    CustomBiomarkerCreate,
+    ReferenceBandOut,
+)
 from app.schemas.interventions import InterventionOut
 from app.schemas.reports import CaveatOut
 from app.schemas.series import BiomarkerPoint, BiomarkerSeries
@@ -68,11 +75,40 @@ async def list_biomarkers(
     db: DbSession,
     category: Annotated[BiomarkerCategory | None, Query()] = None,
 ) -> list[BiomarkerOut]:
-    statement = select(Biomarker).order_by(Biomarker.category, Biomarker.name)
+    statement = (
+        select(Biomarker)
+        .where(or_(Biomarker.user_id.is_(None), Biomarker.user_id == user.id))
+        .order_by(Biomarker.category, Biomarker.name)
+    )
     if category is not None:
         statement = statement.where(Biomarker.category == category)
     biomarkers = (await db.execute(statement)).scalars().all()
     return [to_biomarker_out(biomarker, user) for biomarker in biomarkers]
+
+
+@router.post("/biomarkers", response_model=BiomarkerOut, status_code=status.HTTP_201_CREATED)
+async def create_custom_biomarker(
+    payload: CustomBiomarkerCreate, user: CurrentUser, db: DbSession
+) -> BiomarkerOut:
+    biomarker = Biomarker(
+        user_id=user.id,
+        slug=f"custom-{user.id.hex[:8]}-{uuid.uuid4().hex[:12]}",
+        name=payload.name.strip(),
+        category=BiomarkerCategory.OUTRO,
+        unit_default=payload.unit.strip(),
+        canonical_unit=payload.unit.strip(),
+        unit_conversions={},
+        reference_kind=ReferenceKind.NONE,
+        aliases=[payload.source_name.strip()] if payload.source_name else [],
+        notes=(
+            "Biomarcador personalizado. Consulta o profissional de saúde que pediu "
+            "a análise para interpretar o resultado no teu contexto."
+        ),
+    )
+    db.add(biomarker)
+    await db.commit()
+    await db.refresh(biomarker)
+    return to_biomarker_out(biomarker, user)
 
 
 @router.get("/body/metrics", response_model=list[BodyMetricOut])
@@ -87,7 +123,7 @@ async def biomarker_series(biomarker_id: int, user: CurrentUser, db: DbSession) 
     """Every result this user has for one biomarker, oldest first, plus the
     interventions running over that period."""
     biomarker = await db.get(Biomarker, biomarker_id)
-    if biomarker is None:
+    if biomarker is None or biomarker.user_id not in (None, user.id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Biomarker not found")
 
     statement = (

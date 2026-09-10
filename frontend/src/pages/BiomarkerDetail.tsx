@@ -64,8 +64,14 @@ export function BiomarkerDetail() {
               ? ` · ${t("biomarker.canonicalRange")}: ${canonical} ${biomarker.canonical_unit}`
               : ""}
         </p>
-        {biomarker.notes ? <p className="text-sm text-ink-muted">{biomarker.notes}</p> : null}
       </header>
+
+      <section aria-labelledby="about-biomarker" className="max-w-prose border-l border-primary pl-4">
+        <h2 id="about-biomarker" className="font-display text-base font-semibold text-ink">{t("biomarker.about")}</h2>
+        <p className="mt-1 text-sm leading-relaxed text-ink-muted">
+          {biomarker.notes ?? t(`biomarker.categoryExplanation.${biomarker.category}`)}
+        </p>
+      </section>
 
       {points.length === 0 ? (
         <EmptyState

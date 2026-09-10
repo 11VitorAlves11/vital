@@ -237,6 +237,7 @@ export type PreviewResult = {
   ref_min: string | null;
   ref_max: string | null;
   method: string | null;
+  warnings: string[];
 };
 
 export type ExtractionPreview = {

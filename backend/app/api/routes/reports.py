@@ -10,7 +10,7 @@ from datetime import UTC, date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Response, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from app.api.deps import CurrentUser, DbSession
 from app.models import Biomarker, LabReport, Result
@@ -322,7 +322,16 @@ async def create_report(payload: ReportCreate, user: CurrentUser, db: DbSession)
     catalogue = {
         biomarker.id: biomarker
         for biomarker in (
-            (await db.execute(select(Biomarker).where(Biomarker.id.in_(requested)))).scalars().all()
+            (
+                await db.execute(
+                    select(Biomarker).where(
+                        Biomarker.id.in_(requested),
+                        or_(Biomarker.user_id.is_(None), Biomarker.user_id == user.id),
+                    )
+                )
+            )
+            .scalars()
+            .all()
         )
     }
     unknown = sorted(set(requested) - catalogue.keys())

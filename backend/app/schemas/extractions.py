@@ -87,6 +87,7 @@ class PreviewResult(BaseModel):
     ref_min: Decimal | None
     ref_max: Decimal | None
     method: str | None
+    warnings: list[str] = Field(default_factory=list)
 
 
 class ExtractionPreview(BaseModel):
@@ -119,6 +120,7 @@ class ConfirmResult(BaseModel):
     ref_min: Decimal | None = None
     ref_max: Decimal | None = None
     method: str | None = Field(default=None, max_length=120)
+    source_name: str | None = Field(default=None, max_length=200)
 
     @model_validator(mode="after")
     def _check_range(self) -> Self:

@@ -28,6 +28,7 @@ from app.schemas.extractions import (
 )
 from app.services.anonymization import AnonymizationError, Identity, anonymize_image, redact_text
 from app.services.text import normalise
+from app.services.units import to_canonical
 
 logger = logging.getLogger(__name__)
 
@@ -90,8 +91,7 @@ def spatial_text(page: Any) -> str:
             rows.append([word])
     rows.sort(key=lambda row: min(word[1] for word in row))
     return "\n".join(
-        " ".join(str(word[4]) for word in sorted(row, key=lambda item: item[0]))
-        for row in rows
+        " ".join(str(word[4]) for word in sorted(row, key=lambda item: item[0])) for row in rows
     )
 
 
@@ -143,9 +143,7 @@ def page_contents(
 
         if average >= settings.extraction_text_threshold:
             safe_text = "\n\n".join(redact_text(text, identity) for text in texts)
-            return [
-                {"type": "text", "text": f"{PROMPT}\n\n{LAYOUT_RULE}\n\n---\n\n{safe_text}"}
-            ]
+            return [{"type": "text", "text": f"{PROMPT}\n\n{LAYOUT_RULE}\n\n---\n\n{safe_text}"}]
 
         # A scan. 144 dpi is twice the PDF default: enough for the small print a
         # reference range is set in, without doubling the payload again.
@@ -225,6 +223,26 @@ def match(result: ExtractedResult, index: dict[str, Biomarker]) -> Biomarker | N
     return index.get(normalise(result.biomarker))
 
 
+def preview_warnings(result: ExtractedResult, matched: Biomarker | None) -> list[str]:
+    warnings: list[str] = []
+    if result.value is None:
+        warnings.append("missing_value")
+    if result.ref_min is not None and result.ref_max is not None:
+        if result.ref_min >= result.ref_max:
+            warnings.append("invalid_range")
+        elif result.value is not None and (
+            result.value < result.ref_min / 10 or result.value > result.ref_max * 10
+        ):
+            warnings.append("far_outside_range")
+    if result.value is not None and result.value in (result.ref_min, result.ref_max):
+        warnings.append("value_matches_limit")
+    if matched is None:
+        warnings.append("unmatched")
+    elif result.value is not None and to_canonical(matched, result.value, result.unit)[0] is None:
+        warnings.append("unit_mismatch")
+    return warnings
+
+
 def build_preview(payload: ExtractionPayload, biomarkers: list[Biomarker]) -> ExtractionPreview:
     index = build_index(biomarkers)
     return ExtractionPreview(
@@ -246,6 +264,7 @@ def build_preview(payload: ExtractionPayload, biomarkers: list[Biomarker]) -> Ex
                 method=result.method,
                 ref_min=result.ref_min,
                 ref_max=result.ref_max,
+                warnings=preview_warnings(result, matched),
             )
             for result in payload.results
             for matched in [match(result, index)]

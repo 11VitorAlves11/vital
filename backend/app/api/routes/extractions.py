@@ -22,7 +22,7 @@ from fastapi import (
     UploadFile,
     status,
 )
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from app.api.deps import AppSettings, CurrentUser, DbSession
 from app.api.routes.reports import to_report_out, utcnow
@@ -43,6 +43,7 @@ from app.services.extraction import (
     parse_answer,
 )
 from app.services.model_credentials import CredentialError, effective_model_config
+from app.services.text import normalise
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +207,17 @@ async def read_extraction(job_id: uuid.UUID, user: CurrentUser, db: DbSession) -
     if job.status is ExtractionStatus.PREVIEW and job.raw_output is not None:
         # Rebuilt from the stored answer rather than cached, so a catalogue entry
         # added since the job ran now matches a line that did not before.
-        biomarkers = (await db.execute(select(Biomarker))).scalars().all()
+        biomarkers = (
+            (
+                await db.execute(
+                    select(Biomarker).where(
+                        or_(Biomarker.user_id.is_(None), Biomarker.user_id == user.id)
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
         out.preview = build_preview(
             ExtractionPayload.model_validate(job.raw_output), list(biomarkers)
         )
@@ -232,7 +243,16 @@ async def confirm_extraction(
     catalogue = {
         biomarker.id: biomarker
         for biomarker in (
-            (await db.execute(select(Biomarker).where(Biomarker.id.in_(requested)))).scalars().all()
+            (
+                await db.execute(
+                    select(Biomarker).where(
+                        Biomarker.id.in_(requested),
+                        or_(Biomarker.user_id.is_(None), Biomarker.user_id == user.id),
+                    )
+                )
+            )
+            .scalars()
+            .all()
         )
     }
     unknown = sorted(set(requested) - catalogue.keys())
@@ -258,6 +278,12 @@ async def confirm_extraction(
     )
     for entry in payload.results:
         biomarker = catalogue[entry.biomarker_id]
+        known_names = {
+            normalise(biomarker.name),
+            *(normalise(alias) for alias in biomarker.aliases),
+        }
+        if entry.source_name and normalise(entry.source_name) not in known_names:
+            biomarker.aliases = [*biomarker.aliases, entry.source_name.strip()]
         # Flags and unit conversion stay server-side, extracted or not: the model
         # is never asked to classify or convert, only to transcribe.
         report.results.append(

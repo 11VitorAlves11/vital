@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.enums import BiomarkerCategory, ReferenceKind, ResultFlag
 
@@ -49,6 +49,12 @@ class BiomarkerOut(BaseModel):
     reference_bands: list[ReferenceBandOut] | None = None
     aliases: list[str]
     notes: str | None = None
+
+
+class CustomBiomarkerCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    unit: str = Field(min_length=1, max_length=50)
+    source_name: str | None = Field(default=None, max_length=200)
 
 
 class BodyMetricOut(BaseModel):

@@ -1,8 +1,9 @@
+import uuid
 from datetime import time
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import Boolean, SmallInteger, String, Text, Time, false
+from sqlalchemy import Boolean, ForeignKey, SmallInteger, String, Text, Time, false
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,6 +17,9 @@ class Biomarker(Base):
     __tablename__ = "biomarkers"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True
+    )
     slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     category: Mapped[BiomarkerCategory] = mapped_column(

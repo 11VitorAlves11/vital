@@ -28,9 +28,11 @@ type Row = {
   /** What the document called it, kept beside the match so it can be checked. */
   sourceName: string;
   value: string;
+  unit: string;
   refMin: string;
   refMax: string;
   method: string;
+  warnings: string[];
 };
 
 type ReportImportProps = {
@@ -45,9 +47,11 @@ function toRows(job: ExtractionJob): Row[] {
     biomarkerId: result.biomarker_id === null ? "" : String(result.biomarker_id),
     sourceName: result.source_name,
     value: result.value ?? "",
+    unit: result.unit ?? "",
     refMin: result.ref_min ?? "",
     refMax: result.ref_max ?? "",
     method: result.method ?? "",
+    warnings: result.warnings ?? [],
   }));
 }
 
@@ -63,6 +67,7 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
   const { t } = useTranslation();
   const notify = useToast();
   const { data: biomarkers } = useAsync(() => catalogue.biomarkers());
+  const [customBiomarkers, setCustomBiomarkers] = useState<Biomarker[]>([]);
   const [job, setJob] = useState<ExtractionJob | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,7 +111,7 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
     });
   }, [job?.id, job?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const options = (biomarkers ?? []).map((biomarker: Biomarker) => ({
+  const options = [...(biomarkers ?? []), ...customBiomarkers].map((biomarker: Biomarker) => ({
     value: String(biomarker.id),
     label: `${biomarker.name} (${biomarker.unit_default})`,
   }));
@@ -143,6 +148,27 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
+  async function createCustom(row: Row) {
+    if (!row.unit.trim()) {
+      setError(t("extraction.unitNeeded"));
+      return;
+    }
+    setBusy(true);
+    try {
+      const created = await catalogue.createBiomarker({
+        name: row.sourceName,
+        unit: row.unit.trim(),
+        source_name: row.sourceName,
+      });
+      setCustomBiomarkers((current) => [...current, created]);
+      update(row.key, { biomarkerId: String(created.id), warnings: [] });
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : t("errors.generic"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (job === null) return;
@@ -160,7 +186,9 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
         lab_name: labName,
         results: filled.map((row) => ({
           biomarker_id: Number(row.biomarkerId),
+          source_name: row.sourceName,
           value: Number(row.value.replace(",", ".")),
+          unit: row.unit.trim() || null,
           ref_min: row.refMin ? Number(row.refMin.replace(",", ".")) : null,
           ref_max: row.refMax ? Number(row.refMax.replace(",", ".")) : null,
           method: row.method.trim() || null,
@@ -273,6 +301,7 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
                   {/* The document's own wording, so a wrong match is visible
                       without opening the PDF beside it. */}
                   <p className="data text-sm text-ink-muted">{row.sourceName}</p>
+                  {row.warnings.length > 0 ? <ul className="rounded-[var(--radius-md)] bg-band px-3 py-2 text-sm text-flag-warn">{row.warnings.map((warning) => <li key={warning}>{t(`extraction.warnings.${warning}`)}</li>)}</ul> : null}
                   <Select
                     label={t("reports.biomarker")}
                     placeholder={t("reports.pickBiomarker")}
@@ -280,7 +309,13 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
                     value={row.biomarkerId}
                     onChange={(event) => update(row.key, { biomarkerId: event.target.value })}
                   />
+                  {!row.biomarkerId ? <Button type="button" variant="secondary" loading={busy} onClick={() => void createCustom(row)}>{t("extraction.createCustom")}</Button> : null}
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <Input
+                      label={t("reports.unit")}
+                      value={row.unit}
+                      onChange={(event) => update(row.key, { unit: event.target.value })}
+                    />
                     <Input
                       label={t("reports.value")}
                       inputMode="decimal"

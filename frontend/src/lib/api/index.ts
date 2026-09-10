@@ -118,6 +118,8 @@ export const providers = {
 
 export const catalogue = {
   biomarkers: () => request<Biomarker[]>("/api/biomarkers"),
+  createBiomarker: (payload: { name: string; unit: string; source_name?: string }) =>
+    request<Biomarker>("/api/biomarkers", { method: "POST", body: payload }),
   bodyMetrics: () => request<BodyMetric[]>("/api/body/metrics"),
 };
 
