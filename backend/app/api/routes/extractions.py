@@ -19,6 +19,7 @@ from fastapi import (
     BackgroundTasks,
     File,
     HTTPException,
+    Query,
     Response,
     UploadFile,
     status,
@@ -129,6 +130,7 @@ async def create_extraction(
     settings: AppSettings,
     background: BackgroundTasks,
     file: Annotated[UploadFile, File()],
+    replace: Annotated[bool, Query()] = False,
 ) -> ExtractionOut:
     if not effective_model_config(user, settings).enabled:
         raise HTTPException(
@@ -161,7 +163,11 @@ async def create_extraction(
             ExtractionJob.file_sha256 == file_sha256,
         )
     )
-    if duplicate is not None and duplicate.status is not ExtractionStatus.FAILED:
+    if (
+        duplicate is not None
+        and duplicate.status is not ExtractionStatus.FAILED
+        and not replace
+    ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="This file has already been imported",
@@ -172,6 +178,10 @@ async def create_extraction(
     # retry the exact document without weakening duplicate protection for jobs
     # that are active, awaiting confirmation, or already confirmed.
     if duplicate is not None:
+        # A second click while the same document is already being read should
+        # join that work, not start a competing background task for one row.
+        if duplicate.status in {ExtractionStatus.PENDING, ExtractionStatus.PROCESSING}:
+            return ExtractionOut.model_validate(duplicate)
         duplicate.file_path = storage.store_report_upload(
             user.id, duplicate.id, content, media_type
         )
@@ -293,20 +303,40 @@ async def confirm_extraction(
             detail=f"Unknown biomarker ids: {unknown}",
         )
 
-    report = LabReport(
-        user_id=user.id,
-        collected_on=payload.collected_on,
-        collected_at=payload.collected_at,
-        lab_id=(await providers.lab_for(db, user.id, payload.lab_name)).id,
-        fasting_state=payload.fasting_state,
-        fasting_hours=payload.fasting_hours,
-        notes=payload.notes,
-        notes_at=utcnow() if payload.notes else None,
-        # The stored PDF becomes the report's own, so the original stays one
-        # click from the values that were read off it.
-        file_path=job.file_path,
-        source=ReportSource.EXTRACTED,
-    )
+    lab_id = (await providers.lab_for(db, user.id, payload.lab_name)).id
+    report = await db.get(LabReport, job.report_id) if job.report_id else None
+    if report is not None and report.user_id == user.id:
+        # A confirmed duplicate is replaced atomically here, after the person
+        # has reviewed the new preview. Until this point the old report remains
+        # untouched and usable even when re-extraction fails.
+        report.collected_on = payload.collected_on
+        report.collected_at = payload.collected_at
+        report.lab_id = lab_id
+        report.fasting_state = payload.fasting_state
+        report.fasting_hours = payload.fasting_hours
+        report.notes = payload.notes
+        report.notes_at = utcnow() if payload.notes else None
+        report.file_path = job.file_path
+        report.source = ReportSource.EXTRACTED
+        report.results.clear()
+        # Remove the old rows before inserting their replacements; the report
+        # has a unique biomarker constraint and may contain the same markers.
+        await db.flush()
+    else:
+        report = LabReport(
+            user_id=user.id,
+            collected_on=payload.collected_on,
+            collected_at=payload.collected_at,
+            lab_id=lab_id,
+            fasting_state=payload.fasting_state,
+            fasting_hours=payload.fasting_hours,
+            notes=payload.notes,
+            notes_at=utcnow() if payload.notes else None,
+            # The stored PDF becomes the report's own, so the original stays one
+            # click from the values that were read off it.
+            file_path=job.file_path,
+            source=ReportSource.EXTRACTED,
+        )
     for entry in payload.results:
         biomarker = catalogue[entry.biomarker_id]
         if entry.source_name:

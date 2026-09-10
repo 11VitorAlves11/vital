@@ -98,6 +98,38 @@ describe("ReportImport", () => {
     ).toBeInTheDocument();
   });
 
+  it("offers to replace an identical file and retries only after confirmation", async () => {
+    let uploadCount = 0;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("/api/biomarkers")) {
+        return { ok: true, status: 200, json: async () => [HAEMOGLOBIN] } as Response;
+      }
+      uploadCount += 1;
+      if (!url.includes("replace=true")) {
+        return {
+          ok: false,
+          status: 409,
+          statusText: "Conflict",
+          json: async () => ({ detail: "This file has already been imported" }),
+        } as Response;
+      }
+      return { ok: true, status: 202, json: async () => PREVIEW } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    renderWithProviders(<ReportImport open onOpenChange={() => {}} onCreated={() => {}} />);
+
+    await uploadPdf();
+    expect(await screen.findByText("Estas análises já foram importadas")).toBeInTheDocument();
+    expect(screen.getByText(/nada é substituído antes de confirmares/i)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Reler e substituir" }));
+
+    expect(await screen.findByDisplayValue("10.5")).toBeInTheDocument();
+    expect(uploadCount).toBe(2);
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes("replace=true"))).toBe(true);
+  });
+
   it("shows every read line as an editable row", async () => {
     open();
 

@@ -70,6 +70,7 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
   const [customBiomarkers, setCustomBiomarkers] = useState<Biomarker[]>([]);
   const [job, setJob] = useState<ExtractionJob | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [duplicateFile, setDuplicateFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [collection, setCollection] = useState(() => emptyCollection(todayInputValue()));
@@ -120,6 +121,7 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
     setJob(null);
     setRows([]);
     setError(null);
+    setDuplicateFile(null);
     setLabName("");
     setCollection(emptyCollection(todayInputValue()));
     if (fileInput.current) fileInput.current.value = "";
@@ -130,18 +132,26 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
     onOpenChange(false);
   }
 
-  async function pick(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  async function uploadFile(file: File, replace = false) {
     setError(null);
     setUploading(true);
     try {
-      setJob(await extractions.create(file));
+      setJob(await extractions.create(file, replace));
+      setDuplicateFile(null);
     } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : t("errors.generic"));
+      if (cause instanceof ApiError && cause.status === 409) {
+        setDuplicateFile(file);
+      } else {
+        setError(cause instanceof ApiError ? cause.message : t("errors.generic"));
+      }
     } finally {
       setUploading(false);
     }
+  }
+
+  async function pick(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) await uploadFile(file);
   }
 
   function update(key: number, patch: Partial<Row>) {
@@ -229,6 +239,28 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
             />
           </label>
           {uploading ? <Skeleton lines={2} label={t("extraction.uploading")} /> : null}
+          {duplicateFile ? (
+            <div className="flex flex-col gap-3 rounded-[var(--radius-md)] bg-band p-4" role="alert">
+              <div className="min-w-0">
+                <p className="font-medium text-ink">{t("extraction.duplicateTitle")}</p>
+                <p className="mt-1 break-words text-sm text-ink-muted">
+                  {t("extraction.duplicateDescription", { filename: duplicateFile.name })}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  loading={uploading}
+                  onClick={() => void uploadFile(duplicateFile, true)}
+                >
+                  {t("extraction.replace")}
+                </Button>
+                <Button type="button" variant="ghost" onClick={reset}>
+                  {t("extraction.chooseAnother")}
+                </Button>
+              </div>
+            </div>
+          ) : null}
           {error ? (
             <p role="alert" className="text-sm text-flag-alert">
               {error}

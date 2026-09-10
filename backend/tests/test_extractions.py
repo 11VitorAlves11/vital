@@ -160,6 +160,21 @@ class TestUpload:
 
         assert response.status_code == 409
 
+    async def test_allows_explicitly_replacing_the_same_file(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        stub_model(monkeypatch, ANSWER)
+        content = make_pdf(lines=30)
+        first = await upload(user_client, content)
+
+        response = await user_client.post(
+            "/api/extractions?replace=true",
+            files={"file": ("same-again.pdf", content, "application/pdf")},
+        )
+
+        assert response.status_code == 202
+        assert response.json()["id"] == first["id"]
+
     async def test_retries_the_same_file_after_a_failed_extraction(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:
@@ -313,6 +328,42 @@ class TestPreview:
 
 
 class TestConfirm:
+    async def test_replaces_the_existing_report_only_after_confirmation(
+        self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, catalogue: dict[str, Any]
+    ) -> None:
+        stub_model(monkeypatch, ANSWER)
+        content = make_pdf(lines=30)
+        job = await upload(user_client, content)
+        marker_id = catalogue["biomarkers"]["hemoglobina"]["id"]
+        first_payload = {
+            "collected_on": "2026-02-14",
+            "lab_name": "Unilabs",
+            "results": [{"biomarker_id": marker_id, "value": 10.9, "unit": "g/dL"}],
+        }
+        first = await user_client.post(
+            f"/api/extractions/{job['id']}/confirm", json=first_payload
+        )
+        report_id = first.json()["id"]
+
+        replaced = await user_client.post(
+            "/api/extractions?replace=true",
+            files={"file": ("same.pdf", content, "application/pdf")},
+        )
+        assert replaced.status_code == 202
+        # Re-reading alone leaves the confirmed history unchanged.
+        before_confirm = await user_client.get(f"/api/reports/{report_id}")
+        assert Decimal(before_confirm.json()["results"][0]["value"]) == Decimal("10.9")
+
+        second = await user_client.post(
+            f"/api/extractions/{job['id']}/confirm",
+            json={**first_payload, "results": [{"biomarker_id": marker_id, "value": 13.2}]},
+        )
+
+        assert second.status_code == 201, second.text
+        assert second.json()["id"] == report_id
+        assert Decimal(second.json()["results"][0]["value"]) == Decimal("13.2")
+        assert len((await user_client.get("/api/reports")).json()) == 1
+
     async def test_learns_a_scoped_rule_that_can_be_reviewed_and_removed(
         self, user_client: AsyncClient, monkeypatch: pytest.MonkeyPatch, catalogue: dict[str, Any]
     ) -> None:

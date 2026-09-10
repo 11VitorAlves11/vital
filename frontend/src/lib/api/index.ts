@@ -104,7 +104,8 @@ type ReportPayload = {
  * read reaches the history until `confirm` is called with what a human approved.
  */
 export const extractions = {
-  create: (file: File) => upload<ExtractionJob>("/api/extractions", file),
+  create: (file: File, replace = false) =>
+    upload<ExtractionJob>(`/api/extractions${replace ? "?replace=true" : ""}`, file),
   read: (id: string) => request<ExtractionJob>(`/api/extractions/${id}`),
   confirm: (id: string, payload: ReportPayload) =>
     request<Report>(`/api/extractions/${id}/confirm`, { method: "POST", body: payload }),
