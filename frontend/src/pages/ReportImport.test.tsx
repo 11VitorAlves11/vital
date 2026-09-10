@@ -82,6 +82,14 @@ async function uploadPdf() {
 }
 
 describe("ReportImport", () => {
+  it("presents the task as importing analyses", () => {
+    mockApi([]);
+
+    renderWithProviders(<ReportImport open onOpenChange={() => {}} onCreated={() => {}} />);
+
+    expect(screen.getByRole("heading", { name: "Importar análises" })).toBeInTheDocument();
+  });
+
   it("says up front that nothing is stored before confirmation", async () => {
     open();
 

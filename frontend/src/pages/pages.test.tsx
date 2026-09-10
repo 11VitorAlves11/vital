@@ -386,6 +386,18 @@ describe("BiomarkerDetail", () => {
 });
 
 describe("Reports", () => {
+  it("names the automatic action as importing analyses", async () => {
+    mockApi([
+      { pattern: /\/api\/features/, body: { extraction: true } },
+      { pattern: /\/api\/labs/, body: [] },
+      { pattern: /\/api\/reports/, body: [] },
+    ]);
+
+    renderWithProviders(<Reports />);
+
+    expect(await screen.findByRole("button", { name: "Importar análises" })).toBeInTheDocument();
+  });
+
   it("lists collections with their result count", async () => {
     mockApi([
       { pattern: /\/api\/features/, body: { extraction: false } },
