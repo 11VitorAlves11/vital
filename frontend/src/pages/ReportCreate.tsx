@@ -9,9 +9,9 @@ import {
   toCollectionContext,
 } from "../components/domain/CollectionFields";
 import { Button } from "../components/ui/Button";
+import { Combobox } from "../components/ui/Combobox";
 import { FormSurface } from "../components/ui/FormSurface";
 import { Input } from "../components/ui/Input";
-import { Select } from "../components/ui/Select";
 import { useToast } from "../components/ui/Toast";
 import { catalogue, providers, reports } from "../lib/api";
 import { ApiError } from "../lib/api/client";
@@ -71,10 +71,12 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
   const lab = (labs ?? []).find((candidate) => sameName(candidate.name, labName));
   const { data: suggestions } = useAsync(() => reports.prefill(lab?.id), [lab?.id]);
 
-  const options = (biomarkers ?? []).map((biomarker) => ({
-    value: String(biomarker.id),
-    label: `${biomarker.name} (${biomarker.unit_default})`,
-  }));
+  const options = (biomarkers ?? [])
+    .map((biomarker) => ({
+      value: String(biomarker.id),
+      label: `${biomarker.name} (${biomarker.unit_default})`,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, "pt-PT", { sensitivity: "base" }));
 
   function update(key: number, patch: Partial<Row>) {
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -203,12 +205,13 @@ export function ReportCreate({ open, onOpenChange, onCreated }: ReportCreateProp
                 key={row.key}
                 className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-border p-3"
               >
-                <Select
+                <Combobox
                   label={t("reports.biomarker")}
                   placeholder={t("reports.pickBiomarker")}
+                  noResults={t("reports.noBiomarkerResults")}
                   options={options}
                   value={row.biomarkerId}
-                  onChange={(event) => pickBiomarker(row.key, event.target.value)}
+                  onValueChange={(value) => pickBiomarker(row.key, value)}
                 />
                 {row.from ? (
                   <p className="text-sm text-ink-muted">

@@ -132,6 +132,7 @@
     "deleted": "Collection deleted.",
     "created": "Collection recorded.",
     "pickBiomarker": "Choose a biomarker",
+    "noBiomarkerResults": "No biomarker starts with that text.",
     "import": "Import lab report",
     "openFile": "View the original report",
     "collectedTime": "Collection time",

@@ -9,9 +9,9 @@ import {
   toCollectionContext,
 } from "../components/domain/CollectionFields";
 import { Button } from "../components/ui/Button";
+import { Combobox } from "../components/ui/Combobox";
 import { FormSurface } from "../components/ui/FormSurface";
 import { Input } from "../components/ui/Input";
-import { Select } from "../components/ui/Select";
 import { Skeleton } from "../components/ui/Skeleton";
 import { useToast } from "../components/ui/Toast";
 import { catalogue, extractions } from "../lib/api";
@@ -112,10 +112,12 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
     });
   }, [job?.id, job?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const options = [...(biomarkers ?? []), ...customBiomarkers].map((biomarker: Biomarker) => ({
-    value: String(biomarker.id),
-    label: `${biomarker.name} (${biomarker.unit_default})`,
-  }));
+  const options = [...(biomarkers ?? []), ...customBiomarkers]
+    .map((biomarker: Biomarker) => ({
+      value: String(biomarker.id),
+      label: `${biomarker.name} (${biomarker.unit_default})`,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, "pt-PT", { sensitivity: "base" }));
 
   function reset() {
     setJob(null);
@@ -334,12 +336,13 @@ export function ReportImport({ open, onOpenChange, onCreated }: ReportImportProp
                       without opening the PDF beside it. */}
                   <p className="data text-sm text-ink-muted">{row.sourceName}</p>
                   {row.warnings.length > 0 ? <ul className="rounded-[var(--radius-md)] bg-band px-3 py-2 text-sm text-flag-warn">{row.warnings.map((warning) => <li key={warning}>{t(`extraction.warnings.${warning}`)}</li>)}</ul> : null}
-                  <Select
+                  <Combobox
                     label={t("reports.biomarker")}
                     placeholder={t("reports.pickBiomarker")}
+                    noResults={t("reports.noBiomarkerResults")}
                     options={options}
                     value={row.biomarkerId}
-                    onChange={(event) => update(row.key, { biomarkerId: event.target.value })}
+                    onValueChange={(value) => update(row.key, { biomarkerId: value })}
                   />
                   {!row.biomarkerId ? <Button type="button" variant="secondary" loading={busy} onClick={() => void createCustom(row)}>{t("extraction.createCustom")}</Button> : null}
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

@@ -132,6 +132,7 @@
     "deleted": "Colheita eliminada.",
     "created": "Colheita registada.",
     "pickBiomarker": "Escolher biomarcador",
+    "noBiomarkerResults": "Nenhum biomarcador começa por esse texto.",
     "import": "Importar análises",
     "openFile": "Ver o ficheiro original",
     "collectedTime": "Hora da colheita",
