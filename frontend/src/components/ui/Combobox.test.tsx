@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 
-import { renderWithProviders } from "../../test/utils";
+import { renderWithProviders, setViewport } from "../../test/utils";
 import { Combobox } from "./Combobox";
 
 const options = [
@@ -55,4 +55,25 @@ it("explains when no biomarker starts with the entered text", async () => {
 
   await userEvent.type(screen.getByRole("combobox"), "zzzz");
   expect(screen.getByText("Nenhum biomarcador começa por esse texto.")).toBeInTheDocument();
+});
+
+it("keeps the filtered list in the mobile flow and supports touch selection", async () => {
+  setViewport("mobile");
+  const onValueChange = vi.fn();
+  renderWithProviders(
+    <Combobox
+      label="Biomarcador"
+      options={options}
+      value=""
+      onValueChange={onValueChange}
+      noResults="Nenhum biomarcador começa por esse texto."
+    />,
+  );
+
+  await userEvent.type(screen.getByRole("combobox"), "baso");
+  const list = screen.getByRole("listbox");
+  expect(list).toHaveClass("relative", "max-h-48", "touch-pan-y");
+
+  await userEvent.click(screen.getByRole("option", { name: "Basófilos (10^9/L)" }));
+  expect(onValueChange).toHaveBeenCalledWith("1");
 });

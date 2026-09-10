@@ -104,6 +104,8 @@ export function Combobox({
             open && visible[active] ? `${id}-option-${visible[active].value}` : undefined
           }
           autoComplete="off"
+          enterKeyHint="search"
+          inputMode="search"
           className="min-h-[var(--touch-target)] w-full rounded-[var(--radius-md)] border border-border-strong bg-surface-raised pe-3 ps-10 text-base text-ink placeholder:text-ink-muted"
           placeholder={placeholder}
           value={query}
@@ -129,7 +131,11 @@ export function Combobox({
         <div
           id={listId}
           role="listbox"
-          className="absolute inset-x-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-[var(--radius-md)] border border-border-strong bg-surface-raised p-1 shadow-lg"
+          className={cn(
+            "relative z-50 mt-1 max-h-48 touch-pan-y overscroll-contain overflow-y-auto",
+            "rounded-[var(--radius-md)] border border-border-strong bg-surface-raised p-1 shadow-lg",
+            "sm:absolute sm:inset-x-0 sm:top-full sm:max-h-64",
+          )}
         >
           {visible.length === 0 ? (
             <p className="px-3 py-3 text-sm text-ink-muted">{noResults}</p>
@@ -141,10 +147,10 @@ export function Combobox({
                 role="option"
                 aria-selected={option.value === value}
                 className={cn(
-                  "flex cursor-pointer items-center justify-between gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-sm text-ink",
+                  "flex min-h-[var(--touch-target)] cursor-pointer items-center justify-between gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-sm text-ink",
                   index === active ? "bg-band" : "hover:bg-band",
                 )}
-                onMouseDown={(event) => event.preventDefault()}
+                onPointerDown={(event) => event.preventDefault()}
                 onMouseEnter={() => setActive(index)}
                 onClick={() => choose(option)}
               >
